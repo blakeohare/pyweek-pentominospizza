@@ -4,6 +4,7 @@ def main():
 	pygame.init()
 	
 	screen = pygame.display.set_mode((800, 600))
+	is_fullscreen = False
 	
 	scene = TitleScene()
 	rc = 0
@@ -20,6 +21,14 @@ def main():
 				pressed_keys[event.key] = True
 				if event.key == pygame.K_F4 and (pressed_keys[pygame.K_LALT] or pressed_keys[pygame.K_RALT]):
 					return
+				
+				if event.key == pygame.K_F12:
+					if is_fullscreen:
+						screen = pygame.display.set_mode((800, 600))
+					else:
+						screen = pygame.display.set_mode((800, 600), pygame.FULLSCREEN)
+					is_fullscreen = not is_fullscreen
+						
 			if event.type == pygame.KEYUP:
 				pressed_keys[event.key] = False
 		

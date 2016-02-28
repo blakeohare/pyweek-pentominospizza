@@ -3,6 +3,10 @@ class ImageLibrary:
 		self.images = {}
 	
 	def get(self, path):
-		return None
+		img = self.images.get(path)
+		if img == null:
+			img = pygame.image.load(('source/images/' + path).replace('/', os.sep))
+			self.images[path] = img
+		return img
 
 IMAGES = ImageLibrary()
