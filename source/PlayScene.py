@@ -16,8 +16,16 @@ class PlayScene:
 			dx = -1
 		elif Q.pressedActions['right']:
 			dx = 1
-		
+			
 		self.player.applyWalk(dx)
+		
+		jump = False
+		jumpRelease = False
+		for event in events:
+			if event.type == 'space' and event.down:
+				jump = True
+		
+		self.player.applyJump(jump)
 		
 		for body in self.bodies:
 			body.update(self, dt)

@@ -7,6 +7,7 @@ class GravityBody:
 		self.image = GfxImage(imagePath)
 		self.theta = random.random() * 2 * 3.14159
 		self.rps = rps
+		self.gravity = radius / 100.0
 	
 	def update(self, scene, dt):
 		self.theta += 2 * 3.14159265358979 * self.rps * dt

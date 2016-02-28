@@ -34,6 +34,25 @@ class Sprite:
 				self.hitBox = (x, y, self.r)
 		return self.hitBox
 	
+	def applyJump(self, press):
+		if press and self.ground != None:
+			ground = self.ground
+			jumpVelocity = 100.0 # pixels per second
+			r = self.ground.radius + self.r + 5
+			theta = self.thetaFromGround + self.ground.theta
+			ux = math.cos(theta)
+			uy = math.sin(theta)
+			
+			x = self.ground.x + r * ux
+			y = self.ground.y + r * uy
+			self.x = x
+			self.y = y
+			self.vx = ux * jumpVelocity
+			self.vy = uy * jumpVelocity
+			self.theta = theta
+			self.ground = None
+			
+	
 	def applyWalk(self, dx):
 		if dx != 0:
 			self.facingLeft = dx < 0
@@ -44,20 +63,34 @@ class Sprite:
 			else:
 				print("TODO: movement IN SPACE")
 	
+	def updateForFloating(self, scene, dt):
+		self.x += self.vx * dt
+		self.y += self.vy * dt
+		for body in scene.bodies:
+			dx = self.x - body.x
+			dy = self.y - body.y
+			dr = self.r + body.radius
+			if dx ** 2 + dy ** 2 <= dr ** 2:
+				self.ground = body
+				theta = math.atan2(dx, dy)
+				self.thetaFromGround = theta - body.theta
+				return
+	
+	
 	def update(self, scene, dt):
 		if self.ground == None:
-			self.x += self.vx * dt
-			self.y += self.vy * dt
+			self.updateForFloating(scene, dt)
 		else:
 			# position is landing offset from ground's theta
 			pass
 		self.hitBox = None
 		
 	def render(self, rc):
+		hb = self.getHitBox()
 		if self.ground == None:
-			pass
+			img = self.images['left'][0]
+			img.blitRotation(hb[0], hb[1], self.theta)
 		else:
-			hb = self.getHitBox()
 			if self.type == 'player':
 				imgs = self.images['left'] if self.facingLeft else self.images['right']
 				img = imgs[(rc / 4) % len(imgs)]
