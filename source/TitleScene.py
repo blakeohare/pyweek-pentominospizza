@@ -4,6 +4,7 @@ class TitleScene:
 		self.next = self
 		self.quit_attempt = False
 		self.index = 0
+		self.counter = 0
 		
 		self.options = [
 			("Play", self.click_play),
@@ -13,13 +14,16 @@ class TitleScene:
 		]
 	
 	def update(self, events, keys):
+		self.counter += 1
 		enter = False
 		for event in events:
 			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_UP:
 					self.index -= 1
+					self.counter = 0
 				elif event.key == pygame.K_DOWN:
 					self.index += 1
+					self.counter = 0
 				elif event.key == pygame.K_RETURN:
 					enter = True
 		
@@ -30,7 +34,7 @@ class TitleScene:
 			self.options[self.index][1]()
 		
 	def click_play(self):
-		pass
+		self.next = TransitionScene(self, PlayScene())
 	
 	def click_options(self):
 		pass
@@ -52,7 +56,7 @@ class TitleScene:
 			text = option[0]
 			yOffset = 0
 			if i == self.index:
-				yOffset = int(abs(math.sin(rc * 2 * 3.14159 / 30) * 8))
+				yOffset = int(abs(math.sin(self.counter * 2 * 3.14159 / 30) * 8))
 			FONT.render(screen, text, 'L', x, y - yOffset)
 			y += 100
 			i += 1

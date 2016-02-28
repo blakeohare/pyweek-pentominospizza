@@ -39,11 +39,19 @@ def main():
 		
 		scene.update(events, pressed_keys)
 		
+		if scene != scene.next:
+			old = scene
+			scene = scene.next
+			old.next = None
+		
 		if MUMBLEFOO[0] == 'exit': return
 		
 		scene.render(screen, rc)
 		rc += 1
 		pygame.display.flip()
+		
+		
+		
 		end = time.time()
 		diff = end - start
 		delay = 1 / 30.0 - diff
