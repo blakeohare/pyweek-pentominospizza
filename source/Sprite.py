@@ -21,7 +21,9 @@ class Sprite:
 		
 		self.vx = 0
 		self.vy = 0
+		self.angularVelocity = 0.0
 		self.ground = None
+		self.strongestGround = None
 		self.thetaFromGround = 0
 		self.floatingTheta = 0.0
 		self.hitBox = None
@@ -68,14 +70,13 @@ class Sprite:
 			self.ground = None
 			
 	
-	def applyWalk(self, dx):
-		if dx != 0:
-			self.facingLeft = dx < 0
+	def applyWalk(self, dir):
+		if dir != 0:
+			self.facingLeft = dir < 0
 			v = PLAYER_WALK_VELOCITY
 			if self.ground != None:
-				r = self.ground.radius
-				self.thetaFromGround += math.acos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2))) * dx
-	
+				self.angularVelocity = v * dir
+				
 	def updateForFloating(self, scene, dt):
 		if DT_TEST_ENABLED:
 			self.counter += 1
@@ -110,13 +111,14 @@ class Sprite:
 			if g > strongest_g:
 				strongest_g = g
 				strongest_source = body
+			
 			ux = dx / dist
 			uy = dy / dist
-			
 			
 			gx += g * ux
 			gy += g * uy
 		
+		self.strongestGround = strongest_source
 		if strongest_source != None:
 			dx = strongest_source.x - self.x
 			dy = strongest_source.y - self.y
@@ -132,19 +134,27 @@ class Sprite:
 			r = .9 ** (dt / (1.0 / 30))
 			ar = 1.0 - r
 			self.theta = r * currentTheta + ar * targetTheta
-			
-			
-		
 		
 		self.vx += gx * dt
 		self.vy += gy * dt
+	
+	def updateForGround(self, scene, dt):
+		v = self.angularVelocity
+		r = self.ground.radius
+		# Law-O-Cosines
+		theta = math.acos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2)))
+		if v < 0:
+			self.thetaFromGround -= theta
+		else:
+			self.thetaFromGround += theta
+		
+		self.angularVelocity *= .8 ** (dt / (1.0 / 30))
 	
 	def update(self, scene, dt):
 		if self.ground == None:
 			self.updateForFloating(scene, dt)
 		else:
-			# position is landing offset from ground's theta
-			pass
+			self.updateForGround(scene, dt)
 		self.hitBox = None
 		
 	def render(self, rc, cx, cy):
