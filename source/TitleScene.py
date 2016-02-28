@@ -13,18 +13,18 @@ class TitleScene:
 			('Exit', self.click_exit),
 		]
 	
-	def update(self, events, keys):
+	def update(self, events):
 		self.counter += 1
 		enter = False
 		for event in events:
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_UP:
+			if event.down:
+				if event.type == 'up':
 					self.index -= 1
 					self.counter = 0
-				elif event.key == pygame.K_DOWN:
+				elif event.type == 'down':
 					self.index += 1
 					self.counter = 0
-				elif event.key == pygame.K_RETURN:
+				elif event.type == 'enter' or event.type == 'space':
 					enter = True
 		
 		if self.index < 0: self.index = 0
@@ -45,9 +45,8 @@ class TitleScene:
 	def click_exit(self):
 		MUMBLEFOO[0] = 'exit'
 		
-	def render(self, screen, rc):
-		bg = IMAGES.get('background/space1.png')
-		screen.blit(bg, (0, 0))
+	def render(self, rc):
+		Q.drawImageTopLeft('background/space1.png', 0, 0)
 		
 		x = 200
 		y = 200
@@ -57,7 +56,7 @@ class TitleScene:
 			yOffset = 0
 			if i == self.index:
 				yOffset = int(abs(math.sin(self.counter * 2 * 3.14159 / 30) * 8))
-			FONT.render(screen, text, 'L', x, y - yOffset)
+			FONT.render(text, 'L', x, y - yOffset)
 			y += 100
 			i += 1
 		

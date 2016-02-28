@@ -1,4 +1,3 @@
-TRANSITION_TEMP_IMG = [None]
 
 class TransitionScene:
 	def __init__(self, fromScene, toScene):
@@ -12,34 +11,20 @@ class TransitionScene:
 		self.alpha = 0
 		
 	
-	def update(self, events, pressed_keys):
+	def update(self, events):
 		self.counter += 1
 		if self.counter < self.half:
 			self.bg = self.fromScene
-			progress = 1.0 * self.counter / self.half
+			progress = 1.0 - 1.0 * self.counter / self.half
 		else:
 			self.bg = self.toScene
-			progress = 1 - 1.0 * (self.counter - self.half) / self.half
+			progress = 1.0 * (self.counter - self.half) / self.half
 		
-		alpha = int(255 * progress)
-		if alpha < 0: alpha = 0
-		if alpha > 255: alpha = 255
-		
-		# overlay alpha, that is
-		self.alpha = alpha
+		Q.setScreenAlpha(progress)
 		
 		if self.counter >= self.duration:
+			Q.setScreenAlpha(1)
 			self.next = self.toScene
 	
-	def render(self, screen, rc):
-		self.bg.render(screen, rc)
-		overlay = TRANSITION_TEMP_IMG[0]
-		if overlay == None:
-			overlay = screen.convert()
-			overlay.fill((0, 0, 0))
-			TRANSITION_TEMP_IMG[0] = overlay
-		
-		overlay.set_alpha(self.alpha)
-		
-		screen.blit(overlay, (0, 0))
-
+	def render(self, rc):
+		self.bg.render(rc)
