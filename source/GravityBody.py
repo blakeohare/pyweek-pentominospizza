@@ -4,7 +4,7 @@ class GravityBody:
 		self.x = x + 0.0
 		self.y = y + 0.0
 		self.radius = radius
-		self.imagePath = imagePath
+		self.image = GfxImage(imagePath)
 		self.theta = random.random() * 2 * 3.14159
 		self.rps = rps
 	
@@ -13,4 +13,5 @@ class GravityBody:
 	
 	# TODO: scene offset
 	def render(self):
-		Q.drawImage(self.imagePath, self.x, self.y, self.theta)
+		self.image.blitRotation(self.x, self.y, self.theta)
+		#self.image.blitSimple(self.x, self.y)

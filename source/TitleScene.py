@@ -7,11 +7,12 @@ class TitleScene:
 		self.counter = 0
 		
 		self.options = [
-			("Play", self.click_play),
-			('Options', self.click_options),
-			('Credits', self.click_credits),
-			('Exit', self.click_exit),
+			["Play", self.click_play, None],
+			['Options', self.click_options, None],
+			['Credits', self.click_credits, None],
+			['Exit', self.click_exit, None],
 		]
+		self.bg = None
 	
 	def update(self, events, dt):
 		self.counter = int(time.time() * 30)
@@ -44,9 +45,12 @@ class TitleScene:
 	
 	def click_exit(self):
 		Q.quit()
-		
+	
 	def render(self):
-		Q.drawImageTopLeft('background/space1.png', 0, 0)
+		if self.bg == None:
+			self.bg = GfxImage('background/space1.png')
+			
+		self.bg.blitSimple(0, 0)
 		
 		x = 200
 		y = 200
@@ -56,7 +60,15 @@ class TitleScene:
 			yOffset = 0
 			if i == self.index:
 				yOffset = int(abs(math.sin(self.counter * 2 * 3.14159 / 30) * 8))
-			Q.renderText(text, 'L', x, y - yOffset)
+			yValue = y - yOffset
+			obj = option[2]
+			if obj == None:
+				obj = Q.renderText(text, 'L', x, yValue)
+				option[2] = obj
+			obj.setPosition(x, yValue)
+			
+			obj.render()
+			
 			y += 100
 			i += 1
 		

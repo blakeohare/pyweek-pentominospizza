@@ -25,6 +25,8 @@ class TransitionScene:
 		if self.counter >= self.duration:
 			Q.setScreenAlpha(1)
 			self.next = self.toScene
+		
+		self.bg.update(events, dt)
 	
 	def render(self):
 		self.bg.render()

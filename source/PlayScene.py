@@ -2,8 +2,8 @@ class PlayScene:
 	def __init__(self):
 		self.next = self
 		self.bodies = [
-			GravityBody(300, 300, 150, 'rocks/rock3.png', 1 / 30.0),
-			GravityBody(600, 500, 150, 'rocks/rock3.png', -1 / 50.0),
+			GravityBody(300, 300, 150, 'rocks/rock3.png', 1),
+			GravityBody(600, 500, 150, 'rocks/rock3.png', .5),
 		]
 	
 	def update(self, events, dt):

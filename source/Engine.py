@@ -83,20 +83,17 @@ class Engine:
 		
 	def renderText(self, text, size, x, y):
 		if self.isPyglet:
-			size = self._FONT_SIZE_BY_SHIRT[size]
-			label = self.pyglet.text.Label(text, font_name = 'Arial', font_size = size, x = x, y = self.height - y, anchor_x = 'left', anchor_y = 'top')
-			self.pygletThings.append(label)
+			obj = GfxText(text, size, x, y)
+			self.pygletThings.append(obj)
+			return obj
 		else:
 			if self.fontEngine == None:
 				self.fontEngine = PyGameFontEngine()
 			self.fontEngine.render(text, size, x, y)
 	
 	def pygletOnDraw(self, window):
-		self.scene.render()
 		window.clear()
-		for thing in self.pygletThings:
-			thing.draw()
-		self.pygletThings = []
+		self.scene.render()
 		
 	def flushPygletEvents(self):
 		if len(self.pygletEvents) > 0:
@@ -123,6 +120,9 @@ class Engine:
 			self.window = self.windowClass(width, height, title)
 			self.scene = scene
 			self.pyglet.clock.schedule_interval(self.pygletUpdate, 1 / 60.0)
+			
+			self.pyglet.resource.path = ['./source']
+			self.pyglet.resource.reindex()
 			self.pyglet.app.run()
 		else:
 			self.pygame.init()
@@ -229,7 +229,9 @@ class Engine:
 	
 	def drawImageTopLeft(self, path, x, y):
 		if self.isPyglet:
-			pass
+			
+			return GfxImage(img, x, y)
+			
 		else:
 			self.screen.blit(IMAGES.get(path), (x, y))
 	
