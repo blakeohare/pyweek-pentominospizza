@@ -1,4 +1,4 @@
-PLAYER_WALK_VELOCITY = 2.7
+PLAYER_WALK_VELOCITY = 6.0
 PLAYER_JUMP_VELOCITY = 470.0
 ASTEROID_GRAVITY_COEFFICIENT = 5000.0 # make bigger for stronger gravity
 
@@ -28,6 +28,7 @@ class Sprite:
 		self.floatingTheta = 0.0
 		self.hitBox = None
 		self.facingLeft = False
+		self.currentVelocity = (0.0, 0.0)
 		
 		# for DT_TEST_ENABLED
 		self.counter = 0
@@ -68,6 +69,9 @@ class Sprite:
 			self.vy = uy * jumpVelocity
 			self.theta = theta
 			self.ground = None
+			
+			self.vx += self.currentVelocity[0]
+			self.vy += self.currentVelocity[1]
 			
 	
 	def applyWalk(self, dir):
@@ -139,8 +143,9 @@ class Sprite:
 		self.vy += gy * dt
 	
 	def updateForGround(self, scene, dt):
-		v = self.angularVelocity
+		v = self.angularVelocity * (dt / (1 / 30.0))
 		r = self.ground.radius
+		
 		# Law-O-Cosines
 		theta = math.acos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2)))
 		if v < 0:
@@ -151,11 +156,17 @@ class Sprite:
 		self.angularVelocity *= .8 ** (dt / (1.0 / 30))
 	
 	def update(self, scene, dt):
+		oldLoc = self.getHitBox()
 		if self.ground == None:
 			self.updateForFloating(scene, dt)
 		else:
 			self.updateForGround(scene, dt)
 		self.hitBox = None
+		newLoc = self.getHitBox()
+		
+		mx = (newLoc[0] - oldLoc[0]) / dt
+		my = (newLoc[1] - oldLoc[1]) / dt
+		self.currentVelocity = (mx, my)
 		
 	def render(self, rc, cx, cy):
 		hb = self.getHitBox()
