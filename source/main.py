@@ -22,7 +22,7 @@ def main():
 				if event.key == pygame.K_F4 and (pressed_keys[pygame.K_LALT] or pressed_keys[pygame.K_RALT]):
 					return
 				
-				if event.key == pygame.K_F12:
+				if event.key == pygame.K_p:
 					if is_fullscreen:
 						screen = pygame.display.set_mode((800, 600))
 					else:
