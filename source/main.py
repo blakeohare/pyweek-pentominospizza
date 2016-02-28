@@ -1,6 +1,3 @@
-import pygame
-import time
-from TitleScene import *
 
 def main():
 	
@@ -35,6 +32,5 @@ def main():
 		delay = 1 / 30.0 - diff
 		if delay > 0:
 			time.sleep(delay)
-		
-
+			
 main()

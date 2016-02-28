@@ -1,5 +1,3 @@
-import pygame
-
 class TitleScene:
 	def __init__(self):
 		self.next = self
