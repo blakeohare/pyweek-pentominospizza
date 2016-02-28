@@ -6,6 +6,7 @@ def main():
 	pygame.init()
 	
 	screen = pygame.display.set_mode((800, 600))
+	pygame.display.set_caption("Space Game of Some Sort")
 	is_fullscreen = False
 	
 	scene = TitleScene()
