@@ -121,11 +121,11 @@ class Sprite:
 			pass
 		self.hitBox = None
 		
-	def render(self, rc):
+	def render(self, rc, cx, cy):
 		hb = self.getHitBox()
 		if self.ground == None:
 			img = self.images['left'][0]
-			img.blitRotation(hb[0], hb[1], self.theta)
+			img.blitRotation(hb[0] + cx, hb[1] + cy, self.theta)
 		else:
 			#if self.type == 'player':
 			imgs = self.images['left'] if self.facingLeft else self.images['right']
@@ -133,6 +133,6 @@ class Sprite:
 			#else:
 			#	pass
 			
-			img.blitRotation(hb[0], hb[1], self.ground.theta + self.thetaFromGround)
+			img.blitRotation(hb[0] + cx, hb[1] + cy, self.ground.theta + self.thetaFromGround)
 			
 		

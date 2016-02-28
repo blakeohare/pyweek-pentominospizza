@@ -13,6 +13,6 @@ class GravityBody:
 		self.theta += 2 * 3.14159265358979 * self.rps * dt
 	
 	# TODO: scene offset
-	def render(self):
-		self.image.blitRotation(self.x, self.y, self.theta)
+	def render(self, cx, cy):
+		self.image.blitRotation(self.x + cx, self.y + cy, self.theta)
 		#self.image.blitSimple(self.x, self.y)
