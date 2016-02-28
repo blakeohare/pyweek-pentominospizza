@@ -1,4 +1,6 @@
 
+MUMBLEFOO = [None]
+
 def main():
 	
 	pygame.init()
@@ -13,6 +15,7 @@ def main():
 	while True:
 		start = time.time()
 		
+		events = []
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				return
@@ -28,11 +31,16 @@ def main():
 					else:
 						screen = pygame.display.set_mode((800, 600), pygame.FULLSCREEN)
 					is_fullscreen = not is_fullscreen
-						
+					
 			if event.type == pygame.KEYUP:
 				pressed_keys[event.key] = False
+			
+			events.append(event)
 		
 		scene.update(events, pressed_keys)
+		
+		if MUMBLEFOO[0] == 'exit': return
+		
 		scene.render(screen, rc)
 		rc += 1
 		pygame.display.flip()
