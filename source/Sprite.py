@@ -61,21 +61,36 @@ class Sprite:
 				r = self.ground.radius
 				self.thetaFromGround += math.acos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2))) * dx
 			else:
-				print("TODO: movement IN SPACE")
+				pass #print("TODO: movement IN SPACE")
 	
 	def updateForFloating(self, scene, dt):
 		self.x += self.vx * dt
 		self.y += self.vy * dt
+		
+		gx = 0.0
+		gy = 0.0
+		
 		for body in scene.bodies:
-			dx = self.x - body.x
-			dy = self.y - body.y
+			dx = body.x - self.x
+			dy = body.y - self.y
 			dr = self.r + body.radius
-			if dx ** 2 + dy ** 2 <= dr ** 2:
-				self.ground = body
-				theta = math.atan2(dx, dy)
-				self.thetaFromGround = theta - body.theta
-				return
-	
+			dist = (dx ** 2 + dy ** 2) ** .5
+			if dist < 1000:
+				if dist <= dr:
+					self.ground = body
+					theta = math.atan2(dx, dy)
+					self.thetaFromGround = theta - body.theta
+					return
+				
+			g = body.gravity / (dist / 200) ** 2 # magic number ahoy
+			ux = dx / dist
+			uy = dy / dist
+			
+			gx += g * ux
+			gy += g * uy
+		
+		self.vx += gx
+		self.vy += gy
 	
 	def update(self, scene, dt):
 		if self.ground == None:
