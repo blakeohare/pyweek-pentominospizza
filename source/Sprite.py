@@ -2,7 +2,11 @@ class Sprite:
 
 	def __init__(self, type, startType, x_or_body, y_or_theta):
 		self.r = 10
-		# TODO: apply other types to radius
+		self.images = {}
+		self.type = type
+		if type == 'player':
+			self.images['left'] = [GfxImage('sprites/delete-left-0.png'), GfxImage('sprites/delete-left-1.png')]
+			self.images['right'] = [GfxImage('sprites/delete-right-0.png'), GfxImage('sprites/delete-right-1.png')]
 		
 		self.vx = 0
 		self.vy = 0
@@ -10,6 +14,7 @@ class Sprite:
 		self.thetaFromGround = 0
 		self.floatingTheta = 0.0
 		self.hitBox = None
+		self.facingLeft = False
 		
 		if startType == 'G':
 			self.ground = x_or_body
@@ -29,17 +34,36 @@ class Sprite:
 				self.hitBox = (x, y, self.r)
 		return self.hitBox
 	
-	def update(self, scene):
+	def applyWalk(self, dx):
+		if dx != 0:
+			self.facingLeft = dx < 0
+			v = .7
+			if self.ground != None:
+				r = self.ground.radius
+				self.thetaFromGround += math.acos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2))) * dx
+			else:
+				print("TODO: movement IN SPACE")
+	
+	def update(self, scene, dt):
 		if self.ground == None:
-			self.x += self.vx
-			self.y += self.vy
-			self.hitBox = None
+			self.x += self.vx * dt
+			self.y += self.vy * dt
 		else:
-			pass # position is landing offset from ground's theta
+			# position is landing offset from ground's theta
+			pass
+		self.hitBox = None
 		
 	def render(self, rc):
 		if self.ground == None:
 			pass
 		else:
-			pass
+			hb = self.getHitBox()
+			if self.type == 'player':
+				imgs = self.images['left'] if self.facingLeft else self.images['right']
+				img = imgs[(rc / 4) % len(imgs)]
+			else:
+				pass
+			
+			img.blitRotation(hb[0], hb[1], self.ground.theta + self.thetaFromGround)
+			
 		

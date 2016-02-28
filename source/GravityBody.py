@@ -8,8 +8,8 @@ class GravityBody:
 		self.theta = random.random() * 2 * 3.14159
 		self.rps = rps
 	
-	def update(self, scene):
-		self.theta += 2 * 3.14159 * self.rps / 30
+	def update(self, scene, dt):
+		self.theta += 2 * 3.14159265358979 * self.rps * dt
 	
 	# TODO: scene offset
 	def render(self):
