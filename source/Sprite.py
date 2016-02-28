@@ -1,3 +1,11 @@
+PLAYER_WALK_VELOCITY = 2.7
+PLAYER_JUMP_VELOCITY = 400.0
+ASTEROID_GRAVITY_COEFFICIENT = 4200.0 # make bigger for stronger gravity
+
+# If enabled, will skip every other update phase and apply that dt to the next update phase's dt value to ensure that I'm incorporating dt correctly into my calculations
+# Be sure to set this to true every once in a while to test.
+DT_TEST_ENABLED = False
+
 class Sprite:
 
 	def __init__(self, type, startType, x_or_body, y_or_theta):
@@ -7,6 +15,9 @@ class Sprite:
 		if type == 'player':
 			self.images['left'] = [GfxImage('sprites/delete-left-0.png'), GfxImage('sprites/delete-left-1.png')]
 			self.images['right'] = [GfxImage('sprites/delete-right-0.png'), GfxImage('sprites/delete-right-1.png')]
+		elif type == 'ship':
+			self.images['left'] = [GfxImage('sprites/ship/ship.png')]
+			self.images['right'] = self.images['left']
 		
 		self.vx = 0
 		self.vy = 0
@@ -15,6 +26,10 @@ class Sprite:
 		self.floatingTheta = 0.0
 		self.hitBox = None
 		self.facingLeft = False
+		
+		# for DT_TEST_ENABLED
+		self.counter = 0
+		self.dt_backlog = 0.0
 		
 		if startType == 'G':
 			self.ground = x_or_body
@@ -37,7 +52,7 @@ class Sprite:
 	def applyJump(self, press):
 		if press and self.ground != None:
 			ground = self.ground
-			jumpVelocity = 100.0 # pixels per second
+			jumpVelocity = PLAYER_JUMP_VELOCITY # pixels per second
 			r = self.ground.radius + self.r + 5
 			theta = self.thetaFromGround + self.ground.theta
 			ux = math.cos(theta)
@@ -56,14 +71,20 @@ class Sprite:
 	def applyWalk(self, dx):
 		if dx != 0:
 			self.facingLeft = dx < 0
-			v = .7
+			v = PLAYER_WALK_VELOCITY
 			if self.ground != None:
 				r = self.ground.radius
 				self.thetaFromGround += math.acos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2))) * dx
-			else:
-				pass #print("TODO: movement IN SPACE")
 	
 	def updateForFloating(self, scene, dt):
+		if DT_TEST_ENABLED:
+			self.counter += 1
+			if self.counter % 2 == 0:
+				self.dt_backlog = dt
+				return
+			else:
+				dt += self.dt_backlog
+			
 		self.x += self.vx * dt
 		self.y += self.vy * dt
 		
@@ -75,22 +96,22 @@ class Sprite:
 			dy = body.y - self.y
 			dr = self.r + body.radius
 			dist = (dx ** 2 + dy ** 2) ** .5
-			if dist < 1000:
+			if dist < 2000:
 				if dist <= dr:
 					self.ground = body
 					theta = math.atan2(-dy, -dx)
 					self.thetaFromGround = theta - body.theta
 					return
 				
-			g = body.gravity / (dist / 200) ** 2 # magic number ahoy
+			g = body.gravity / (dist / ASTEROID_GRAVITY_COEFFICIENT) ** 2
 			ux = dx / dist
 			uy = dy / dist
 			
 			gx += g * ux
 			gy += g * uy
 		
-		self.vx += gx
-		self.vy += gy
+		self.vx += gx * dt
+		self.vy += gy * dt
 	
 	def update(self, scene, dt):
 		if self.ground == None:
@@ -106,11 +127,11 @@ class Sprite:
 			img = self.images['left'][0]
 			img.blitRotation(hb[0], hb[1], self.theta)
 		else:
-			if self.type == 'player':
-				imgs = self.images['left'] if self.facingLeft else self.images['right']
-				img = imgs[(rc / 4) % len(imgs)]
-			else:
-				pass
+			#if self.type == 'player':
+			imgs = self.images['left'] if self.facingLeft else self.images['right']
+			img = imgs[(rc / 4) % len(imgs)]
+			#else:
+			#	pass
 			
 			img.blitRotation(hb[0], hb[1], self.ground.theta + self.thetaFromGround)
 			

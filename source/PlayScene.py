@@ -5,12 +5,12 @@ class PlayScene:
 			GravityBody(300, 300, 150, 'rocks/rock3.png', 1 / 20.0),
 			GravityBody(600, 500, 150, 'rocks/rock3.png', 1 / 30.0),
 		]
-		self.sprites = []
 		self.player = Sprite('player', 'G', self.bodies[0], 3.14159 / 2)
-		self.sprites.append(self.player)
+		self.ship = Sprite('ship', 'G', self.bodies[1], 3.14159 / 2)
+		self.sprites = [self.player, self.ship]
+		
 	
 	def update(self, events, dt):
-		
 		dx = 0
 		if Q.pressedActions['left']:
 			dx = -1
