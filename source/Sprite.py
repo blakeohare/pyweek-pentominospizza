@@ -90,6 +90,8 @@ class Sprite:
 		
 		gx = 0.0
 		gy = 0.0
+		strongest_g = -1
+		strongest_source = None
 		
 		for body in scene.bodies:
 			dx = body.x - self.x
@@ -104,11 +106,35 @@ class Sprite:
 					return
 				
 			g = body.gravity / (dist / ASTEROID_GRAVITY_COEFFICIENT) ** 2
+			
+			if g > strongest_g:
+				strongest_g = g
+				strongest_source = body
 			ux = dx / dist
 			uy = dy / dist
 			
+			
 			gx += g * ux
 			gy += g * uy
+		
+		if strongest_source != None:
+			dx = strongest_source.x - self.x
+			dy = strongest_source.y - self.y
+			twoPi = 2 * 3.14159265358979
+			targetTheta = math.atan2(-dy, -dx) % twoPi
+			currentTheta = self.theta % twoPi
+			dTheta = currentTheta - targetTheta
+			if dTheta > 3.14159265358979:
+				currentTheta -= twoPi
+			if dTheta < -3.14159265358979:
+				targetTheta -= twoPi
+			
+			r = .9 ** (dt / (1.0 / 30))
+			ar = 1.0 - r
+			self.theta = r * currentTheta + ar * targetTheta
+			
+			
+		
 		
 		self.vx += gx * dt
 		self.vy += gy * dt
@@ -123,16 +149,11 @@ class Sprite:
 		
 	def render(self, rc, cx, cy):
 		hb = self.getHitBox()
+		imgs = self.images['left'] if self.facingLeft else self.images['right']
+		img = imgs[(rc / 4) % len(imgs)]
 		if self.ground == None:
-			img = self.images['left'][0]
 			img.blitRotation(hb[0] + cx, hb[1] + cy, self.theta)
 		else:
-			#if self.type == 'player':
-			imgs = self.images['left'] if self.facingLeft else self.images['right']
-			img = imgs[(rc / 4) % len(imgs)]
-			#else:
-			#	pass
-			
 			img.blitRotation(hb[0] + cx, hb[1] + cy, self.ground.theta + self.thetaFromGround)
 			
 		
