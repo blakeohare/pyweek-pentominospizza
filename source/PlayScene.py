@@ -6,12 +6,12 @@ class PlayScene:
 			GravityBody(600, 500, 150, 'rocks/rock3.png', -1 / 50.0),
 		]
 	
-	def update(self, events):
+	def update(self, events, dt):
 		for body in self.bodies:
 			body.update(self)
 	
-	def render(self, rc):
+	def render(self):
 		Q.fill(0, 10, 40)
 		
 		for body in self.bodies:
-			body.render(rc)
+			body.render()

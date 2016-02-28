@@ -11,8 +11,8 @@ class TransitionScene:
 		self.alpha = 0
 		
 	
-	def update(self, events):
-		self.counter += 1
+	def update(self, events, dt):
+		self.counter += dt * 30.0
 		if self.counter < self.half:
 			self.bg = self.fromScene
 			progress = 1.0 - 1.0 * self.counter / self.half
@@ -26,5 +26,5 @@ class TransitionScene:
 			Q.setScreenAlpha(1)
 			self.next = self.toScene
 	
-	def render(self, rc):
-		self.bg.render(rc)
+	def render(self):
+		self.bg.render()

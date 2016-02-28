@@ -10,7 +10,7 @@ LETTERS += LETTERS.upper()
 LETTERS += '0123456789'
 LETTERS += '!@#$%^&*`~()-_=+[]{}|\\;:\'",.<>?/'
 
-class FontEngine:
+class PyGameFontEngine:
 	def __init__(self):
 		self.characters_by_size = {}
 	
@@ -32,5 +32,3 @@ class FontEngine:
 				Q.drawImageInstance(letter, x, y)
 				x += letter.get_width()
 				
-
-FONT = FontEngine()

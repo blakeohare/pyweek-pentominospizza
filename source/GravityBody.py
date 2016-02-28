@@ -12,5 +12,5 @@ class GravityBody:
 		self.theta += 2 * 3.14159 * self.rps / 30
 	
 	# TODO: scene offset
-	def render(self, rc):
+	def render(self):
 		Q.drawImage(self.imagePath, self.x, self.y, self.theta)

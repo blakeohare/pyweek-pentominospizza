@@ -13,8 +13,8 @@ class TitleScene:
 			('Exit', self.click_exit),
 		]
 	
-	def update(self, events):
-		self.counter += 1
+	def update(self, events, dt):
+		self.counter = int(time.time() * 30)
 		enter = False
 		for event in events:
 			if event.down:
@@ -43,9 +43,9 @@ class TitleScene:
 		pass
 	
 	def click_exit(self):
-		MUMBLEFOO[0] = 'exit'
+		Q.quit()
 		
-	def render(self, rc):
+	def render(self):
 		Q.drawImageTopLeft('background/space1.png', 0, 0)
 		
 		x = 200
@@ -56,7 +56,7 @@ class TitleScene:
 			yOffset = 0
 			if i == self.index:
 				yOffset = int(abs(math.sin(self.counter * 2 * 3.14159 / 30) * 8))
-			FONT.render(text, 'L', x, y - yOffset)
+			Q.renderText(text, 'L', x, y - yOffset)
 			y += 100
 			i += 1
 		
