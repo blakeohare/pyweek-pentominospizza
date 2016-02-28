@@ -62,9 +62,8 @@ class GfxImage:
 			self.theta = theta
 			self.sprite.rotation = theta
 		
-		rx = x
 		ry = Q.height - y
 		
-		self.sprite.set_position(rx, ry)
+		self.sprite.set_position(x, ry)
 		self.sprite.draw()	
 	
