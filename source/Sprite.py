@@ -78,7 +78,7 @@ class Sprite:
 			if dist < 1000:
 				if dist <= dr:
 					self.ground = body
-					theta = math.atan2(dx, dy)
+					theta = math.atan2(-dy, -dx)
 					self.thetaFromGround = theta - body.theta
 					return
 				
