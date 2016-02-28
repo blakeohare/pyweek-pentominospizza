@@ -20,7 +20,7 @@ def main():
 				return
 			
 			if event.type == pygame.KEYDOWN:
-				presed_keys[event.key] = True
+				pressed_keys[event.key] = True
 				if event.key == pygame.K_F4 and (pressed_keys[pygame.K_LALT] or pressed_keys[pygame.K_RALT]):
 					return
 			if event.type == pygame.KEYUP:
