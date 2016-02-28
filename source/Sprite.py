@@ -1,6 +1,6 @@
 PLAYER_WALK_VELOCITY = 2.7
-PLAYER_JUMP_VELOCITY = 400.0
-ASTEROID_GRAVITY_COEFFICIENT = 4200.0 # make bigger for stronger gravity
+PLAYER_JUMP_VELOCITY = 470.0
+ASTEROID_GRAVITY_COEFFICIENT = 5000.0 # make bigger for stronger gravity
 
 # If enabled, will skip every other update phase and apply that dt to the next update phase's dt value to ensure that I'm incorporating dt correctly into my calculations
 # Be sure to set this to true every once in a while to test.
