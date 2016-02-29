@@ -6,6 +6,12 @@ class PlayScene:
 			GravityBody(300, 300, 150, 'rocks/rock3.png', 1 / 20.0),
 			GravityBody(600, 500, 150, 'rocks/rock3.png', 1 / 30.0),
 		]
+		
+		self.debris = [
+			Debris(100, 100, 'small-debris1'),
+			Debris(600, 100, 'small-debris2'),
+		]
+		
 		self.player = Sprite('player', 'G', self.bodies[0], 3.14159 / 2)
 		self.ship = Sprite('ship', 'G', self.bodies[1], 3.14159 / 2)
 		self.sprites = [self.player, self.ship]
@@ -36,6 +42,8 @@ class PlayScene:
 		
 		self.player.applyJump(jump)
 		
+		for deb in self.debris:
+			deb.update(self, dt)
 		for body in self.bodies:
 			body.update(self, dt)
 		for sprite in self.sprites:
@@ -59,6 +67,9 @@ class PlayScene:
 		
 		cx = Q.width / 2 - self.cameraCurrentX
 		cy = Q.height / 2 - self.cameraCurrentY
+		
+		for deb in self.debris:
+			deb.render(cx, cy)
 		
 		for body in self.bodies:
 			body.render(cx, cy)
