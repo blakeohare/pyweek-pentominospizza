@@ -12,7 +12,6 @@ class Level:
 				if line[0] != '+':
 					parts = line.split(',')
 					objectId = parts[0].strip()
-					print parts
 					x = int(parts[1].strip())
 					y = int(parts[2].strip())
 					activeObject = (objectId, x, y, [])

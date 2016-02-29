@@ -5,9 +5,8 @@ _BODY_TYPE_INFO = {
 	'rock2': ('rock2', 150),
 	'rock3': ('rock3', 150),
 	'rock4': ('rock4', 150),
+	'water': ('water', 150),
 }
-
-
 
 class PlayScene:
 	def __init__(self):
@@ -23,7 +22,10 @@ class PlayScene:
 		for body in self.level.stuff:
 			type, x, y, sprites = body
 			imgPath, radius = _BODY_TYPE_INFO[type]
-			body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', 1 / 30.0)
+			flag = None
+			if type == 'water':
+				flag = 'water'
+			body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', 1 / 30.0, flag)
 			for sprite in sprites:
 				spriteInstance = None
 				type, angle = sprite
@@ -67,7 +69,7 @@ class PlayScene:
 			if event.type == 'space' and event.down:
 				jump = True
 		
-		self.player.applyJump(jump)
+		self.player.applyJump(jump, dt)
 		
 		for deb in self.debris:
 			deb.update(self, dt)

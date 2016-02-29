@@ -29,6 +29,8 @@ class Sprite:
 		self.hitBox = None
 		self.facingLeft = False
 		self.currentVelocity = (0.0, 0.0)
+		self.distanceFromCenter = None
+		self.waterJump = 0.0
 		
 		# for DT_TEST_ENABLED
 		self.counter = 0
@@ -37,6 +39,8 @@ class Sprite:
 		if startType == 'G':
 			self.ground = x_or_body
 			self.thetaFromGround = y_or_theta
+			if self.ground.isWater:
+				print("Starting sprites on water bodies not supported.")
 		else:
 			self.x = x_or_body + 0.0
 			self.y = y_or_theta + 0.0
@@ -46,32 +50,38 @@ class Sprite:
 			if self.ground == None:
 				self.hitBox = (self.x, self.y, self.r)
 			else:
-				r = self.ground.radius + self.r
+				if self.ground.isWater:
+					r = self.distanceFromCenter + self.r
+				else:
+					r = self.ground.radius + self.r
 				x = self.ground.x + r * math.cos(self.thetaFromGround + self.ground.theta)
 				y = self.ground.y + r * math.sin(self.thetaFromGround + self.ground.theta)
 				self.hitBox = (x, y, self.r)
 		return self.hitBox
 	
-	def applyJump(self, press):
+	def applyJump(self, press, dt):
 		if press and self.ground != None:
-			ground = self.ground
-			jumpVelocity = PLAYER_JUMP_VELOCITY # pixels per second
-			r = self.ground.radius + self.r + 5
-			theta = self.thetaFromGround + self.ground.theta
-			ux = math.cos(theta)
-			uy = math.sin(theta)
-			
-			x = self.ground.x + r * ux
-			y = self.ground.y + r * uy
-			self.x = x
-			self.y = y
-			self.vx = ux * jumpVelocity
-			self.vy = uy * jumpVelocity
-			self.theta = theta
-			self.ground = None
-			
-			self.vx += self.currentVelocity[0]
-			self.vy += self.currentVelocity[1]
+			if self.ground.isWater and self.distanceFromCenter < self.ground.radius:
+				self.waterJump = 5
+			else:
+				ground = self.ground
+				jumpVelocity = PLAYER_JUMP_VELOCITY # pixels per second
+				r = self.ground.radius + self.r + 5
+				theta = self.thetaFromGround + self.ground.theta
+				ux = math.cos(theta)
+				uy = math.sin(theta)
+				
+				x = self.ground.x + r * ux
+				y = self.ground.y + r * uy
+				self.x = x
+				self.y = y
+				self.vx = ux * jumpVelocity
+				self.vy = uy * jumpVelocity
+				self.theta = theta
+				self.ground = None
+				
+				self.vx += self.currentVelocity[0]
+				self.vy += self.currentVelocity[1]
 			
 	
 	def applyWalk(self, dir):
@@ -79,8 +89,9 @@ class Sprite:
 			self.facingLeft = dir < 0
 			v = PLAYER_WALK_VELOCITY
 			if self.ground != None:
+				# works for both water and solid ground
 				self.angularVelocity = v * dir
-				
+	
 	def updateForFloating(self, scene, dt):
 		if DT_TEST_ENABLED:
 			self.counter += 1
@@ -106,6 +117,7 @@ class Sprite:
 			if dist < 2000:
 				if dist <= dr:
 					self.ground = body
+					self.distanceFromCenter = self.ground.radius + 0.0
 					theta = math.atan2(-dy, -dx)
 					self.thetaFromGround = theta - body.theta
 					return
@@ -144,7 +156,18 @@ class Sprite:
 	
 	def updateForGround(self, scene, dt):
 		v = self.angularVelocity * (dt / (1 / 30.0))
-		r = self.ground.radius
+		if self.ground.isWater:
+		
+			self.distanceFromCenter += self.waterJump
+			self.waterJump *= .9 ** (dt / (1.0 / 30))
+			
+			r = self.distanceFromCenter
+			self.distanceFromCenter *= .98 ** (dt / (1 / 30.0))
+			if self.distanceFromCenter < 10:
+				self.distanceFromCenter = 10.0
+			
+		else:
+			r = self.ground.radius
 		
 		# Law-O-Cosines
 		theta = math.acos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2)))
@@ -154,6 +177,7 @@ class Sprite:
 			self.thetaFromGround += theta
 		
 		self.angularVelocity *= .8 ** (dt / (1.0 / 30))
+		
 	
 	def update(self, scene, dt):
 		oldLoc = self.getHitBox()
