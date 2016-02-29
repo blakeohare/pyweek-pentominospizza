@@ -1,0 +1,7 @@
+halfgrass, 0, 0
++ player, @10
++ store, @0
+
+rock1, 600, 80
+
+rock2, 600, -600

@@ -1,36 +1,59 @@
+_BODY_TYPE_INFO = {
+	# image name, radius
+	'halfgrass': ('halfgrass', 150),
+	'rock1': ('rock1', 150),
+	'rock2': ('rock2', 150),
+	'rock3': ('rock3', 150),
+	'rock4': ('rock4', 150),
+}
+
+
+
 class PlayScene:
 	def __init__(self):
 		self.next = self
 		self.bg = GfxImage('background/space4.png')
-		self.bodies = [
-			GravityBody(300, 300, 150, 'rocks/rock3.png', 1 / 20.0),
-			GravityBody(600, 500, 150, 'rocks/rock3.png', 1 / 30.0),
-		]
 		
-		self.debris = [
-			Debris(100, 100, 'small-debris1'),
-			Debris(600, 100, 'small-debris2'),
-		]
+		self.level = Level('level1')
 		
-		self.player = Sprite('player', 'G', self.bodies[0], 3.14159 / 2)
-		self.ship = Sprite('ship', 'G', self.bodies[1], 3.14159 / 2)
-		self.sprites = [self.player, self.ship]
+		self.sprites = []
+		self.player = None
+		self.bodies = []
 		
-		self.inputTarget = self.player
+		for body in self.level.stuff:
+			type, x, y, sprites = body
+			imgPath, radius = _BODY_TYPE_INFO[type]
+			body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', 1 / 30.0)
+			for sprite in sprites:
+				type, angle = sprite
+				if type == 'player':
+					spriteInstance = Sprite('player', 'G', body, angle)
+					self.player = spriteInstance
+				elif type == 'store':
+					spriteInstance = Sprite('player', 'G', body, angle)
+				else:
+					print("Unknown sprite type: " + type)
+				self.sprites.append(spriteInstance)
+			self.bodies.append(body)
+		
+		self.debris = []
+		
+		for i in range(10):
+			self.debris.append(Debris(1000 * random.random(), random.random() * 1000, 'small-debris' + str(int(random.random() * 8) + 1)))
+		
 		self.cameraTargetX = None
 		self.cameraTargetY = None
 		self.cameraCurrentX = None
 		self.cameraCurrentY = None
 		
-	
 	def update(self, events, dt):
 		dx = 0
 		if Q.pressedActions['left']:
 			dx = -1
-			self.inputTarget.facingLeft = True
+			self.player.facingLeft = True
 		elif Q.pressedActions['right']:
 			dx = 1
-			self.inputTarget.facingLeft = False
+			self.player.facingLeft = False
 			
 		self.player.applyWalk(dx)
 		
@@ -52,7 +75,7 @@ class PlayScene:
 	def render(self):
 		self.bg.blitSimple(0, 0)
 		
-		hb = self.inputTarget.getHitBox()
+		hb = self.player.getHitBox()
 		
 		self.cameraTargetX = hb[0]
 		self.cameraTargetY = hb[1]
