@@ -13,7 +13,7 @@ class ImageLibrary:
 		return img
 	
 	def getRotated(self, path, theta):
-		theta = theta / (2 * 3.14159265358979) % 1
+		theta = theta / TWO_PI % 1
 		if theta < 0: theta += 1
 		lookup = self.imagesByThetaByPath.get(path)
 		if lookup == None:

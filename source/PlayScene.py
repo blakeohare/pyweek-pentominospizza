@@ -95,7 +95,7 @@ class PlayScene:
 			self.cameraCurrentX = self.cameraCurrentX * .9 + self.cameraTargetX * .1
 			self.cameraCurrentY = self.cameraCurrentY * .9 + self.cameraTargetY * .1
 		
-		t = int(time.time() * 30)
+		t = int(time.time() * FPS)
 		
 		cx = Q.width / 2 - self.cameraCurrentX
 		cy = Q.height / 2 - self.cameraCurrentY

@@ -5,7 +5,7 @@ class GravityBody:
 		self.y = y + 0.0
 		self.radius = radius
 		self.image = GfxImage(imagePath)
-		self.theta = random.random() * 2 * 3.14159
+		self.theta = random.random() * TWO_PI
 		self.rps = rps
 		self.gravity = radius / 100.0
 		self.isWater = False
@@ -20,7 +20,7 @@ class GravityBody:
 		self.image.setSize(imgWH[0], imgWH[1])
 	
 	def update(self, scene, dt):
-		self.theta += 2 * 3.14159265358979 * self.rps * dt
+		self.theta += TWO_PI * self.rps * dt
 	
 	def render(self, cx, cy):
 		self.image.blitRotation(self.x + cx, self.y + cy, self.theta)

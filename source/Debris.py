@@ -10,12 +10,12 @@ class Debris:
 		self.x = x
 		self.y = y
 		self.type = type
-		self.theta = random.random() * 2 * 3.14159265358979
+		self.theta = random.random() * TWO_PI
 		self.img = GfxImage('rocks/' + type + '.png')
 		self.angularVelocity = random.random() / 25.0
 	
 	def update(self, scene, dt):
-		self.theta += self.angularVelocity * (dt / (1.0 / 30))
+		self.theta += self.angularVelocity * (dt * FPS)
 	
 	def render(self, cx, cy):
 		x = (self.x + cx * .6) % 1000 - 500

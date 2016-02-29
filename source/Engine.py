@@ -119,7 +119,7 @@ class Engine:
 		if self.isPyglet:
 			self.window = self.windowClass(width, height, title)
 			self.scene = scene
-			self.pyglet.clock.schedule_interval(self.pygletUpdate, 1 / 60.0)
+			self.pyglet.clock.schedule_interval(self.pygletUpdate, 1 / 60.0) # faster than the canonical SPF
 			
 			self.pyglet.resource.path = ['./source']
 			self.pyglet.resource.reindex()
@@ -134,7 +134,7 @@ class Engine:
 				if Q.exitGame:
 					return
 				
-				scene.update(events, 1 / 30.0)
+				scene.update(events, SPF)
 				
 				if scene != scene.next:
 					old = scene
@@ -210,7 +210,7 @@ class Engine:
 			else:
 				now = time.time()
 				diff = now - self.frameStart
-				delay = 1 / 30.0 - diff
+				delay = SPF - diff
 				if delay > 0:
 					time.sleep(delay)
 				self.frameStart = now

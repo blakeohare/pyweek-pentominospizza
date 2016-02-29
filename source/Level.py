@@ -19,7 +19,7 @@ class Level:
 				else:
 					parts = line[1:].split(',')
 					spriteId = parts[0].strip()
-					theta = int(parts[1].strip()[1:]) * 2 * 3.14159265358979  / 360
+					theta = int(parts[1].strip()[1:]) * TWO_PI  / 360
 					activeObject[3].append((spriteId, theta))
 		
 		self.stuff = objects

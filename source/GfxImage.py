@@ -71,7 +71,7 @@ class GfxImage:
 		diff = theta - self.theta
 		if diff < -0.00001 or diff > 0.00001:
 			self.theta = theta
-			self.sprite.rotation = 360 / (2 * 3.14159265358979) * theta + 90
+			self.sprite.rotation = 360 / TWO_PI * theta + 90
 		
 		ry = Q.height - y
 		

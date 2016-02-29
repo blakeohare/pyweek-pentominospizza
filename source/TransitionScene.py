@@ -4,7 +4,7 @@ class TransitionScene:
 		self.next = self
 		self.fromScene = fromScene
 		self.toScene = toScene
-		self.duration = 30
+		self.duration = FPS
 		self.half = self.duration / 2
 		self.counter = 0
 		self.bg = fromScene
@@ -12,7 +12,7 @@ class TransitionScene:
 		
 	
 	def update(self, events, dt):
-		self.counter += dt * 30.0
+		self.counter += dt * FPS
 		if self.counter < self.half:
 			self.bg = self.fromScene
 			progress = 1.0 - 1.0 * self.counter / self.half

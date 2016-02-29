@@ -138,16 +138,15 @@ class Sprite:
 		if strongest_source != None:
 			dx = strongest_source.x - self.x
 			dy = strongest_source.y - self.y
-			twoPi = 2 * 3.14159265358979
-			targetTheta = math.atan2(-dy, -dx) % twoPi
-			currentTheta = self.theta % twoPi
+			targetTheta = math.atan2(-dy, -dx) % TWO_PI
+			currentTheta = self.theta % TWO_PI
 			dTheta = currentTheta - targetTheta
-			if dTheta > 3.14159265358979:
-				currentTheta -= twoPi
-			if dTheta < -3.14159265358979:
-				targetTheta -= twoPi
+			if dTheta > PI:
+				currentTheta -= TWO_PI
+			if dTheta < -PI:
+				targetTheta -= TWO_PI
 			
-			r = .9 ** (dt / (1.0 / 30))
+			r = .9 ** (dt * FPS)
 			ar = 1.0 - r
 			self.theta = r * currentTheta + ar * targetTheta
 		
@@ -155,13 +154,13 @@ class Sprite:
 		self.vy += gy * dt
 	
 	def updateForGround(self, scene, dt):
-		v = self.angularVelocity * (dt / (1 / 30.0))
+		v = self.angularVelocity * (dt * FPS)
 		if self.ground.isWater:
 			self.distanceFromCenter += self.waterJump
-			self.waterJump *= .9 ** (dt / (1.0 / 30))
+			self.waterJump *= .9 ** (dt * FPS)
 			
 			r = self.distanceFromCenter
-			self.distanceFromCenter *= .98 ** (dt / (1 / 30.0))
+			self.distanceFromCenter *= .98 ** (dt * FPS)
 			if self.distanceFromCenter < 10:
 				self.distanceFromCenter = 10.0
 		else:
@@ -174,7 +173,7 @@ class Sprite:
 		else:
 			self.thetaFromGround += theta
 		
-		self.angularVelocity *= .8 ** (dt / (1.0 / 30))
+		self.angularVelocity *= .8 ** (dt * FPS)
 		
 	
 	def update(self, scene, dt):

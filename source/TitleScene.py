@@ -59,7 +59,8 @@ class TitleScene:
 			text = option[0]
 			yOffset = 0
 			if i == self.index:
-				yOffset = int(abs(math.sin(self.counter * 2 * 3.14159 / 30) * 8))
+				# needs to be adjusted to dt
+				yOffset = int(abs(math.sin(self.counter * TWO_PI / FPS) * 8))
 			yValue = y - yOffset
 			obj = option[2]
 			if obj == None:
