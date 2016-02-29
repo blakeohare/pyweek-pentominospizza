@@ -39,6 +39,17 @@ class GfxImage:
 		self.width = img.width
 		self.height = img.height
 		self.theta = None
+	
+	def setSize(self, width, height):
+		self.width = width
+		self.height = height
+		self.sprite.image.width = width
+		self.sprite.image.height = height
+		self.centered = False
+		self.sprite.anchor_x = 0
+		self.sprite.anchor_y = 0
+		self.img.cx = width / 2.0
+		self.img.cy = height / 2.0
 		
 	def blitSimple(self, x, y):
 		self.img.anchorTopLeft()

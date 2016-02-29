@@ -5,6 +5,7 @@ class GravityBody:
 		self.y = y + 0.0
 		self.radius = radius
 		self.image = GfxImage(imagePath)
+		self.image.setSize(radius * 2, radius * 2)
 		self.theta = random.random() * 2 * 3.14159
 		self.rps = rps
 		self.gravity = radius / 100.0
