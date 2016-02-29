@@ -5,6 +5,7 @@ _BODY_TYPE_INFO = {
 	'rock2': ('rock2', 150),
 	'rock3': ('rock3', 150),
 	'rock4': ('rock4', 150),
+	'volcano': ('volcano', 150),
 	'water': ('water', 150),
 }
 
@@ -25,6 +26,8 @@ class PlayScene:
 			flag = None
 			if type == 'water':
 				flag = 'water'
+			elif type == 'volcano':
+				flag = 'volcano'
 			body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', 1 / 30.0, flag)
 			for sprite in sprites:
 				spriteInstance = None

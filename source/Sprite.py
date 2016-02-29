@@ -157,7 +157,6 @@ class Sprite:
 	def updateForGround(self, scene, dt):
 		v = self.angularVelocity * (dt / (1 / 30.0))
 		if self.ground.isWater:
-		
 			self.distanceFromCenter += self.waterJump
 			self.waterJump *= .9 ** (dt / (1.0 / 30))
 			
@@ -165,7 +164,6 @@ class Sprite:
 			self.distanceFromCenter *= .98 ** (dt / (1 / 30.0))
 			if self.distanceFromCenter < 10:
 				self.distanceFromCenter = 10.0
-			
 		else:
 			r = self.ground.radius
 		
