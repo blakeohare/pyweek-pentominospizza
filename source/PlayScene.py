@@ -25,17 +25,21 @@ class PlayScene:
 			imgPath, radius = _BODY_TYPE_INFO[type]
 			body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', 1 / 30.0)
 			for sprite in sprites:
+				spriteInstance = None
 				type, angle = sprite
 				if type == 'player':
-					spriteInstance = Sprite('player', 'G', body, angle)
-					self.player = spriteInstance
+					self.player = Sprite('player', 'G', body, angle)
 				elif type == 'store':
-					spriteInstance = Sprite('player', 'G', body, angle)
+					spriteInstance = Sprite('store', 'G', body, angle)
 				else:
 					print("Unknown sprite type: " + type)
-				self.sprites.append(spriteInstance)
+				if spriteInstance != None:
+					self.sprites.append(spriteInstance)
 			self.bodies.append(body)
 		
+		if self.player != None:
+			# ensure player is rendered last so always on top
+			self.sprites.append(self.player)
 		self.debris = []
 		
 		for i in range(10):

@@ -15,8 +15,8 @@ class Sprite:
 		if type == 'player':
 			self.images['left'] = [GfxImage('sprites/delete-left-0.png'), GfxImage('sprites/delete-left-1.png')]
 			self.images['right'] = [GfxImage('sprites/delete-right-0.png'), GfxImage('sprites/delete-right-1.png')]
-		elif type == 'ship':
-			self.images['left'] = [GfxImage('sprites/ship/ship.png')]
+		elif type == 'store':
+			self.images['left'] = [GfxImage('sprites/store.png')]
 			self.images['right'] = self.images['left']
 		
 		self.vx = 0
