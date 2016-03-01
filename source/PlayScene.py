@@ -1,6 +1,7 @@
 _BODY_TYPE_INFO = {
 	# image name, radius
 	'halfgrass': ('halfgrass', 150),
+	'lava': ('lava', 150),
 	'rock1': ('rock1', 150),
 	'rock2': ('rock2', 150),
 	'rock3': ('rock3', 150),
