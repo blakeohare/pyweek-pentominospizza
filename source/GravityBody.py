@@ -1,6 +1,19 @@
 
+GRAVITY_ID_ALLOC = [0]
+
+def getIdFromBody(body):
+	if body == None: return None
+	return body.id
+
+def getBodyFromId(id, bodies):
+	if id == None: return None
+	return bodies.get(id)
+	
 class GravityBody:
 	def __init__(self, x, y, radius, imagePath, rps, typeFlag = None):
+		# IF YOU ADD ANYTHING HERE, ADD IT TO SAVE AND RESTORE STATE
+		self.id = GRAVITY_ID_ALLOC[0]
+		GRAVITY_ID_ALLOC[0] += 1
 		self.x = x + 0.0
 		self.y = y + 0.0
 		self.radius = radius
@@ -24,3 +37,18 @@ class GravityBody:
 	
 	def render(self, cx, cy):
 		self.image.blitRotation(self.x + cx, self.y + cy, self.theta)
+
+	def saveState(self):
+		return [self.x, self.y, self.radius, self.image, self.theta, self.rps, self.gravity, self.isWater, self.isVolcano, self.id]
+		
+	def restoreState(self, state):
+		self.x = state[0]
+		self.y = state[1]
+		self.radius = state[2]
+		self.image = state[3]
+		self.theta = state[4]
+		self.rps = state[5]
+		self.gravity = state[6]
+		self.isWater = state[7]
+		self.isVolcano = state[8]
+		self.id = state[9]

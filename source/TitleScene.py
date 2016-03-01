@@ -35,7 +35,7 @@ class TitleScene:
 			self.options[self.index][1]()
 		
 	def click_play(self):
-		self.next = TransitionScene(self, PlayScene())
+		self.next = TransitionScene(self, PlayScene('M', 'level1'))
 	
 	def click_options(self):
 		pass

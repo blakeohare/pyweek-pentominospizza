@@ -8,7 +8,7 @@ DT_TEST_ENABLED = False
 
 class Sprite:
 
-	def __init__(self, type, startType, x_or_body, y_or_theta):
+	def __init__(self, type, startType, x_or_body, y_or_theta_or_bodies_lookup):
 		self.r = 10
 		self.images = {}
 		self.type = type
@@ -36,14 +36,60 @@ class Sprite:
 		self.counter = 0
 		self.dt_backlog = 0.0
 		
-		if startType == 'G':
+		self.x = None
+		self.y = None
+		
+		if startType == 'R': #restore
+			self.restoreState(x_or_body, y_or_theta_or_bodies_lookup)
+		elif startType == 'G':
 			self.ground = x_or_body
-			self.thetaFromGround = y_or_theta
+			self.thetaFromGround = y_or_theta_or_bodies_lookup
 			if self.ground.isWater:
 				print("Starting sprites on water bodies not supported.")
 		else:
 			self.x = x_or_body + 0.0
-			self.y = y_or_theta + 0.0
+			self.y = y_or_theta_or_bodies_lookup + 0.0
+	
+	def restoreState(self, state, bodiesById):
+		self.r = state[0]
+		self.type = state[1]
+		self.images = state[2]
+		self.vx = state[3]
+		self.vy = state[4]
+		self.angularVelocity = state[5]
+		self.ground = getBodyFromId(state[6])
+		self.strongestGround = getBodyFromId(state[7])
+		self.thetaFromGround = state[8]
+		self.floatingTheta = state[9]
+		self.hitBox = state[10]
+		self.facingLeft = state[11]
+		self.currentVelocity = state[12]
+		self.distanceFromCenter = state[13]
+		self.waterJump = state[14]
+		self.counter = state[15]
+		self.x = state[16]
+		self.y = state[17]
+	
+	def saveState(self):
+		return [
+			self.r,
+			self.type,
+			self.images,
+			self.vx,
+			self.vy,
+			self.angularVelocity,
+			getIdFromBody(self.ground),
+			getIdFromBody(self.strongestGround),
+			self.thetaFromGround,
+			self.floatingTheta,
+			self.hitBox,
+			self.facingLeft,
+			self.currentVelocity,
+			self.distanceFromCenter,
+			self.waterJump,
+			self.counter,
+			self.x,
+			self.y]
 	
 	def getHitBox(self):
 		if self.hitBox == None:
