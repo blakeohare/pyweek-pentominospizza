@@ -1,6 +1,7 @@
 _BODY_TYPE_INFO = {
 	# image name, radius
 	'halfgrass': ('halfgrass', 150),
+	'lava': ('lava', 150),
 	'rock1': ('rock1', 150),
 	'rock2': ('rock2', 150),
 	'rock3': ('rock3', 150),
@@ -10,41 +11,59 @@ _BODY_TYPE_INFO = {
 }
 
 class PlayScene:
-	def __init__(self):
+	# Restore type is either 'M' for map or 'S' for state
+	# arg is level string ID for M and another playscene for S
+	def __init__(self, restoreType, arg):
 		self.next = self
 		self.bg = GfxImage('background/space4.png')
-		
-		self.level = Level('level1')
 		
 		self.sprites = []
 		self.player = None
 		self.bodies = []
 		
-		for body in self.level.stuff:
-			type, x, y, sprites = body
-			imgPath, radius = _BODY_TYPE_INFO[type]
-			flag = None
-			if type == 'water':
-				flag = 'water'
-			elif type == 'volcano':
-				flag = 'volcano'
-			body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', 1 / 30.0, flag)
-			for sprite in sprites:
-				spriteInstance = None
-				type, angle = sprite
-				if type == 'player':
-					self.player = Sprite('player', 'G', body, angle)
-				elif type == 'store':
-					spriteInstance = Sprite('store', 'G', body, angle)
-				else:
-					print("Unknown sprite type: " + type)
-				if spriteInstance != None:
-					self.sprites.append(spriteInstance)
-			self.bodies.append(body)
+		if restoreType == 'M':
+			self.level = Level(arg)
+			
+			for body in self.level.stuff:
+				type, x, y, sprites = body
+				imgPath, radius = _BODY_TYPE_INFO[type]
+				flag = None
+				if type == 'water':
+					flag = 'water'
+				elif type == 'volcano':
+					flag = 'volcano'
+				elif type == 'lava':
+					flag = 'lava'
+				body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', 1 / 30.0, flag)
+				for sprite in sprites:
+					spriteInstance = None
+					type, angle = sprite
+					if type == 'player':
+						self.player = Sprite('player', 'G', body, angle)
+					elif type == 'store':
+						spriteInstance = Sprite('store', 'G', body, angle)
+					else:
+						print("Unknown sprite type: " + type)
+					if spriteInstance != None:
+						self.sprites.append(spriteInstance)
+				self.bodies.append(body)
+			
+			if self.player != None:
+				# ensure player is rendered last so always on top
+				self.sprites.append(self.player)
+		elif restoreType == 'S':
+			bodiesById = {}
+			for bodyState in arg.savedStateBodies:
+				gb = GravityBody(0, 0, 150, 'rocks/rock1.png', 0, None) # dummy value
+				gb.restoreState(bodyState)
+				self.bodies.append(gb)
+				bodiesById[gb.id] = gb
+			for spriteState in arg.savedStateSprites:
+				sprite = Sprite('player', 'R', spriteState, bodiesById)
+				if sprite.type == 'player':
+					self.player = sprite
+				self.sprites.append(sprite)
 		
-		if self.player != None:
-			# ensure player is rendered last so always on top
-			self.sprites.append(self.player)
 		self.debris = []
 		
 		for i in range(10):
@@ -55,6 +74,27 @@ class PlayScene:
 		self.cameraCurrentX = None
 		self.cameraCurrentY = None
 		
+		# These values are immediately set by saveState() and will never actually be null when the game update phase is running.
+		self.savedStateBodies = None
+		self.savedStateSprites = None
+		
+		self.saveState()
+	
+	def saveState(self):
+		mapping = {} # body instance to index in the list
+		bodies = []
+		sprites = []
+		bodyToIndex = {}
+		for body in self.bodies:
+			bodyToIndex[body] = len(bodies)
+			bodies.append(body.saveState())
+		
+		for sprite in self.sprites:
+			sprites.append(sprite.saveState())
+		
+		self.savedStateBodies = bodies
+		self.savedStateSprites = sprites
+	
 	def update(self, events, dt):
 		dx = 0
 		if Q.pressedActions['left']:
@@ -80,6 +120,9 @@ class PlayScene:
 			body.update(self, dt)
 		for sprite in self.sprites:
 			sprite.update(self, dt)
+	
+	def triggerDeath(self):
+		self.next = TransitionScene(self, PlayScene('S', self))
 	
 	def render(self):
 		self.bg.blitSimple(0, 0)
