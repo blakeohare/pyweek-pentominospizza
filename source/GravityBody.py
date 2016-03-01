@@ -23,12 +23,15 @@ class GravityBody:
 		self.gravity = radius / 100.0
 		self.isWater = False
 		self.isVolcano = False
+		self.isDeathy = False
 		imgWH = (radius * 2, radius * 2)
 		if typeFlag == 'water':
 			self.isWater = True
 		elif typeFlag == 'volcano':
 			self.isVolcano = True
 			imgWH = (radius * 2.6, radius * 2.6)
+		elif typeFlag == 'lava':
+			self.isDeathy = True
 		
 		self.image.setSize(imgWH[0], imgWH[1])
 	
@@ -39,7 +42,7 @@ class GravityBody:
 		self.image.blitRotation(self.x + cx, self.y + cy, self.theta)
 
 	def saveState(self):
-		return [self.x, self.y, self.radius, self.image, self.theta, self.rps, self.gravity, self.isWater, self.isVolcano, self.id]
+		return [self.x, self.y, self.radius, self.image, self.theta, self.rps, self.gravity, self.isWater, self.isVolcano, self.id, self.isDeathy]
 		
 	def restoreState(self, state):
 		self.x = state[0]
@@ -52,3 +55,4 @@ class GravityBody:
 		self.isWater = state[7]
 		self.isVolcano = state[8]
 		self.id = state[9]
+		self.isDeathy = state[10]

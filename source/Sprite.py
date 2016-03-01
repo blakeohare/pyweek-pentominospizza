@@ -57,8 +57,8 @@ class Sprite:
 		self.vx = state[3]
 		self.vy = state[4]
 		self.angularVelocity = state[5]
-		self.ground = getBodyFromId(state[6])
-		self.strongestGround = getBodyFromId(state[7])
+		self.ground = getBodyFromId(state[6], bodiesById)
+		self.strongestGround = getBodyFromId(state[7], bodiesById)
 		self.thetaFromGround = state[8]
 		self.floatingTheta = state[9]
 		self.hitBox = state[10]
@@ -166,6 +166,12 @@ class Sprite:
 					self.distanceFromCenter = self.ground.radius + 0.0
 					theta = math.atan2(-dy, -dx)
 					self.thetaFromGround = theta - body.theta
+					if body.isDeathy:
+						scene.triggerDeath()
+					elif body.isWater:
+						pass
+					else:
+						scene.saveState()
 					return
 				
 			g = body.gravity / (dist / ASTEROID_GRAVITY_COEFFICIENT) ** 2

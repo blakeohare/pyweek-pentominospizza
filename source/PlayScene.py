@@ -32,6 +32,8 @@ class PlayScene:
 					flag = 'water'
 				elif type == 'volcano':
 					flag = 'volcano'
+				elif type == 'lava':
+					flag = 'lava'
 				body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', 1 / 30.0, flag)
 				for sprite in sprites:
 					spriteInstance = None
@@ -59,7 +61,7 @@ class PlayScene:
 			for spriteState in arg.savedStateSprites:
 				sprite = Sprite('player', 'R', spriteState, bodiesById)
 				if sprite.type == 'player':
-					self.player.append(sprite)
+					self.player = sprite
 				self.sprites.append(sprite)
 		
 		self.debris = []
@@ -118,6 +120,9 @@ class PlayScene:
 			body.update(self, dt)
 		for sprite in self.sprites:
 			sprite.update(self, dt)
+	
+	def triggerDeath(self):
+		self.next = TransitionScene(self, PlayScene('S', self))
 	
 	def render(self):
 		self.bg.blitSimple(0, 0)
