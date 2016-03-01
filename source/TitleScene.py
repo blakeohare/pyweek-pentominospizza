@@ -13,6 +13,9 @@ class TitleScene:
 			['Exit', self.click_exit, None],
 		]
 		self.bg = None
+		self.textCounter = None
+		DB.setValue('views', DB.getValue('views', 0) + 1)
+		DB.save()
 	
 	def update(self, events, dt):
 		self.counter = int(time.time() * 30)
@@ -73,5 +76,20 @@ class TitleScene:
 			y += 100
 			i += 1
 		
+		if self.textCounter == None:
+			views = str(DB.getValue('views', 0))
+			last = views[-1:]
+			last2 = views[-2:]
+			if last == '1' and last2 != '11': 
+				suffix = 'st'
+			elif last == '2' and last2 != '12':
+				suffix = 'nd'
+			elif last == '3' and last2 != '13':
+				suffix = 'rd'
+			else:
+				suffix = 'th'
+				
+			self.textCounter = Q.renderText("This is the " + views + suffix + " time you've viewed this screen.", 'M', 0, 20)
 		
+		self.textCounter.render()
 	
