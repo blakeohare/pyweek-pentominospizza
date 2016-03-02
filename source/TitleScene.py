@@ -6,6 +6,8 @@ class TitleScene:
 		self.index = 0
 		self.counter = 0
 		
+		self.cursor = None
+		
 		self.options = [
 			["Play", self.click_play, None],
 			['Options', self.click_options, None],
@@ -14,11 +16,11 @@ class TitleScene:
 		]
 		self.bg = None
 		self.textCounter = None
-		DB.setValue('views', DB.getValue('views', 0) + 1)
+		DB.setValue('views', DB.getInt('views', 0) + 1)
 		DB.save()
 	
 	def update(self, events, dt):
-		self.counter = int(time.time() * 30)
+		self.counter += dt * 30
 		enter = False
 		for event in events:
 			if event.down:
@@ -38,7 +40,7 @@ class TitleScene:
 			self.options[self.index][1]()
 		
 	def click_play(self):
-		self.next = TransitionScene(self, PlayScene('M', 'level1'))
+		self.next = TransitionScene(self, MapSelectScreen())
 	
 	def click_options(self):
 		pass
@@ -63,21 +65,25 @@ class TitleScene:
 			yOffset = 0
 			if i == self.index:
 				# needs to be adjusted to dt
-				yOffset = int(abs(math.sin(self.counter * TWO_PI / FPS) * 8))
-			yValue = y - yOffset
+				yOffset = int(abs(math.sin(self.counter * TWO_PI / FPS) * 16))
+				if self.cursor == None:
+					self.cursor = GfxImage('menus/pizza.png')
+				self.cursor.blitSimple(x - 100, y - yOffset - 30)
 			obj = option[2]
 			if obj == None:
-				obj = Q.renderText(text, 'L', x, yValue)
+				obj = Q.renderText(text, 'L', x, y)
 				option[2] = obj
-			obj.setPosition(x, yValue)
+			obj.setPosition(x, y)
 			
 			obj.render()
+			
+			
 			
 			y += 100
 			i += 1
 		
 		if self.textCounter == None:
-			views = str(DB.getValue('views', 0))
+			views = str(DB.getInteger('views', 0))
 			last = views[-1:]
 			last2 = views[-2:]
 			if last == '1' and last2 != '11': 

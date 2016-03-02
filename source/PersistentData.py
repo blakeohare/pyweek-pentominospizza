@@ -1,3 +1,15 @@
+'''
+data saved:
+boolean -> {map key}_completed
+float -> {map_key}_longestjump (seconds)
+float -> {map_key}_fastesttime (seconds)
+int -> {map_key}_fewestjumps
+int -> {map_key}_timesplayed
+
+A map is considered unlocked if it is first in the manifest or its previous map is marked as _completed
+
+'''
+
 INT = type(42)
 FLOAT = type(42.5)
 STRING = type('42')
@@ -98,8 +110,33 @@ class PersistentData:
 			print("Persistent file write failed.")
 			pass
 	
-	def getValue(self, key, default):
-		return self.values.get(key, default)
+	def getBoolean(self, key, default = False):
+		return self.values.get(key, default) == True
+	
+	def getFloat(self, key, default = 0.0):
+		output = self.values.get(key, default)
+		if type(output) == FLOAT:
+			return output
+		if type(output) == INT:
+			return output + 0.0
+		return default
+	
+	def getInteger(self, key, default = 0):
+		return self.getInt(key, default)
+	
+	def getInt(self, key, default = 0):
+		output = self.values.get(key, default)
+		if type(output) == INT:
+			return output
+		if type(output) == FLOAT:
+			return int(output)
+		return default
+	
+	def getString(self, key, default = None):
+		return str(self.values.get(key, default))
+	
+	def hasValue(self, key):
+		return key in self.values
 	
 	def setValue(self, key, value):
 		self.values[key] = value
