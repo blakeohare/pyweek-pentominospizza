@@ -42,6 +42,8 @@ class PlayScene:
 						self.player = Sprite('player', 'G', body, angle)
 					elif type == 'store':
 						spriteInstance = Sprite('store', 'G', body, angle)
+					elif type in ('house1', 'house2', 'house3'):
+						spriteInstance = Sprite(type, 'G', body, angle)
 					else:
 						print("Unknown sprite type: " + type)
 					if spriteInstance != None:
@@ -79,6 +81,13 @@ class PlayScene:
 		self.savedStateSprites = None
 		
 		self.saveState()
+		
+		
+		for sprite in self.sprites:
+			if sprite.type.startswith('house'):
+				self.victoryPlanet = sprite.ground
+				break
+		
 	
 	def saveState(self):
 		mapping = {} # body instance to index in the list
@@ -123,8 +132,11 @@ class PlayScene:
 		for sprite in self.sprites:
 			sprite.update(self, dt)
 	
+	def triggerWin(self):
+		self.next = WinScreen(self)
+	
 	def triggerDeath(self):
-		self.next = TransitionScene(self, PlayScene('S', self))
+		self.next = TransitionScene(self, ['S', self])
 	
 	def render(self):
 		self.bg.blitSimple(0, 0)

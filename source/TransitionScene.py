@@ -17,6 +17,9 @@ class TransitionScene:
 			self.bg = self.fromScene
 			progress = 1.0 - 1.0 * self.counter / self.half
 		else:
+			# Hack alert: don't instantiate a new PlayScene until the old one is done showing.
+			if type(self.toScene) == LIST:
+				self.toScene = PlayScene(self.toScene[0], self.toScene[1])
 			self.bg = self.toScene
 			progress = 1.0 * (self.counter - self.half) / self.half
 		

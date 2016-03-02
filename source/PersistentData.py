@@ -16,6 +16,7 @@ INT = type(42)
 FLOAT = type(42.5)
 STRING = type('42')
 BOOL = type(True)
+LIST = type([])
 
 class PersistentData:
 	def __init__(self):

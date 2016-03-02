@@ -6,6 +6,11 @@ rock1, 600, 80
 
 rock2, 600, -600
 
+rock3, 1000, -700
+
+halfgrass, 1300, -1000
++ house1, @0
+
 water, -100, -400
 
 volcano, -400, 50

@@ -15,8 +15,8 @@ class Sprite:
 		if type == 'player':
 			self.images['left'] = [GfxImage('sprites/delete-left-0.png'), GfxImage('sprites/delete-left-1.png')]
 			self.images['right'] = [GfxImage('sprites/delete-right-0.png'), GfxImage('sprites/delete-right-1.png')]
-		elif type == 'store':
-			self.images['left'] = [GfxImage('sprites/store.png')]
+		elif type in ('store', 'house1', 'house2', 'house3'):
+			self.images['left'] = [GfxImage('sprites/' + type + '.png')]
 			self.images['right'] = self.images['left']
 		
 		self.vx = 0
@@ -163,6 +163,10 @@ class Sprite:
 			if dist < 2000:
 				if dist <= dr:
 					self.ground = body
+					
+					if self.type == 'player' and body == scene.victoryPlanet:
+						scene.triggerWin()
+					
 					self.distanceFromCenter = self.ground.radius + 0.0
 					theta = math.atan2(-dy, -dx)
 					self.thetaFromGround = theta - body.theta
