@@ -16,6 +16,7 @@ class PlayScene:
 	def __init__(self, restoreType, arg):
 		self.next = self
 		self.bg = GfxImage('background/space4.png')
+		self.pointer = GfxImage('pointer.png')
 		
 		self.sprites = []
 		self.player = None
@@ -81,7 +82,6 @@ class PlayScene:
 		self.savedStateSprites = None
 		
 		self.saveState()
-		
 		
 		for sprite in self.sprites:
 			if sprite.type.startswith('house'):
@@ -165,3 +165,36 @@ class PlayScene:
 		
 		for sprite in self.sprites:
 			sprite.render(t, cx, cy)
+			
+		
+		vp = self.victoryPlanet
+		cx = self.cameraCurrentX
+		cy = self.cameraCurrentY
+		dx = vp.x - cx
+		dy = vp.y - cy
+		dist = (dx ** 2 + dy ** 2) ** .5
+		if dist > 100:
+			ang = math.atan2(dy, dx)
+			left = -350
+			right = 350
+			top = -250
+			bottom = 250
+			
+			for segment in (
+				(left, top, right, top),
+				(left, top, left, bottom),
+				(right, top, right, bottom),
+				(left, bottom, right, bottom)
+				):
+				
+				
+				pt = findIntersectionOrNull(ang, segment[0], segment[1], segment[2], segment[3], dist)
+				#print pt, ang, segment
+				if pt != None:
+					#print pt
+					self.pointer.blitRotation(pt[0] + 400, pt[1] + 300, ang)
+					break
+			
+			
+			
+			
