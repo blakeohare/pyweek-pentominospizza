@@ -10,6 +10,7 @@ class TitleScene:
 		
 		self.options = [
 			["Play", self.click_play, None],
+			["Replay Intro", self.click_intro, None],
 			['Options', self.click_options, None],
 			['Credits', self.click_credits, None],
 			['Exit', self.click_exit, None],
@@ -38,7 +39,10 @@ class TitleScene:
 		
 		if enter:
 			self.options[self.index][1]()
-		
+	
+	def click_intro(self):
+		self.next = TransitionScene(self, CutScene())
+	
 	def click_play(self):
 		self.next = TransitionScene(self, MapSelectScreen())
 	
@@ -79,7 +83,7 @@ class TitleScene:
 			
 			
 			
-			y += 100
+			y += 80
 			i += 1
 		
 		if self.textCounter == None:

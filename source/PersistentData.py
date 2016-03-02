@@ -1,5 +1,7 @@
 '''
 data saved:
+boolean -> intro_shown
+
 boolean -> {map key}_completed
 float -> {map_key}_longestjump (seconds)
 float -> {map_key}_fastesttime (seconds)
