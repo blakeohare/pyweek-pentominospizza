@@ -24,7 +24,7 @@ class PlayScene:
 		
 		if restoreType == 'M':
 			self.level = Level(arg)
-			
+			self.id = arg
 			for body in self.level.stuff:
 				type, x, y, sprites = body
 				imgPath, radius = _BODY_TYPE_INFO[type]
@@ -56,6 +56,7 @@ class PlayScene:
 				self.sprites.append(self.player)
 		elif restoreType == 'S':
 			bodiesById = {}
+			self.id = arg.id
 			for bodyState in arg.savedStateBodies:
 				gb = GravityBody(0, 0, 150, 'rocks/rock1.png', 0, None) # dummy value
 				gb.restoreState(bodyState)

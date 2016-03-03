@@ -5,7 +5,7 @@ class WinScreen:
 		self.overlay = GfxImage('dark_overlay.png')
 		self.overlay.setSize(800, 600)
 		self.counter = 0
-		id = self.bg.level.id
+		id = self.bg.id
 		timesPlayed = DB.getInt(id + '_timesplayed') + 1
 		DB.setValue(id + '_timesplayed', timesPlayed)
 		DB.setValue(id + '_completed', True)
