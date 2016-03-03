@@ -22,6 +22,10 @@ class PlayScene:
 		self.player = None
 		self.bodies = []
 		
+		self.hoverTime = None # counter for when you are jumping
+		self.recordIndicator = None
+		self.countdownLabel = None
+		
 		if restoreType == 'M':
 			self.level = Level(arg)
 			self.id = arg
