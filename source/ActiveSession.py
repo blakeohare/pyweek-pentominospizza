@@ -29,5 +29,9 @@ class ActiveSession:
 	def getLongestJump(self):
 		return self.longestJump
 	
+	def endGame(self):
+		self.gameDuration = time.time() - self.startTime
+		
+	
 
 ACTIVE_SESSION = ActiveSession()

@@ -11,16 +11,30 @@ class WinScreen:
 		DB.setValue(id + '_timesplayed', timesPlayed)
 		DB.setValue(id + '_completed', True)
 		
+		ACTIVE_SESSION.endGame()
 		longestJump = ACTIVE_SESSION.getLongestJump()
+		
+		self.longestJumpRecord = False
+		self.gameDurationRecord = False
+		self.jumpCountRecord = False
 		
 		prev = DB.getFloat(id + '_longestjump')
 		if longestJump > prev:
 			self.isLongestJumpRecord = True
 			DB.setValue(id + '_longestjump', longestJump)
-			print 'Jump record', longestJump
+			self.longestJumpRecord = True
+		
+		self.gameDuration =  ACTIVE_SESSION.gameDuration
+		if not DB.hasValue(id + '_fastesttime') or DB.getFloat(id + '_fastesttime') > self.gameDuration:
+			DB.setValue(id + '_fastesttime', self.gameDuration)
+			self.gameDurationRecord = True
+		
+		self.jumpCount = ACTIVE_SESSION.jumpCount
+		if not DB.hasValue(id + '_fewestjumps') or self.jumpCount < DB.getInt(id + '_fewestjumps'):
+			DB.setValue(id + '_fewestjumps', self.jumpCount)
+			self.jumpCountRecord = True
 		
 		DB.save()
-		#TODO: add the other fields.
 	
 	def update(self, events, dt):
 		self.counter += dt

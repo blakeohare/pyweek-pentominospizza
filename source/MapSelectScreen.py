@@ -1,3 +1,5 @@
+MAP_COLUMN_SPACING = [200, 100, 100, 100, 100, 100]
+
 class MapSelectScreen:
 	def __init__(self):
 		self.next = self
@@ -16,6 +18,10 @@ class MapSelectScreen:
 			['Back to title screen'],
 			])
 		
+		ch = ['Attempts', 'Fastest Time', 'Fewest Jumps', 'Longest Jump']
+		self.columnHeaders = [
+			[None] * len(ch), # text labels
+			ch]
 		
 		for key in MAP_DB.getKeys():
 			m = MAP_DB.get(key)
@@ -33,8 +39,8 @@ class MapSelectScreen:
 					fastestTime = DB.getFloat(key + '_fastesttime')
 				if DB.hasValue(key + '_longestjump'):
 					longestJump = DB.getFloat(key + '_longestjump')
-				if DB.hasValue(key + '_fewesetjumps'):
-					fewestJumps = DB.getInt(key + '_fewesetjumps')
+				if DB.hasValue(key + '_fewestjumps'):
+					fewestJumps = DB.getInt(key + '_fewestjumps')
 				timesPlayed = DB.getInt(key + '_timesplayed')
 			
 			option = [
@@ -88,6 +94,18 @@ class MapSelectScreen:
 			index += 1
 			x = 100
 			
+			if index == 1:
+				xSave = x
+				x += MAP_COLUMN_SPACING[0]
+				for colIndex in range(len(self.columnHeaders[0])):
+					img = self.columnHeaders[0][colIndex]
+					if img == None:
+						img = Q.renderText(self.columnHeaders[1][colIndex], 'S', x, y - 40)
+						self.columnHeaders[0][colIndex] = img
+					x += MAP_COLUMN_SPACING[colIndex + 1]
+					img.render()
+			
+				x = xSave
 			if index == self.index:
 				# needs to be adjusted to dt
 				yOffset = int(abs(math.sin(self.counter * TWO_PI / FPS) * 16))
@@ -105,8 +123,8 @@ class MapSelectScreen:
 				button = buttons[i]
 				if button == None and text[i] != None:
 					button = Q.renderText(text[i], 'M', x, y)
-					x += [200, 100, 100, 100, 100, 100][i]
 					buttons[i] = button
+				x += MAP_COLUMN_SPACING[i]
 				
 				if button != None:
 					button.render()
