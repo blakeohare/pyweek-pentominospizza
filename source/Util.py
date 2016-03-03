@@ -1,7 +1,7 @@
 def formatTime(amount):
 	if amount == None: return None
 	
-	deci = (int(amount * 100) % 100) / 100.0
+	deci = int(amount * 100) % 100
 	amount = int(amount)
 	seconds = amount % 60
 	amount = amount / 60

@@ -12,6 +12,7 @@ class Sprite:
 		self.r = 10
 		self.images = {}
 		self.type = type
+		self.isPlayer = type == 'player'
 		if type == 'player':
 			self.images['left'] = [GfxImage('sprites/delete-left-0.png'), GfxImage('sprites/delete-left-1.png')]
 			self.images['right'] = [GfxImage('sprites/delete-right-0.png'), GfxImage('sprites/delete-right-1.png')]
@@ -69,6 +70,7 @@ class Sprite:
 		self.counter = state[15]
 		self.x = state[16]
 		self.y = state[17]
+		self.isPlayer = self.type == 'player'
 	
 	def saveState(self):
 		return [
@@ -126,6 +128,9 @@ class Sprite:
 				self.theta = theta
 				self.ground = None
 				
+				if self.isPlayer:
+					ACTIVE_SESSION.startJump()
+				
 				self.vx += self.currentVelocity[0]
 				self.vy += self.currentVelocity[1]
 			
@@ -164,8 +169,13 @@ class Sprite:
 				if dist <= dr:
 					self.ground = body
 					
-					if self.type == 'player' and body == scene.victoryPlanet:
-						scene.triggerWin()
+					if self.isPlayer:
+						
+						ACTIVE_SESSION.endJump()
+						
+						if body == scene.victoryPlanet:
+							scene.triggerWin()
+						
 					
 					self.distanceFromCenter = self.ground.radius + 0.0
 					theta = math.atan2(-dy, -dx)

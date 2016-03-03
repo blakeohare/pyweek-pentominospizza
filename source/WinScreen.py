@@ -5,10 +5,20 @@ class WinScreen:
 		self.overlay = GfxImage('dark_overlay.png')
 		self.overlay.setSize(800, 600)
 		self.counter = 0
+		self.isLongestJumpRecord = False
 		id = self.bg.id
 		timesPlayed = DB.getInt(id + '_timesplayed') + 1
 		DB.setValue(id + '_timesplayed', timesPlayed)
 		DB.setValue(id + '_completed', True)
+		
+		longestJump = ACTIVE_SESSION.getLongestJump()
+		
+		prev = DB.getFloat(id + '_longestjump')
+		if longestJump > prev:
+			self.isLongestJumpRecord = True
+			DB.setValue(id + '_longestjump', longestJump)
+			print 'Jump record', longestJump
+		
 		DB.save()
 		#TODO: add the other fields.
 	
