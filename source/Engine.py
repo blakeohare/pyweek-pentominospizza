@@ -8,57 +8,41 @@ class Action:
 		self.up = not down
 
 class Engine:
-	def __init__(self, pygame, pyglet):
-		self.pygame = pygame
+	def __init__(self, pyglet):
 		self.pyglet = pyglet
-		self.isPyglet = pyglet != None
 		outerSelf = self
 		self.fontEngine = None
-		if self.isPyglet:
-			class PygletWindow(pyglet.window.Window):
-				def __init__(self, width, height, title):
-					pyglet.window.Window.__init__(self, width, height, title)
-				
-				def on_draw(self):
-					outerSelf.pygletOnDraw(self)
-				
-				def on_key_press(self, symbol, modifiers):
-					outerSelf.pygletKeyEvent(symbol, True)
-				
-				def on_key_release(self, symbol, modifiers):
-					outerSelf.pygletKeyEvent(symbol, False)
-					
-					
-			self.windowClass = PygletWindow
-			self._ACTION_BY_PYGLET_EVENT = {
-				pyglet.window.key.UP: 'up',
-				pyglet.window.key.DOWN: 'down',
-				pyglet.window.key.LEFT: 'left',
-				pyglet.window.key.RIGHT: 'right',
-				pyglet.window.key.ENTER: 'enter',
-				pyglet.window.key.SPACE: 'space',
-			}
-			self._FONT_SIZE_BY_SHIRT = {
-				'XL': 36,
-				'L': 20,
-				'M': 14,
-				'S': 10,
-			}
-		elif self.pygame != None:
-			self._ACTION_BY_PYGAME_EVENT = {
-					pygame.K_UP: 'up',
-					pygame.K_DOWN: 'down',
-					pygame.K_RIGHT: 'right',
-					pygame.K_LEFT: 'left',
-					pygame.K_RETURN: 'enter',
-					pygame.K_SPACE: 'space',
-					pygame.K_LALT: 'lalt',
-					pygame.K_RALT: 'ralt',
-				}
-			print("Pyglet was not found. Falling back to PyGame. For better performance, please get Pyglet: https://bitbucket.org/pyglet/pyglet/wiki/Home")
-		else:
-			print("Neither PyGame nor Pyglet were found. One of these (preferably Pyglet) must exist in order to run.")
 		
+		class PygletWindow(pyglet.window.Window):
+			def __init__(self, width, height, title):
+				pyglet.window.Window.__init__(self, width, height, title)
+			
+			def on_draw(self):
+				outerSelf.pygletOnDraw(self)
+			
+			def on_key_press(self, symbol, modifiers):
+				outerSelf.pygletKeyEvent(symbol, True)
+			
+			def on_key_release(self, symbol, modifiers):
+				outerSelf.pygletKeyEvent(symbol, False)
+				
+				
+		self.windowClass = PygletWindow
+		self._ACTION_BY_PYGLET_EVENT = {
+			pyglet.window.key.UP: 'up',
+			pyglet.window.key.DOWN: 'down',
+			pyglet.window.key.LEFT: 'left',
+			pyglet.window.key.RIGHT: 'right',
+			pyglet.window.key.ENTER: 'enter',
+			pyglet.window.key.SPACE: 'space',
+		}
+		self._FONT_SIZE_BY_SHIRT = {
+			'XL': 36,
+			'L': 20,
+			'M': 14,
+			'S': 10,
+		}
+	
 		self.initialized = False
 		self.screen = None
 		self.width = None
@@ -82,14 +66,9 @@ class Engine:
 			self.pressedActions[key] = isDown
 		
 	def renderText(self, text, size, x, y):
-		if self.isPyglet:
-			obj = GfxText(text, size, x, y)
-			self.pygletThings.append(obj)
-			return obj
-		else:
-			if self.fontEngine == None:
-				self.fontEngine = PyGameFontEngine()
-			self.fontEngine.render(text, size, x, y)
+		obj = GfxText(text, size, x, y)
+		self.pygletThings.append(obj)
+		return obj
 	
 	def pygletOnDraw(self, window):
 		window.clear()
@@ -115,45 +94,19 @@ class Engine:
 	def openWindow(self, title, width, height, scene):
 		self.width = width
 		self.height = height
+	
+		self.window = self.windowClass(width, height, title)
+		self.scene = scene
+		self.pyglet.clock.schedule_interval(self.pygletUpdate, 1 / 60.0) # faster than the canonical SPF
 		
-		if self.isPyglet:
-			self.window = self.windowClass(width, height, title)
-			self.scene = scene
-			self.pyglet.clock.schedule_interval(self.pygletUpdate, 1 / 60.0) # faster than the canonical SPF
-			
-			self.pyglet.resource.path = ['./source']
-			self.pyglet.resource.reindex()
-			self.pyglet.app.run()
-		else:
-			self.pygame.init()
-			self.screen = self.pygame.display.set_mode((width, height))
-			self.pygame.display.set_caption(title)
-		
-			while True:
-				events = Q.pumpEvents()
-				if Q.exitGame:
-					return
-				
-				scene.update(events, SPF)
-				
-				if scene != scene.next:
-					old = scene
-					scene = scene.next
-					old.next = None
-				
-				scene.render()
-				
-				Q.clockTick()
+		self.pyglet.resource.path = ['./source']
+		self.pyglet.resource.reindex()
+		self.pyglet.app.run()
+	
 			
 	
 	def toggleFullScreen(self):
-		if self.isPyglet:
-			print("Full screen not supported in pyglet version yet.")
-		else:
-			if self.isFullScreen:
-				self.screen = self.pygame.display.set_mode((width, height))
-			else:
-				self.screen = self.pygame.display.set_mode((width, height), self.pygame.FULLSCREEN)
+		print("Full screen not supported in pyglet version yet.")
 		self.isFullScreen = not self.isFullScreen
 	
 	def quit(self):
@@ -163,27 +116,6 @@ class Engine:
 		
 		events = []
 		
-		if self.isPyglet:
-			pass
-		else:
-			for event in self.pygame.event.get():
-				if event.type == self.pygame.QUIT:
-					self.exitGame = True
-				
-				if event.type == self.pygame.KEYDOWN:
-					if event.key == self.pygame.K_F4 and (self.pressedActions['lalt'] or self.pressedActions['ralt']):
-						self.exitGame = True
-					
-					if event.key == self.pygame.K_p:
-						self.toggleFullScreen()
-						
-				if event.type == self.pygame.KEYUP or event.type == self.pygame.KEYDOWN:
-					action = self._ACTION_BY_PYGAME_EVENT.get(event.key)
-					if action != None:
-						down = event.type == self.pygame.KEYDOWN
-						self.pressedActions[action] = down
-						events.append(Action(action, down))
-				
 		return events
 	
 	def setScreenAlpha(self, value):
@@ -192,80 +124,28 @@ class Engine:
 		self.screenAlpha = value
 	
 	def clockTick(self):
-		if self.isPyglet:
-			pass
-		else:
-			alpha = int(self.screenAlpha * 255 + .5)
-			if alpha < 255:
-				overlay = self.blackener
-				if overlay == None:
-					overlay = self.screen.convert()
-					self.blackener = overlay
-				overlay.set_alpha(255 - alpha)
-				self.screen.blit(overlay, (0, 0))
-				
-			self.pygame.display.flip()
-			if self.frameStart == None:
-				self.frameStart = time.time()
-			else:
-				now = time.time()
-				diff = now - self.frameStart
-				delay = SPF - diff
-				if delay > 0:
-					time.sleep(delay)
-				self.frameStart = now
+		pass
 	
 	def fill(self, r, g, b):
-		if self.isPyglet:
-			pass
-		else:
-			self.screen.fill((r, g, b))
+		pass # Not used, actually.
 	
 	def drawImageInstance(self, img, x, y):
-		if self.isPyglet:
-			pass
-		else:
-			self.screen.blit(img, (x, y))
+		pass # not used
 	
 	def drawImageTopLeft(self, path, x, y):
-		if self.isPyglet:
-			
-			return GfxImage(img, x, y)
-			
-		else:
-			self.screen.blit(IMAGES.get(path), (x, y))
+		return GfxImage(img, x, y)
 	
 	def drawImage(self, path, x, y, angle = None):
-		if self.isPyglet:
-			pass
-		else:
-			if angle == None:
-				img = IMAGES.get(path)
-			else:
-				img = IMAGES.getRotated(path, angle)
-			
-			w, h = img.get_size()
-			x -= w / 2.0
-			y -= h / 2.0
-			
-			self.screen.blit(img, (int(x), int(y)))
+		pass
 	
 	def drawImageWithRotationalOffset(self, path, x, y, radius, angle):
 		pass
 
-pygm = None
-pygl = None
 try:
 	import pyglet
-	pygl = pyglet
+	Q = Engine(pyglet)
 except:
-	pass
-
-try:
-	import pygame
-	pygm = pygame
-except:
-	pass
-
-Q = Engine(pygm, pygl)
+	print("Pyglet is required to play: https://bitbucket.org/pyglet/pyglet/wiki/Home")
+	os.sys.exit(0)
+	
 
