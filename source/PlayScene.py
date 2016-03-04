@@ -31,6 +31,7 @@ class PlayScene:
 		self.mouseBodyStartOffset = None # offset from center of body that user clicked
 		
 		if restoreType == 'M':
+			print arg
 			self.level = Level(arg)
 			self.id = arg
 			for body in self.level.stuff:
@@ -43,7 +44,7 @@ class PlayScene:
 					flag = 'volcano'
 				elif type == 'lava':
 					flag = 'lava'
-				body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', speedRatio / 30.0, flag)
+				body = GravityBody(type, x, y, radius, 'rocks/' + imgPath + '.png', speedRatio / 30.0, speedRatio, flag)
 				for sprite in sprites:
 					spriteInstance = None
 					type, angle = sprite
@@ -132,19 +133,19 @@ class PlayScene:
 			elif event.type == 'enter' and event.down:
 				self.next = PauseScreen(self)
 			elif EDITOR_ENABLED and self.cameraCurrentX != None:
-				if event.coord != None:
+				if event.type == 'save' and event.down:
+					saveLevel(self)
+				elif event.coord != None:
 					x, y = event.coord
 					rawXY = (x, y)
 					x = self.cameraCurrentX - 400 + x
 					y = self.cameraCurrentY - 300 + y
-					print event.type, self.mouseBody
 					if event.type == 'mousemove':
 						if self.mouseBody != None:
 							oldXY = (self.mouseBody.x, self.mouseBody.y)
 							self.mouseBody.x = int(x - self.mouseBodyStartOffset[0])
 							self.mouseBody.y = int(y - self.mouseBodyStartOffset[1])
 							
-							print 'MOVING:', self.mouseBody.x, self.mouseBody.y, oldXY
 							
 					elif event.type == 'mouseleft':
 						if event.down:
@@ -153,7 +154,6 @@ class PlayScene:
 									dx = x - body.x
 									dy = y - body.y
 									if dx ** 2 + dy ** 2 < body.radius ** 2:
-										print 'found one', body
 										self.mouseBody = body
 										self.mouseBodyStartOffset = [dx, dy]
 										break

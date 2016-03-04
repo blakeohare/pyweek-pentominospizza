@@ -10,13 +10,15 @@ def getBodyFromId(id, bodies):
 	return bodies.get(id)
 	
 class GravityBody:
-	def __init__(self, x, y, radius, imagePath, rps, typeFlag = None):
+	def __init__(self, type, x, y, radius, imagePath, rps, rotRat, typeFlag = None):
 		# IF YOU ADD ANYTHING HERE, ADD IT TO SAVE AND RESTORE STATE
+		self.type = type
 		self.id = GRAVITY_ID_ALLOC[0]
 		GRAVITY_ID_ALLOC[0] += 1
 		self.x = x + 0.0
 		self.y = y + 0.0
 		self.radius = radius
+		self.rotRat = rotRat
 		self.image = GfxImage(imagePath)
 		self.theta = random.random() * TWO_PI
 		self.rps = rps
@@ -42,7 +44,7 @@ class GravityBody:
 		self.image.blitRotation(self.x + cx, self.y + cy, self.theta)
 
 	def saveState(self):
-		return [self.x, self.y, self.radius, self.image, self.theta, self.rps, self.gravity, self.isWater, self.isVolcano, self.id, self.isDeathy]
+		return [self.x, self.y, self.radius, self.image, self.theta, self.rps, self.gravity, self.isWater, self.isVolcano, self.id, self.isDeathy, self.type, self.rotRat]
 		
 	def restoreState(self, state):
 		self.x = state[0]
@@ -56,3 +58,5 @@ class GravityBody:
 		self.isVolcano = state[8]
 		self.id = state[9]
 		self.isDeathy = state[10]
+		self.type = state[11]
+		self.rotRat = state[12]
