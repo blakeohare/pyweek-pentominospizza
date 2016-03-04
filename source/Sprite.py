@@ -14,13 +14,17 @@ class Sprite:
 		self.type = type
 		self.isPlayer = type == 'player'
 		if type == 'player':
-			images = []
-			for i in range(9):
+			left = []
+			right = []
+			for i in range(10):
 				img = GfxImage('sprites/chet-walk-' + str(i) + '.png')
 				img.setSize(img.width // 5, img.height // 5)
-				images.append(img)
-			self.images['left'] = images
-			self.images['right'] = images
+				right.append(img)
+				img = GfxImage('sprites/chetleft/chet-walk-' + str(i) + '.png')
+				img.setSize(img.width // 5, img.height // 5)
+				left.append(img)
+			self.images['left'] = left
+			self.images['right'] = right
 		elif type in ('store', 'house1', 'house2', 'house3'):
 			self.images['left'] = [GfxImage('sprites/' + type + '.png')]
 			self.images['right'] = self.images['left']
