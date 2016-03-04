@@ -26,6 +26,10 @@ class PlayScene:
 		self.recordIndicator = None
 		self.countdownLabel = None
 		
+		self.mouseXY = (0, 0)
+		self.mouseBody = None
+		self.mouseBodyStartOffset = None # offset from center of body that user clicked
+		
 		if restoreType == 'M':
 			self.level = Level(arg)
 			self.id = arg
@@ -127,7 +131,37 @@ class PlayScene:
 				jump = True
 			elif event.type == 'enter' and event.down:
 				self.next = PauseScreen(self)
-		
+			elif EDITOR_ENABLED and self.cameraCurrentX != None:
+				if event.coord != None:
+					x, y = event.coord
+					rawXY = (x, y)
+					x = self.cameraCurrentX - 400 + x
+					y = self.cameraCurrentY - 300 + y
+					print event.type, self.mouseBody
+					if event.type == 'mousemove':
+						if self.mouseBody != None:
+							oldXY = (self.mouseBody.x, self.mouseBody.y)
+							self.mouseBody.x = int(x - self.mouseBodyStartOffset[0])
+							self.mouseBody.y = int(y - self.mouseBodyStartOffset[1])
+							
+							print 'MOVING:', self.mouseBody.x, self.mouseBody.y, oldXY
+							
+					elif event.type == 'mouseleft':
+						if event.down:
+							if self.mouseBody == None:
+								for body in self.bodies:
+									dx = x - body.x
+									dy = y - body.y
+									if dx ** 2 + dy ** 2 < body.radius ** 2:
+										print 'found one', body
+										self.mouseBody = body
+										self.mouseBodyStartOffset = [dx, dy]
+										break
+						else:
+							if self.mouseBody != None:
+								self.mouseBody = None
+							
+			
 		self.player.applyJump(jump, dt)
 		
 		for deb in self.debris:

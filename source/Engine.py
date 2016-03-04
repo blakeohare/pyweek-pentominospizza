@@ -2,10 +2,11 @@
 
 
 class Action:
-	def __init__(self, type, down):
+	def __init__(self, type, down, coord = None):
 		self.type = type
 		self.down = down
 		self.up = not down
+		self.coord = coord
 
 class Engine:
 	def __init__(self, pyglet):
@@ -25,6 +26,15 @@ class Engine:
 			
 			def on_key_release(self, symbol, modifiers):
 				outerSelf.pygletKeyEvent(symbol, False)
+			
+			def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+				outerSelf.pygletMouseMove(x, y)
+			
+			def on_mouse_press(self, x, y, button, modifiers):
+				outerSelf.pygletMouseClick(x, y, button == pyglet.window.mouse.LEFT, True)
+			
+			def on_mouse_release(self, x, y, button, modifiers):
+				outerSelf.pygletMouseClick(x, y, button == pyglet.window.mouse.LEFT, False)
 				
 				
 		self.windowClass = PygletWindow
@@ -54,10 +64,23 @@ class Engine:
 		self.frameStart = None
 		self.screenAlpha = 1.0
 		self.blackener = None
+		self.mouseX = 0
+		self.mouseY = 0
 		self.pygletEvents = []
 		self.pygletThings = []
 		for type in 'up down left right space enter f4'.split(' '):
 			self.pressedActions[type] = False
+	
+	def pygletMouseMove(self, x, y):
+		self.mouseX = x
+		self.mouseY = y
+		self.pygletEvents.append(Action('mousemove', None, (x, 600 - y)))
+	
+	def pygletMouseClick(self, x, y, left, down):
+		self.mouseX = x
+		self.mouseY = y
+		self.pygletEvents.append(Action('mouseleft' if left else 'mouseright', down, (x, 600 - y)))
+		
 	
 	def pygletKeyEvent(self, symbol, isDown):
 		key = self._ACTION_BY_PYGLET_EVENT.get(symbol)
