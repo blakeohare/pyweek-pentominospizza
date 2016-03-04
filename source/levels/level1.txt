@@ -13,6 +13,6 @@ halfgrass, 1300, -1000
 
 water, -100, -400
 
-volcano, -400, 50
+volcano, -400, 50, -3
 
 lava, 0, 500

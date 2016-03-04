@@ -1,7 +1,7 @@
 _BODY_TYPE_INFO = {
 	# image name, radius
 	'halfgrass': ('halfgrass', 150),
-	'lava': ('lava', 150),
+	'lava': ('lava', 250),
 	'rock1': ('rock1', 150),
 	'rock2': ('rock2', 150),
 	'rock3': ('rock3', 150),
@@ -30,7 +30,7 @@ class PlayScene:
 			self.level = Level(arg)
 			self.id = arg
 			for body in self.level.stuff:
-				type, x, y, sprites = body
+				type, x, y, sprites, speedRatio = body
 				imgPath, radius = _BODY_TYPE_INFO[type]
 				flag = None
 				if type == 'water':
@@ -39,7 +39,7 @@ class PlayScene:
 					flag = 'volcano'
 				elif type == 'lava':
 					flag = 'lava'
-				body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', 1 / 30.0, flag)
+				body = GravityBody(x, y, radius, 'rocks/' + imgPath + '.png', speedRatio / 30.0, flag)
 				for sprite in sprites:
 					spriteInstance = None
 					type, angle = sprite
@@ -143,6 +143,10 @@ class PlayScene:
 	def triggerDeath(self):
 		self.next = TransitionScene(self, ['S', self])
 	
+	def triggerJumpRecord(self, x, y, amt):
+		self.recordIndicator = Q.renderText('New Record! ' + formatTime(amt), 'M', x, y)
+		self.recordIndicatorCounters = [x, y, time.time()]
+	
 	def render(self):
 		self.bg.blitSimple(0, 0)
 		
@@ -157,7 +161,8 @@ class PlayScene:
 			self.cameraCurrentX = self.cameraCurrentX * .9 + self.cameraTargetX * .1
 			self.cameraCurrentY = self.cameraCurrentY * .9 + self.cameraTargetY * .1
 		
-		t = int(time.time() * FPS)
+		tm = time.time()
+		t = int(tm * FPS)
 		
 		cx = Q.width / 2 - self.cameraCurrentX
 		cy = Q.height / 2 - self.cameraCurrentY
@@ -171,6 +176,17 @@ class PlayScene:
 		for sprite in self.sprites:
 			sprite.render(t, cx, cy)
 			
+		
+		if self.recordIndicator != None and self.recordIndicatorCounters != None:
+			lifetime = tm - self.recordIndicatorCounters[2]
+			if lifetime > 2:
+				self.recordIndicatorCounters = None
+				self.recordIndicator = None
+			else:
+				ric = self.recordIndicatorCounters
+				self.recordIndicator.setPosition(ric[0] + cx, ric[1] - lifetime * 50 + cy)
+				self.recordIndicator.render()
+				
 		
 		vp = self.victoryPlanet
 		cx = self.cameraCurrentX
@@ -192,11 +208,8 @@ class PlayScene:
 				(left, bottom, right, bottom)
 				):
 				
-				
 				pt = findIntersectionOrNull(ang, segment[0], segment[1], segment[2], segment[3], dist)
-				#print pt, ang, segment
 				if pt != None:
-					#print pt
 					self.pointer.blitRotation(pt[0] + 400, pt[1] + 300, ang)
 					break
 			

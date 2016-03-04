@@ -14,8 +14,13 @@ class Sprite:
 		self.type = type
 		self.isPlayer = type == 'player'
 		if type == 'player':
-			self.images['left'] = [GfxImage('sprites/delete-left-0.png'), GfxImage('sprites/delete-left-1.png')]
-			self.images['right'] = [GfxImage('sprites/delete-right-0.png'), GfxImage('sprites/delete-right-1.png')]
+			images = []
+			for i in range(9):
+				img = GfxImage('sprites/chet-walk-' + str(i) + '.png')
+				img.setSize(img.width // 5, img.height // 5)
+				images.append(img)
+			self.images['left'] = images
+			self.images['right'] = images
 		elif type in ('store', 'house1', 'house2', 'house3'):
 			self.images['left'] = [GfxImage('sprites/' + type + '.png')]
 			self.images['right'] = self.images['left']
@@ -172,6 +177,8 @@ class Sprite:
 					if self.isPlayer:
 						
 						ACTIVE_SESSION.endJump()
+						if ACTIVE_SESSION.isJumpRecord:
+							scene.triggerJumpRecord(self.x, self.y, ACTIVE_SESSION.longestJump)
 						
 						if body == scene.victoryPlanet:
 							scene.triggerWin()
@@ -259,9 +266,19 @@ class Sprite:
 		hb = self.getHitBox()
 		imgs = self.images['left'] if self.facingLeft else self.images['right']
 		img = imgs[(rc / 4) % len(imgs)]
+		x = hb[0] + cx
+		y = hb[1] + cy
 		if self.ground == None:
-			img.blitRotation(hb[0] + cx, hb[1] + cy, self.theta)
+			img.blitRotation(x, y, self.theta)
 		else:
-			img.blitRotation(hb[0] + cx, hb[1] + cy, self.ground.theta + self.thetaFromGround)
+			img.blitRotation(x, y, self.ground.theta + self.thetaFromGround)
+		
+		if self.isPlayer:
+			currentJump = ACTIVE_SESSION.getCurrentJump()
+			if currentJump != None and currentJump > 1:
+				lbl = Q.renderText(formatTime(currentJump), 'M', x - 8, y - 40)
+				lbl.render()
+				
+				
 			
 		

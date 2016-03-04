@@ -60,7 +60,6 @@ class WinScreen:
 		self.bg.render()
 		self.overlay.blitSimple(0, 0)
 		
-		
 		self.getTextLabel('title', "DELIVERY SUCCESSFUL!" if self.isWin else "TIME'S UP", 'XL', 100, 50).render()
 		
 		cols = [100, 300, 500]

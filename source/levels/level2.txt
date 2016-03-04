@@ -2,12 +2,12 @@ halfgrass, 0, 0
 + player, @10
 + store, @0
 
-rock1, 600, 80
+rock1, -500, 0
 
-rock2, 600, -600
+rock2, -1000, 0, -2
 
-water, -100, -400
+rock3, -1500, 200
+rock4, -1500, -200
 
-volcano, -400, 50
-
-lava, 0, 500
+halfgrass, -2400, 0
++ house1, @0

@@ -78,7 +78,7 @@ class MapSelectScreen:
 			if key == 'BACK':
 				self.next = TransitionScene(self, TitleScene())
 			else:
-				ACTIVE_SESSION.startGame()
+				ACTIVE_SESSION.startGame(key)
 				self.next = TransitionScene(self, PlayScene('M', key))
 		
 		
