@@ -44,6 +44,9 @@ class GravityBody:
 			self.isDeathy = False
 		
 		self.image.setSize(imgWH[0], imgWH[1])
+		self.lavaball = None
+		if self.type == 'volcano':
+			self.lavaball = LavaBall(self)
 	
 	def update(self, scene, dt):
 		self.theta += TWO_PI * self.rps * dt
