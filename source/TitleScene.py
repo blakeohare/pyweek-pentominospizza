@@ -49,7 +49,7 @@ class TitleScene:
 		self.next = TransitionScene(self, MapSelectScreen())
 	
 	def click_options(self):
-		pass
+		self.next = OptionsMenu()
 	
 	def click_credits(self):
 		pass

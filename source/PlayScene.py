@@ -15,7 +15,7 @@ class PlayScene:
 	# arg is level string ID for M and another playscene for S
 	def __init__(self, restoreType, arg):
 		self.next = self
-		self.bg = GfxImage('background/space4.png')
+		self.bg = GfxImage('background/space1.png')
 		self.pointer = GfxImage('pointer.png')
 		
 		self.sprites = []
