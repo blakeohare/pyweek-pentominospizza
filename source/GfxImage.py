@@ -29,7 +29,6 @@ class GfxImage:
 	def __init__(self, path):
 		img = _GFX_IMAGE_LIBRARY.get(path)
 		if img == None:
-			path = path.replace('lavamini', 'lava') #OMGHAX
 			img = RawImage(Q.pyglet.resource.image(os.path.join('images', path.replace('/', os.sep)).replace('\\', '/')))
 			_GFX_IMAGE_LIBRARY[path] = img
 		self.img = img
