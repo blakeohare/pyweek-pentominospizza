@@ -13,7 +13,8 @@ class Engine:
 		self.pyglet = pyglet
 		outerSelf = self
 		self.fontEngine = None
-		self.eventLoop = pyglet.app.EventLoop()
+		#self.eventLoop = pyglet.app.EventLoop()
+		self.fader = None
 		
 		class PygletWindow(pyglet.window.Window):
 			def __init__(self, width, height, title):
@@ -98,6 +99,12 @@ class Engine:
 	def pygletOnDraw(self, window):
 		window.clear()
 		self.scene.render()
+		if self.screenAlpha != 1:
+			if self.fader == None:
+				self.fader = GfxImage('just_black.png')
+				self.fader.setSize(800, 600)
+			self.fader.setOpacity(255 * (1.0 - self.screenAlpha))
+			self.fader.blitSimple(0, 0)
 		
 	def flushPygletEvents(self):
 		if len(self.pygletEvents) > 0:

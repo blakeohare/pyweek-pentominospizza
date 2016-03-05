@@ -49,10 +49,10 @@ class TitleScene:
 		self.next = TransitionScene(self, MapSelectScreen())
 	
 	def click_options(self):
-		self.next = OptionsMenu()
+		self.next = TransitionScene(self, OptionsMenu())
 	
 	def click_credits(self):
-		pass
+		self.next = TransitionScene(self, CreditsScene())
 	
 	def click_exit(self):
 		# Not sure if this is considered "clean" in Pyglet, but the recommended way didn't seem to work. But it's PyWeek so this is good enough for me.

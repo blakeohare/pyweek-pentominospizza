@@ -39,6 +39,9 @@ class GfxImage:
 		self.width = img.width
 		self.height = img.height
 		self.theta = None
+		
+	def setOpacity(self, ratio):
+		self.sprite.opacity = ratio
 	
 	def setSize(self, width, height):
 		self.width = width

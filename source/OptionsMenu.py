@@ -23,7 +23,7 @@ class OptionsMenu:
 				DB.setValue('magic', not DB.getBoolean('magic'))
 				DB.save()
 			else:
-				self.next = TitleScene()
+				self.next = TransitionScene(self, TitleScene())
 	
 	def render(self):
 		self.getImage('background/space1.png').blitSimple(0, 0)
