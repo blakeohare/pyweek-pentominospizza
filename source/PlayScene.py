@@ -137,7 +137,7 @@ class PlayScene:
 			jump = False
 			jumpRelease = False
 			for event in events:
-				if event.type == 'space' and event.down:
+				if (event.type == 'space' or event.type == 'up') and event.down:
 					jump = True
 				elif event.type == 'enter' and event.down:
 					self.next = PauseScreen(self)

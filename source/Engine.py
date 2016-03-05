@@ -47,6 +47,10 @@ class Engine:
 			pyglet.window.key.RIGHT: 'right',
 			pyglet.window.key.ENTER: 'enter',
 			pyglet.window.key.SPACE: 'space',
+			pyglet.window.key.A: 'left',
+			pyglet.window.key.S: 'down',
+			pyglet.window.key.W: 'up',
+			pyglet.window.key.D: 'right',
 			pyglet.window.key.Y: 'save',
 		}
 		self._FONT_SIZE_BY_SHIRT = {
