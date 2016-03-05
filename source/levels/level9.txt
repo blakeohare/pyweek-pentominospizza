@@ -4,15 +4,15 @@ halfgrass, 168, 81, 1.0
 
 lava, 345, 584, 1.0
 lava, 637, 1174, 1.0
-lavamini, 59, 1458, 1.0
+lavamini, -9, 1461, 1.0
 lavamini, 636, 109, 1.0
 lavamini, 879, 818, 1.0
 lavamini, 1200, 1200, 1.0
 
 volcano, 833, 435, 1.0
-volcano, 41, 1868, 1.0
-volcano, 202, 1053, 1.0
+volcano, 427, 1716, 1.0
+volcano, 123, 1086, 1.0
 
 
-halfgrass, -69, 2337, 1.0
+halfgrass, 43, 2075, 1.0
 + house1, @0
