@@ -13,6 +13,7 @@ class Engine:
 		self.pyglet = pyglet
 		outerSelf = self
 		self.fontEngine = None
+		self.eventLoop = pyglet.app.EventLoop()
 		
 		class PygletWindow(pyglet.window.Window):
 			def __init__(self, width, height, title):
@@ -134,7 +135,7 @@ class Engine:
 		self.isFullScreen = not self.isFullScreen
 	
 	def quit(self):
-		self.exitGame = True
+		self.eventLoop.exit()
 	
 	def pumpEvents(self):
 		

@@ -53,7 +53,8 @@ class TitleScene:
 		pass
 	
 	def click_exit(self):
-		Q.quit()
+		# Not sure if this is considered "clean" in Pyglet, but the recommended way didn't seem to work. But it's PyWeek so this is good enough for me.
+		os.sys.exit()
 	
 	def render(self):
 		if self.bg == None:
