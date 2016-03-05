@@ -6,6 +6,8 @@ ASTEROID_GRAVITY_COEFFICIENT = 5000.0 # make bigger for stronger gravity
 # Be sure to set this to true every once in a while to test.
 DT_TEST_ENABLED = False
 
+CACHED_JUMP_TIMES = {} # cache by 10*t
+
 class Sprite:
 
 	def __init__(self, type, startType, x_or_body, y_or_theta_or_bodies_lookup):
@@ -286,7 +288,16 @@ class Sprite:
 		if self.isPlayer:
 			currentJump = ACTIVE_SESSION.getCurrentJump()
 			if currentJump != None and currentJump > 1:
-				lbl = Q.renderText(formatTime(currentJump), 'M', x - 8, y - 40)
+				currentJump = int(currentJump * 10) / 10.0
+				key = int(currentJump * 10)
+				lbl = CACHED_JUMP_TIMES.get(key)
+				x = x - 8
+				y = y - 40
+				if lbl == None:
+					lbl = Q.renderText(formatTime(currentJump), 'M', x, y)
+					CACHED_JUMP_TIMES[key] = lbl
+				else:
+					lbl.setPosition(x, y)
 				lbl.render()
 				
 				
