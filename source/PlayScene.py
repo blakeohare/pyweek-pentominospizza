@@ -194,7 +194,8 @@ class PlayScene:
 			dx = shark.x - hb[0]
 			dy = shark.y - hb[1]
 			if dx ** 2 + dy ** 2 < 17 ** 2:
-				self.triggerDeath()
+				if not EDITOR_ENABLED:
+					self.triggerDeath()
 	
 	def triggerWin(self):
 		self.next = WinScreen(self)
