@@ -14,14 +14,17 @@ FPS = 30.0
 SPF = 1.0 / FPS
 
 EDITOR_ENABLED = True
+#EDITOR_ENABLED = False
 
 
 
 class ActiveSession:
 	def __init__(self):
 		self.startTime = 0
+		self.id = None
 	
 	def startGame(self, id, timeLimitSeconds):
+		self.id = id
 		self.timeLimitSeconds = timeLimitSeconds
 		self.startTime = time.time()
 		self.longestJump = 0.0
@@ -87,23 +90,180 @@ ACTIVE_SESSION = ActiveSession()
 
 
 
+class CreditsScene:
+	def __init__(self):
+		self.next = self
+		self.things = {}
+		self.counter = 0
+	
+	def update(self, events, dt):
+		self.counter += dt
+		
+		for event in events:
+			if event.down and event.type in ('space', 'enter'):
+				self.next = TransitionScene(self, TitleScene())
+	
+	
+	def render(self):
+		bg = self.things.get('bg')
+		if bg == None:
+			bg = GfxImage('background/space1.png')
+			self.things['bg'] = bg
+		
+		bg.blitSimple(0, 0)
+		
+		self.getText('Programming', 'S', 80, 200).render()
+		self.getText("Blake O'Hare", 'L', 80, 260).render()
+		
+		self.getText('Art', 'S', 370, 200).render()
+		self.getText('Sophia Baldonado', 'L', 370, 260).render()
+		
+		y = 450
+		self.getText('Press ENTER or something', 'S', 300, y - abs(int(math.sin(self.counter * TWO_PI) * 15))).render()
+		
+	
+	def getText(self, text, size, x, y):
+		t = self.things.get(text)
+		if t == None:
+			t = Q.renderText(text, size, x, y)
+			self.things[text] = t
+		else:
+			t.setPosition(x, y)
+		return t
+
+
+
+
 class CutScene:
 	def __init__(self):
 		self.next = self
 		self.stub = None
-	
+		self.index = 0
+		self.state_counter = 0.0
+		self.progress = 0.0
+		
+		self.states = [
+			('start', 2),
+			('ringring', 1),
+			('phone1-normal', 2),
+			('ufo-enter', 1),
+			('ufo-wait', 1),
+			('ufo-blast', 1),
+			('white-in', 1),
+			('white', 1),
+			('white-out', 1),
+			('end', 2),
+		]
+
+		self.images = {}
+
+	def render(self):
+		if self.index >= len(self.states):
+			state = self.states[-1]
+		else:
+			state = self.states[self.index]
+
+		progress = self.state_counter / state[1]
+		if progress < 0: progress = 0.0
+		elif progress > 1: progress = 1.0
+		antiprogress = 1.0 - progress
+		id = state[0]
+
+		asteroidsY = math.sin(time.time() * TWO_PI) * 4
+		
+		if id == 'start':
+			self.blitImage('window-background-small', 350, 50)
+			self.blitImage('page1', 0, 0)
+		elif id == 'ringring':
+			self.blitImage('window-background-small', 350, 50)
+			self.blitImage('page1', 0, 0)
+			self.drawText("*RING RING*", 566, 31)
+		elif id == 'phone1-normal':
+			self.blitImage('window-background', 85, 58)
+			self.blitImage('window', 0, 0)
+		elif id == 'ufo-enter':
+			self.blitImage('window-background', 85, 58)
+			yStart = -300
+			yEnd = 100
+			y = progress * yEnd + antiprogress * yStart
+			self.blitImage('ufo', 200, y)
+			self.blitImage('window', 0, 0)
+		elif id == 'ufo-wait':
+			self.blitImage('window-background', 85, 58)
+			self.blitImage('ufo', 200, 100)
+			self.blitImage('window', 0, 0)
+		elif id == 'ufo-blast':
+			self.blitImage('window-background', 85, 58)
+			self.blitImage('beam', 270, 180)
+			self.blitImage('ufo', 200, 100)
+			self.blitImage('window', 0, 0)
+		elif id == 'white-in':
+			self.blitImage('window-background', 85, 58)
+			self.blitImage('beam', 270, 180)
+			self.blitImage('ufo', 200, 100)
+			self.blitImage('window', 0, 0)
+			self.blitImage('white', 0, 0, progress)
+		elif id == 'white':
+			self.blitImage('white', 0, 0, 1.0)
+		elif id == 'white-out':
+			
+			self.blitImage('space-background', 85, 58)
+			self.blitImage('space-asteroids', 85, 58 + asteroidsY)
+			self.blitImage('window', 0, 0)
+			self.blitImage('white', 0, 0, antiprogress)
+		elif id == 'end':
+			self.blitImage('space-background', 85, 58)
+			self.blitImage('space-asteroids', 85, 58 + asteroidsY)
+			self.blitImage('window', 0, 0)
+
 	def update(self, events, dt):
+		self.state_counter += dt
+		if self.index >= len(self.states):
+			self.leave()
+
 		for event in events:
 			if event.down and (event.type == 'enter' or event.type == 'space'):
-				self.next = TransitionScene(self, TitleScene())
-				DB.setValue('intro_shown', True)
-				DB.save()
-				
-	
-	def render(self):
-		if self.stub == None:
-			self.stub = GfxImage('cutscene/page1.png')
-		self.stub.blitSimple(0, 0)
+				self.leave()
+
+		if self.index >= len(self.states):
+			self.index = len(self.states) - 1
+
+		state = self.states[self.index]
+
+		total = state[1]
+		if self.state_counter >= total:
+			self.state_counter = 0
+			self.index += 1
+
+		self.progress = 1.0 * self.state_counter / total
+
+	def leave(self):
+		self.next = TransitionScene(self, TitleScene())
+		DB.setValue('intro_shown', True)
+		DB.save()
+
+	def drawText(self, text, x, y):
+		txt = self.images.get('T:' + text)
+		if txt == None:
+			txt = Q.renderText(text, 'L', x, y)
+			self.images['T:' + text] = txt
+
+		txt.render()
+
+	def blitImage(self, path, x, y, opacityRatio = None):
+		img = self.images.get(path)
+		if img == None:
+			img = GfxImage('cutscene/' + path + '.png')
+			self.images[path] = img
+
+		if (opacityRatio != None):
+			alpha = int(opacityRatio * 255)
+			if alpha < 0: alpha = 0
+			if alpha > 255: alpha = 255
+			img.sprite.opacity = alpha
+
+		img.blitSimple(x, y)
+
 
 
 
@@ -154,7 +314,8 @@ class Engine:
 		self.pyglet = pyglet
 		outerSelf = self
 		self.fontEngine = None
-		self.eventLoop = pyglet.app.EventLoop()
+		#self.eventLoop = pyglet.app.EventLoop()
+		self.fader = None
 		
 		class PygletWindow(pyglet.window.Window):
 			def __init__(self, width, height, title):
@@ -187,6 +348,10 @@ class Engine:
 			pyglet.window.key.RIGHT: 'right',
 			pyglet.window.key.ENTER: 'enter',
 			pyglet.window.key.SPACE: 'space',
+			pyglet.window.key.A: 'left',
+			pyglet.window.key.S: 'down',
+			pyglet.window.key.W: 'up',
+			pyglet.window.key.D: 'right',
 			pyglet.window.key.Y: 'save',
 		}
 		self._FONT_SIZE_BY_SHIRT = {
@@ -239,6 +404,12 @@ class Engine:
 	def pygletOnDraw(self, window):
 		window.clear()
 		self.scene.render()
+		if self.screenAlpha != 1:
+			if self.fader == None:
+				self.fader = GfxImage('just_black.png')
+				self.fader.setSize(800, 600)
+			self.fader.setOpacity(255 * (1.0 - self.screenAlpha))
+			self.fader.blitSimple(0, 0)
 		
 	def flushPygletEvents(self):
 		if len(self.pygletEvents) > 0:
@@ -400,6 +571,9 @@ class GfxImage:
 		self.width = img.width
 		self.height = img.height
 		self.theta = None
+		
+	def setOpacity(self, ratio):
+		self.sprite.opacity = ratio
 	
 	def setSize(self, width, height):
 		self.width = width
@@ -495,10 +669,13 @@ class GravityBody:
 		self.image = GfxImage(imagePath)
 		self.theta = random.random() * TWO_PI
 		self.rps = rps
+		self.isDeathy = False
 		self.gravity = radius / 100.0
+		if self.type == 'blackhole':
+			self.gravity *= 4
+			self.isDeathy = True
 		self.isWater = False
 		self.isVolcano = False
-		self.isDeathy = False
 		imgWH = (radius * 2, radius * 2)
 		if typeFlag == 'water':
 			self.isWater = True
@@ -507,8 +684,16 @@ class GravityBody:
 			imgWH = (radius * 2.6, radius * 2.6)
 		elif typeFlag == 'lava':
 			self.isDeathy = True
+		elif self.type == 'blackhole':
+			imgWH = (radius * 5, radius * 5)
+		
+		if EDITOR_ENABLED:
+			self.isDeathy = False
 		
 		self.image.setSize(imgWH[0], imgWH[1])
+		self.lavaball = None
+		if self.type == 'volcano':
+			self.lavaball = LavaBall(self)
 	
 	def update(self, scene, dt):
 		self.theta += TWO_PI * self.rps * dt
@@ -533,6 +718,43 @@ class GravityBody:
 		self.isDeathy = state[10]
 		self.type = state[11]
 		self.rotRat = state[12]
+
+
+
+
+LAVA_EXIT_VELOCITY = 150 # pixels / sec
+
+class LavaBall:
+	def __init__(self, volcano):
+		self.body = volcano
+		self.x = self.body.x
+		self.y = self.body.y
+		self.path = None
+		self.lifetime = 0
+		self.images = [GfxImage('rocks/lavasplash1.png'), GfxImage('rocks/lavasplash2.png')]
+		self.image = self.images[0]
+	
+	def update(self, scene, dt):
+		
+		if self.path == None:
+			theta = int(random.random() * 3) * TWO_PI / 3 + PI / 2 + 8 - .07
+			theta += self.body.theta
+			self.lifetime = 0
+			self.path = theta
+			self.image = random.choice(self.images)
+		
+		self.lifetime += dt
+		
+		r = self.body.radius + self.lifetime * LAVA_EXIT_VELOCITY
+		
+		self.x = math.cos(self.path) * r + self.body.x
+		self.y = math.sin(self.path) * r + self.body.y
+		
+		if r - self.body.radius > 300:
+			self.path = None
+	
+	def render(self, cx, cy):
+		self.image.blitRotation(self.x + cx, self.y + cy, self.lifetime * 2)
 
 
 
@@ -640,7 +862,7 @@ MAP_DB = MapDatabase()
 
 
 
-MAP_COLUMN_SPACING = [200, 100, 100, 100, 100, 100]
+MAP_COLUMN_SPACING = [280, 100, 120, 120, 120, 120]
 
 class MapSelectScreen:
 	def __init__(self):
@@ -665,7 +887,10 @@ class MapSelectScreen:
 			[None] * len(ch), # text labels
 			ch]
 		
+		self.index = 0
 		for key in MAP_DB.getKeys():
+			if ACTIVE_SESSION.id == key:
+				self.index = len(self.options)
 			m = MAP_DB.get(key)
 			unlocked = MAP_DB.isUnlocked(m.key)
 			fastestTime = None
@@ -696,7 +921,9 @@ class MapSelectScreen:
 			option = [key, 0, [None] * len(option), option] # [0] -> map key, [1] -> bottom padding, [2] -> pyglet label objects, [3] -> raw string values or None if not present
 			
 			self.options.append(option)
-		
+		self.index += 1
+		if self.index >= len(self.options):
+			self.index = len(self.options) - 1
 	
 	def update(self, events, dt):
 		self.counter += dt * 30
@@ -720,7 +947,10 @@ class MapSelectScreen:
 			if key == 'BACK':
 				self.next = TransitionScene(self, TitleScene())
 			else:
-				ACTIVE_SESSION.startGame(key, 3 * 60)
+				timelimit = 3 * 60
+				if EDITOR_ENABLED:
+					timelimit = 100 * 60
+				ACTIVE_SESSION.startGame(key, timelimit)
 				self.next = TransitionScene(self, PlayScene('M', key))
 		
 		
@@ -734,7 +964,7 @@ class MapSelectScreen:
 		index = -1
 		for option in self.options:
 			index += 1
-			x = 100
+			x = 60
 			
 			if index == 1:
 				xSave = x
@@ -803,7 +1033,7 @@ class OptionsMenu:
 				DB.setValue('magic', not DB.getBoolean('magic'))
 				DB.save()
 			else:
-				self.next = TitleScene()
+				self.next = TransitionScene(self, TitleScene())
 	
 	def render(self):
 		self.getImage('background/space1.png').blitSimple(0, 0)
@@ -842,23 +1072,64 @@ class OptionsMenu:
 class PauseScreen:
 
 	def __init__(self, bg):
+		self.counter = 0
 		self.next = self
 		self.bg = bg
 		self.overlay = GfxImage('dark_overlay.png')
 		self.overlay.setSize(800, 600)
 		self.index = 0
+		
+		x = 200
+		y = 250
+		margin = 100
+		self.options = [
+			Q.renderText('Resume', 'L', x, y),
+			Q.renderText('Restart', 'L', x, y + margin),
+			Q.renderText('Back to Menu', 'L', x, y + margin * 2),
+		]
+		
+		self.cursor = GfxImage('menus/pizza.png')
 	
 	def update(self, events, dt):
+		self.counter += dt
 		ACTIVE_SESSION.ensureTimerRunning(False)
+		confirm = False
 		for event in events:
 			if event.down:
 				if event.type == 'space' or event.type == 'enter':
-					self.next = self.bg
-					self.next.next = self.next
+					confirm = True
+				elif event.type == 'up':
+					self.index -= 1
+				elif event.type == 'down':
+					self.index += 1
+		if self.index < 0:
+			self.index = 0
+		if self.index > 2:
+			self.index = 2
+		
+		if confirm:
+			if self.index == 0:
+				self.next = self.bg
+				self.next.next = self.next
+			elif self.index == 1:
+				self.next = TransitionScene(self, ['M', self.bg.id])
+			elif self.index == 2:
+				self.next = TransitionScene(self, MapSelectScreen())
+					
+		
 	
 	def render(self):
 		self.bg.render()
 		self.overlay.blitSimple(0, 0)
+		
+		for option in self.options:
+			option.render()
+		
+		x = 50
+		y = 250 + 100 * self.index - abs(15 * math.sin(self.counter * TWO_PI))
+		
+		self.cursor.blitSimple(x, y)
+		
 		
 
 
@@ -1019,18 +1290,21 @@ _BODY_TYPE_INFO = {
 	# image name, radius
 	'halfgrass': ('halfgrass', 150),
 	'lava': ('lava', 250),
+	'lavamini': ('lavamini', 150),
 	'rock1': ('rock1', 150),
 	'rock2': ('rock2', 150),
 	'rock3': ('rock3', 150),
 	'rock4': ('rock4', 150),
 	'volcano': ('volcano', 150),
 	'water': ('water', 150),
+	'blackhole': ('blackhole', 80),
 }
 
 class PlayScene:
 	# Restore type is either 'M' for map or 'S' for state
 	# arg is level string ID for M and another playscene for S
 	def __init__(self, restoreType, arg):
+		self.YOU_DEAD = False
 		self.next = self
 		self.bg = GfxImage('background/space1.png')
 		self.pointer = GfxImage('pointer.png')
@@ -1038,6 +1312,8 @@ class PlayScene:
 		self.sprites = []
 		self.player = None
 		self.bodies = []
+		self.sharks = [] # too much different mechanics than sprites, don't want to introduce bugs 3 hours before game is due. adding as a different type.
+		self.lavaballs = []
 		
 		self.hoverTime = None # counter for when you are jumping
 		self.recordIndicator = None
@@ -1060,8 +1336,9 @@ class PlayScene:
 					flag = 'water'
 				elif type == 'volcano':
 					flag = 'volcano'
-				elif type == 'lava':
+				elif type == 'lava' or type == 'lavamini':
 					flag = 'lava'
+				
 				body = GravityBody(type, x, y, radius, 'rocks/' + imgPath + '.png', speedRatio / 30.0, speedRatio, flag)
 				for sprite in sprites:
 					spriteInstance = None
@@ -1116,6 +1393,14 @@ class PlayScene:
 				self.victoryPlanet = sprite.ground
 				break
 		
+		if self.id == 'level5' or self.id == 'level9' or self.id == 'level10':
+			for body in self.bodies:
+				if body.type == 'water':
+					self.sharks.append(Shark(body))
+		
+		for body in self.bodies:
+			if body.lavaball != None:
+				self.lavaballs.append(body.lavaball)
 	
 	def saveState(self):
 		mapping = {} # body instance to index in the list
@@ -1139,55 +1424,57 @@ class PlayScene:
 			self.triggerLose()
 			return
 			
-		
-		dx = 0
-		if Q.pressedActions['left']:
-			dx = -1
-			self.player.facingLeft = True
-		elif Q.pressedActions['right']:
-			dx = 1
-			self.player.facingLeft = False
+		if not self.YOU_DEAD:
+			dx = 0
+			if Q.pressedActions['left']:
+				dx = -1
+				self.player.facingLeft = True
+			elif Q.pressedActions['right']:
+				dx = 1
+				self.player.facingLeft = False
 			
-		self.player.applyWalk(dx)
+			self.player.applyWalk(dx)
 		
-		jump = False
-		jumpRelease = False
-		for event in events:
-			if event.type == 'space' and event.down:
-				jump = True
-			elif event.type == 'enter' and event.down:
-				self.next = PauseScreen(self)
-			elif EDITOR_ENABLED and self.cameraCurrentX != None:
-				if event.type == 'save' and event.down:
-					saveLevel(self)
-				elif event.coord != None:
-					x, y = event.coord
-					rawXY = (x, y)
-					x = self.cameraCurrentX - 400 + x
-					y = self.cameraCurrentY - 300 + y
-					if event.type == 'mousemove':
-						if self.mouseBody != None:
-							oldXY = (self.mouseBody.x, self.mouseBody.y)
-							self.mouseBody.x = int(x - self.mouseBodyStartOffset[0])
-							self.mouseBody.y = int(y - self.mouseBodyStartOffset[1])
-							
-							
-					elif event.type == 'mouseleft':
-						if event.down:
-							if self.mouseBody == None:
-								for body in self.bodies:
-									dx = x - body.x
-									dy = y - body.y
-									if dx ** 2 + dy ** 2 < body.radius ** 2:
-										self.mouseBody = body
-										self.mouseBodyStartOffset = [dx, dy]
-										break
-						else:
+			jump = False
+			jumpRelease = False
+			for event in events:
+				if (event.type == 'space' or event.type == 'up') and event.down:
+					jump = True
+				elif event.type == 'enter' and event.down:
+					self.next = PauseScreen(self)
+				elif EDITOR_ENABLED and self.cameraCurrentX != None:
+					if event.type == 'save' and event.down:
+						saveLevel(self)
+					elif event.coord != None:
+						x, y = event.coord
+						rawXY = (x, y)
+						x = self.cameraCurrentX - 400 + x
+						y = self.cameraCurrentY - 300 + y
+						if event.type == 'mousemove':
 							if self.mouseBody != None:
-								self.mouseBody = None
-							
-			
-		self.player.applyJump(jump, dt)
+								oldXY = (self.mouseBody.x, self.mouseBody.y)
+								self.mouseBody.x = int(x - self.mouseBodyStartOffset[0])
+								self.mouseBody.y = int(y - self.mouseBodyStartOffset[1])
+								
+								
+						elif event.type == 'mouseleft':
+							if event.down:
+								if self.mouseBody == None:
+									for body in self.bodies:
+										dx = x - body.x
+										dy = y - body.y
+										if dx ** 2 + dy ** 2 < body.radius ** 2:
+											self.mouseBody = body
+											self.mouseBodyStartOffset = [dx, dy]
+											break
+							else:
+								if self.mouseBody != None:
+									self.mouseBody = None
+								
+				
+			self.player.applyJump(jump, dt)
+		
+		hb = self.player.getHitBox()
 		
 		for deb in self.debris:
 			deb.update(self, dt)
@@ -1195,11 +1482,26 @@ class PlayScene:
 			body.update(self, dt)
 		for sprite in self.sprites:
 			sprite.update(self, dt)
+		for shark in self.sharks:
+			shark.update(self, dt)
+			dx = shark.x - hb[0]
+			dy = shark.y - hb[1]
+			if dx ** 2 + dy ** 2 < 17 ** 2:
+				if not EDITOR_ENABLED:
+					self.triggerDeath()
+		for ball in self.lavaballs:
+			ball.update(self, dt)
+			dx = ball.x - hb[0]
+			dy = ball.y - hb[1]
+			if dx ** 2 + dy ** 2 < 30 ** 2:
+				if not EDITOR_ENABLED:
+					self.triggerDeath()
 	
 	def triggerWin(self):
 		self.next = WinScreen(self)
 	
 	def triggerDeath(self):
+		self.YOU_DEAD = True
 		self.next = TransitionScene(self, ['S', self])
 	
 	def triggerLose(self):
@@ -1233,12 +1535,18 @@ class PlayScene:
 		for deb in self.debris:
 			deb.render(cx, cy)
 		
+		for ball in self.lavaballs:
+			ball.render(cx, cy)
+			
 		for body in self.bodies:
 			body.render(cx, cy)
 		
 		for sprite in self.sprites:
 			sprite.render(t, cx, cy)
-			
+		
+		for shark in self.sharks:
+			shark.render(cx, cy)
+		
 		
 		if self.recordIndicator != None and self.recordIndicatorCounters != None:
 			lifetime = tm - self.recordIndicatorCounters[2]
@@ -1309,6 +1617,62 @@ class SaveState:
 
 
 
+SHARK_VELOCITY = 2.0
+
+SHARK_IMAGES = [None, None]
+
+class Shark:
+	def __init__(self, body):
+		self.x = body.x
+		self.y = body.y
+		self.body = body
+		self.target = None
+		self.leftFacing = random.random() < .5
+		if SHARK_IMAGES[0] == None:
+			SHARK_IMAGES[0] = GfxImage('sprites/shark-right.png')
+			SHARK_IMAGES[1] = GfxImage('sprites/shark-left.png')
+		self.images = SHARK_IMAGES
+	
+	def update(self, scene, dt):
+		player = scene.player
+		x = self.body.x
+		y = self.body.y
+		
+		if player.ground == self.body:
+			hb = player.getHitBox()
+			x = hb[0]
+			y = hb[1]
+		else:
+			if self.target == None:
+				theta = random.random()
+				x = math.cos(theta) * self.body.radius
+				y = math.sin(theta) * self.body.radius
+				x += self.body.x
+				y += self.body.y
+				self.target = (x, y)
+			x, y = self.target
+			
+		dx = x - self.x
+		dy = y - self.y
+		dist = (dx ** 2 + dy ** 2) ** .5
+		if dist > SHARK_VELOCITY * 2:
+			ux = dx / dist
+			uy = dy / dist
+			self.x += SHARK_VELOCITY * ux * dt * FPS
+			self.y += SHARK_VELOCITY * uy * dt * FPS
+			
+			self.leftFacing = dx < 0
+		else:
+			self.target = None
+	
+	def render(self, cx, cy):
+		img = self.images[self.leftFacing]
+		img.blitRotation(self.x + cx, self.y + cy, 0)
+		
+
+
+
+
 PLAYER_WALK_VELOCITY = 6.0
 PLAYER_JUMP_VELOCITY = 470.0
 ASTEROID_GRAVITY_COEFFICIENT = 5000.0 # make bigger for stronger gravity
@@ -1316,6 +1680,8 @@ ASTEROID_GRAVITY_COEFFICIENT = 5000.0 # make bigger for stronger gravity
 # If enabled, will skip every other update phase and apply that dt to the next update phase's dt value to ensure that I'm incorporating dt correctly into my calculations
 # Be sure to set this to true every once in a while to test.
 DT_TEST_ENABLED = False
+
+CACHED_JUMP_TIMES = {} # cache by 10*t
 
 class Sprite:
 
@@ -1352,6 +1718,7 @@ class Sprite:
 		self.currentVelocity = (0.0, 0.0)
 		self.distanceFromCenter = None
 		self.waterJump = 0.0
+		self.lastWalk = 0
 		
 		# for DT_TEST_ENABLED
 		self.counter = 0
@@ -1457,6 +1824,7 @@ class Sprite:
 	
 	def applyWalk(self, dir):
 		if dir != 0:
+			self.lastWalk = time.time()
 			self.facingLeft = dir < 0
 			v = PLAYER_WALK_VELOCITY
 			if self.ground != None:
@@ -1562,7 +1930,6 @@ class Sprite:
 			self.thetaFromGround += theta
 		
 		self.angularVelocity *= .8 ** (dt * FPS)
-		
 	
 	def update(self, scene, dt):
 		oldLoc = self.getHitBox()
@@ -1579,8 +1946,13 @@ class Sprite:
 		
 	def render(self, rc, cx, cy):
 		hb = self.getHitBox()
+		isWalking = (time.time() - self.lastWalk) < .1
+		if not isWalking:
+			rc = 1
+		else:
+			rc = int(rc * 1.3) // 2
 		imgs = self.images['left'] if self.facingLeft else self.images['right']
-		img = imgs[(int(rc) // 4) % len(imgs)]
+		img = imgs[rc % len(imgs)]
 		x = hb[0] + cx
 		y = hb[1] + cy
 		if self.ground == None:
@@ -1591,7 +1963,16 @@ class Sprite:
 		if self.isPlayer:
 			currentJump = ACTIVE_SESSION.getCurrentJump()
 			if currentJump != None and currentJump > 1:
-				lbl = Q.renderText(formatTime(currentJump), 'M', x - 8, y - 40)
+				currentJump = int(currentJump * 10) / 10.0
+				key = int(currentJump * 10)
+				lbl = CACHED_JUMP_TIMES.get(key)
+				x = x - 8
+				y = y - 40
+				if lbl == None:
+					lbl = Q.renderText(formatTime(currentJump), 'M', x, y)
+					CACHED_JUMP_TIMES[key] = lbl
+				else:
+					lbl.setPosition(x, y)
 				lbl.render()
 				
 				
@@ -1652,10 +2033,10 @@ class TitleScene:
 		self.next = TransitionScene(self, MapSelectScreen())
 	
 	def click_options(self):
-		self.next = OptionsMenu()
+		self.next = TransitionScene(self, OptionsMenu())
 	
 	def click_credits(self):
-		pass
+		self.next = TransitionScene(self, CreditsScene())
 	
 	def click_exit(self):
 		# Not sure if this is considered "clean" in Pyglet, but the recommended way didn't seem to work. But it's PyWeek so this is good enough for me.
@@ -1671,11 +2052,12 @@ class TitleScene:
 			self.chet = GfxImage('sprites/chet-walk-1.png')
 			r = 1.0 * self.chet.width / self.chet.height
 			self.chet.setSize(400 * r, 400)
-		self.chet.blitSimple(100, 200)
+		self.chet.blitSimple(100, 230)
 		
 		if self.title == None:
 			self.title = GfxImage('menus/title.png')
-		self.title.blitSimple(50, 10)
+			self.title.setSize(self.title.width * 1.5, self.title.height * 1.5)
+		self.title.blitSimple(10, 0)
 		
 		x = 480
 		y = 100

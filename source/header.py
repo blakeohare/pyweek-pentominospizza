@@ -13,4 +13,5 @@ HALF_PI = PI / 2
 FPS = 30.0
 SPF = 1.0 / FPS
 
+#EDITOR_ENABLED = True
 EDITOR_ENABLED = False
