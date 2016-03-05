@@ -1,4 +1,4 @@
-MAP_COLUMN_SPACING = [200, 100, 100, 100, 100, 100]
+MAP_COLUMN_SPACING = [280, 100, 120, 120, 120, 120]
 
 class MapSelectScreen:
 	def __init__(self):
@@ -100,7 +100,7 @@ class MapSelectScreen:
 		index = -1
 		for option in self.options:
 			index += 1
-			x = 100
+			x = 60
 			
 			if index == 1:
 				xSave = x

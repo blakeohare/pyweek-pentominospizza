@@ -36,7 +36,7 @@ class GravityBody:
 			self.isDeathy = True
 		
 		if EDITOR_ENABLED:
-			self.isDeath = False
+			self.isDeathy = False
 		
 		self.image.setSize(imgWH[0], imgWH[1])
 	

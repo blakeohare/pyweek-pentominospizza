@@ -2,6 +2,7 @@ _BODY_TYPE_INFO = {
 	# image name, radius
 	'halfgrass': ('halfgrass', 150),
 	'lava': ('lava', 250),
+	'lavamini': ('lavamini', 150),
 	'rock1': ('rock1', 150),
 	'rock2': ('rock2', 150),
 	'rock3': ('rock3', 150),
@@ -44,7 +45,7 @@ class PlayScene:
 					flag = 'water'
 				elif type == 'volcano':
 					flag = 'volcano'
-				elif type == 'lava':
+				elif type == 'lava' or type == 'lavamini':
 					flag = 'lava'
 				body = GravityBody(type, x, y, radius, 'rocks/' + imgPath + '.png', speedRatio / 30.0, speedRatio, flag)
 				for sprite in sprites:
