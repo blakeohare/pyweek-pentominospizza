@@ -5,34 +5,34 @@ class CutScene:
 		self.index = 0
 		self.state_counter = 0.0
 		self.progress = 0.0
-		
+
 		self.states = [
-			('start', 3),
-			('ringring', 2),
-			('phone1-normal', 3),
-			('ufo-enter', 1),
-			('ufo-wait', 1),
-			('ufo-blast', 2),
-			('white-in', 1),
-			('white', 2),
-			('white-out', 3),
-			('end', 2),
+			('start', 2),
+			('ringring', 1),
+			('phone1-normal', 0.5),
+			('ufo-enter', 0.1),
+			('ufo-wait', 0.2),
+			('ufo-blast', 0.01),
+			('white-in', 0.1),
+			('white', 0.1),
+			('white-out', 0.1),
+			('end', 1.5),
 		]
-		
+
 		self.images = {}
-	
+
 	def render(self):
 		if self.index >= len(self.states):
 			state = self.states[-1]
 		else:
 			state = self.states[self.index]
-		
+
 		progress = self.state_counter / state[1]
 		if progress < 0: progress = 0.0
 		elif progress > 1: progress = 1.0
 		antiprogress = 1.0 - progress
 		id = state[0]
-		
+
 		if id == 'start':
 			self.blitImage('window-background-small', 350, 50)
 			self.blitImage('page1', 0, 0)
@@ -76,56 +76,55 @@ class CutScene:
 			self.blitImage('space-background', 85, 58)
 			self.blitImage('space-asteroids', 85, 58)
 			self.blitImage('window', 0, 0)
-			
-		
-			
-			
-		
+
+
+
+
+
 	def update(self, events, dt):
 		self.state_counter += dt
 		if self.index >= len(self.states):
 			self.leave()
-		
+
 		for event in events:
 			if event.down and (event.type == 'enter' or event.type == 'space'):
 				self.leave()
-		
+
 		if self.index >= len(self.states):
 			self.index = len(self.states) - 1
-		
+
 		state = self.states[self.index]
-		
+
 		total = state[1]
 		if self.state_counter >= total:
 			self.state_counter = 0
 			self.index += 1
-		
+
 		self.progress = 1.0 * self.state_counter / total
 
 	def leave(self):
 		self.next = TransitionScene(self, TitleScene())
 		DB.setValue('intro_shown', True)
 		DB.save()
-	
+
 	def drawText(self, text, x, y):
 		txt = self.images.get('T:' + text)
 		if txt == None:
 			txt = Q.renderText(text, 'L', x, y)
 			self.images['T:' + text] = txt
-		
+
 		txt.render()
-	
+
 	def blitImage(self, path, x, y, opacityRatio = None):
 		img = self.images.get(path)
 		if img == None:
 			img = GfxImage('cutscene/' + path + '.png')
 			self.images[path] = img
-		
+
 		if (opacityRatio != None):
 			alpha = int(opacityRatio * 255)
 			if alpha < 0: alpha = 0
 			if alpha > 255: alpha = 255
 			img.sprite.opacity = alpha
-		
+
 		img.blitSimple(x, y)
-	
