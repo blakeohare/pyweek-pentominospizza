@@ -25,13 +25,14 @@ class PlayScene:
 		self.hoverTime = None # counter for when you are jumping
 		self.recordIndicator = None
 		self.countdownLabel = None
+		self.timeLeft = None
+		self.timeLeftValue = None
 		
 		self.mouseXY = (0, 0)
 		self.mouseBody = None
 		self.mouseBodyStartOffset = None # offset from center of body that user clicked
 		
 		if restoreType == 'M':
-			print arg
 			self.level = Level(arg)
 			self.id = arg
 			for body in self.level.stuff:
@@ -115,6 +116,7 @@ class PlayScene:
 		self.savedStateSprites = sprites
 	
 	def update(self, events, dt):
+		ACTIVE_SESSION.ensureTimerRunning(True)
 		dx = 0
 		if Q.pressedActions['left']:
 			dx = -1
@@ -179,9 +181,11 @@ class PlayScene:
 	
 	def triggerJumpRecord(self, x, y, amt):
 		self.recordIndicator = Q.renderText('New Record! ' + formatTime(amt), 'M', x, y)
-		self.recordIndicatorCounters = [x, y, time.time()]
+		self.recordIndicatorCounters = [x, y, ACTIVE_SESSION.getCurrentTime()]
 	
 	def render(self):
+		tm = ACTIVE_SESSION.getCurrentTime()
+		
 		self.bg.blitSimple(0, 0)
 		
 		hb = self.player.getHitBox()
@@ -195,7 +199,6 @@ class PlayScene:
 			self.cameraCurrentX = self.cameraCurrentX * .9 + self.cameraTargetX * .1
 			self.cameraCurrentY = self.cameraCurrentY * .9 + self.cameraTargetY * .1
 		
-		tm = time.time()
 		t = int(tm * FPS)
 		
 		cx = Q.width / 2 - self.cameraCurrentX
@@ -246,7 +249,15 @@ class PlayScene:
 				if pt != None:
 					self.pointer.blitRotation(pt[0] + 400, pt[1] + 300, ang)
 					break
+		self.renderTimer()
+		
+	def renderTimer(self):
+		countdown = int(10 * 60 - ACTIVE_SESSION.getCurrentTime())
+		if countdown < 0: countdown = 0
+		timeToShow = formatCountdown(countdown)
+		if self.timeLeft == None or self.timeLeftValue != timeToShow:
+			self.timeLeft = Q.renderText('Delivery Guarantee: ' + timeToShow, 'L', 400, 50)
+		self.timeLeft.render()
 			
-			
-			
-			
+		
+		

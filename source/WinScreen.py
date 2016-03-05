@@ -14,6 +14,7 @@ class WinScreen:
 		DB.setValue(id + '_timesplayed', timesPlayed)
 		DB.setValue(id + '_completed', True)
 		self.timesPlayed = timesPlayed
+		ACTIVE_SESSION.ensureTimerRunning(False)
 		
 		self.ui = {}
 		

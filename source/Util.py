@@ -16,6 +16,13 @@ def formatTime(amount):
 	
 	return ensureLength(seconds, False) + "." + ensureLength(deci, True) + '"'
 
+def formatCountdown(seconds):
+	minutes = seconds // 60
+	seconds = seconds % 60
+	if seconds < 10:
+		return str(minutes) + ':0' + str(seconds)
+	return str(minutes) + ':' + str(seconds)
+	
 def ensureLength(n, pad):
 	if pad and n < 10: return '0' + str(n)
 	return str(n)
@@ -23,7 +30,6 @@ def ensureLength(n, pad):
 def nstr(value):
 	if value == None: return None
 	return str(value)
-
 
 def safeTan(ang):
 	s = math.sin(ang)

@@ -9,14 +9,32 @@ class ActiveSession:
 		self.jumpCount = 0
 		self.isJumpRecord = False
 		self.lastKnownJumpRecord = DB.getFloat(id + '_longestjump')
+		self.timerRunning = True
+		self.timeAccrued = 0.0
 	
 	def startJump(self):
 		self.jumpCount += 1
-		self.currentJump = time.time()
+		self.currentJump = self.getCurrentTime()
 		self.isJumpRecord = False
 	
+	def ensureTimerRunning(self, toggle):
+		if toggle == self.timerRunning:
+			return
+		
+		self.timerRunning = toggle
+		if toggle:
+			self.startTime = time.time() - self.timeAccrued
+		else:
+			self.timeAccrued = time.time() - self.startTime
+	
+	def getCurrentTime(self):
+		if self.timerRunning:
+			return time.time() - self.startTime
+		else:
+			return self.timeAccrued
+	
 	def endJump(self):
-		jumpDuration = time.time() - self.currentJump
+		jumpDuration = self.getCurrentTime() - self.currentJump
 		if jumpDuration > self.longestJump:
 			self.longestJump = jumpDuration
 		if jumpDuration > self.lastKnownJumpRecord:
@@ -33,7 +51,7 @@ class ActiveSession:
 	def getCurrentJump(self):
 		if self.currentJump == None:
 			return None
-		return time.time() - self.currentJump
+		return self.getCurrentTime() - self.currentJump
 	
 	def getLongestJump(self):
 		return self.longestJump

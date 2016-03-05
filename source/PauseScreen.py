@@ -8,6 +8,7 @@ class PauseScreen:
 		self.index = 0
 	
 	def update(self, events, dt):
+		ACTIVE_SESSION.ensureTimerRunning(False)
 		for event in events:
 			if event.down:
 				if event.type == 'space' or event.type == 'enter':
