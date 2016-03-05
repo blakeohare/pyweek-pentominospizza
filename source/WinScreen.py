@@ -32,7 +32,7 @@ class WinScreen:
 		
 		self.gameDuration =  ACTIVE_SESSION.gameDuration
 		if not isWin: # assuming all losses are timeouts since others resolve into restore-replays. 
-			self.gameDuration = 600.0 # avoid slight rounding errors that would make it look unfair. 
+			self.gameDuration = ACTIVE_SESSION.timeLimitSeconds * 1.0 # avoid slight rounding errors that would make it look unfair. 
 		
 		if not DB.hasValue(id + '_fastesttime') or DB.getFloat(id + '_fastesttime') > self.gameDuration:
 			if self.isWin:

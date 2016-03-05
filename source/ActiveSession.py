@@ -2,7 +2,8 @@ class ActiveSession:
 	def __init__(self):
 		self.startTime = 0
 	
-	def startGame(self, id):
+	def startGame(self, id, timeLimitSeconds):
+		self.timeLimitSeconds = timeLimitSeconds
 		self.startTime = time.time()
 		self.longestJump = 0.0
 		self.currentJump = None

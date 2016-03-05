@@ -117,6 +117,12 @@ class PlayScene:
 	
 	def update(self, events, dt):
 		ACTIVE_SESSION.ensureTimerRunning(True)
+		
+		if ACTIVE_SESSION.getCurrentTime() > ACTIVE_SESSION.timeLimitSeconds:
+			self.triggerLose()
+			return
+			
+		
 		dx = 0
 		if Q.pressedActions['left']:
 			dx = -1
@@ -178,6 +184,9 @@ class PlayScene:
 	
 	def triggerDeath(self):
 		self.next = TransitionScene(self, ['S', self])
+	
+	def triggerLose(self):
+		self.next = WinScreen(self, False)
 	
 	def triggerJumpRecord(self, x, y, amt):
 		self.recordIndicator = Q.renderText('New Record! ' + formatTime(amt), 'M', x, y)
@@ -252,7 +261,7 @@ class PlayScene:
 		self.renderTimer()
 		
 	def renderTimer(self):
-		countdown = int(10 * 60 - ACTIVE_SESSION.getCurrentTime())
+		countdown = int(ACTIVE_SESSION.timeLimitSeconds - ACTIVE_SESSION.getCurrentTime() + .99) # +.99 so that when it shows 0 it's the actual deadline
 		if countdown < 0: countdown = 0
 		timeToShow = formatCountdown(countdown)
 		if self.timeLeft == None or self.timeLeftValue != timeToShow:
