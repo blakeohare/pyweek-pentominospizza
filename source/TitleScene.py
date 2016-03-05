@@ -17,6 +17,8 @@ class TitleScene:
 		]
 		self.bg = None
 		self.textCounter = None
+		self.chet = None
+		self.title = None
 		DB.setValue('views', DB.getInt('views', 0) + 1)
 		DB.save()
 	
@@ -62,8 +64,18 @@ class TitleScene:
 			
 		self.bg.blitSimple(0, 0)
 		
-		x = 200
-		y = 200
+		if self.chet == None:
+			self.chet = GfxImage('sprites/chet-walk-1.png')
+			r = 1.0 * self.chet.width / self.chet.height
+			self.chet.setSize(400 * r, 400)
+		self.chet.blitSimple(100, 200)
+		
+		if self.title == None:
+			self.title = GfxImage('menus/title.png')
+		self.title.blitSimple(50, 10)
+		
+		x = 480
+		y = 100
 		i = 0
 		for option in self.options:
 			text = option[0]
@@ -73,10 +85,10 @@ class TitleScene:
 				yOffset = int(abs(math.sin(self.counter * TWO_PI / FPS) * 16))
 				if self.cursor == None:
 					self.cursor = GfxImage('menus/pizza.png')
-				self.cursor.blitSimple(x - 100, y - yOffset - 30)
+				self.cursor.blitSimple(x - 70, y - yOffset - 20)
 			obj = option[2]
 			if obj == None:
-				obj = Q.renderText(text, 'L', x, y)
+				obj = Q.renderText(text, 'XL', x, y)
 				option[2] = obj
 			obj.setPosition(x, y)
 			
@@ -84,23 +96,7 @@ class TitleScene:
 			
 			
 			
-			y += 80
+			y += 100
 			i += 1
 		
-		if self.textCounter == None:
-			views = str(DB.getInteger('views', 0))
-			last = views[-1:]
-			last2 = views[-2:]
-			if last == '1' and last2 != '11': 
-				suffix = 'st'
-			elif last == '2' and last2 != '12':
-				suffix = 'nd'
-			elif last == '3' and last2 != '13':
-				suffix = 'rd'
-			else:
-				suffix = 'th'
-				
-			self.textCounter = Q.renderText("This is the " + views + suffix + " time you've viewed this screen.", 'M', 0, 20)
-		
-		self.textCounter.render()
 	
