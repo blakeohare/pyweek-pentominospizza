@@ -9,14 +9,14 @@ class CutScene:
 		self.states = [
 			('start', 2),
 			('ringring', 1),
-			('phone1-normal', 0.5),
-			('ufo-enter', 0.1),
-			('ufo-wait', 0.2),
-			('ufo-blast', 0.01),
-			('white-in', 0.1),
-			('white', 0.1),
-			('white-out', 0.1),
-			('end', 1.5),
+			('phone1-normal', 2),
+			('ufo-enter', 1),
+			('ufo-wait', 1),
+			('ufo-blast', 1),
+			('white-in', 1),
+			('white', 1),
+			('white-out', 1),
+			('end', 2),
 		]
 
 		self.images = {}
