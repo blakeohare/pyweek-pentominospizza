@@ -1,6 +1,18 @@
-halfgrass, 0, 0, 1.0
+halfgrass, 168, 81, 1.0
 + player, @10
 + store, @0
+
+lava, 302, 557, 1.0
+lava, -124, 623, 1.0
+lavamini, -101, 437, 1.0
+lavamini, 636, 109, 1.0
+lavamini, 1000, 1000, 1.0
+lavamini, 1200, 1200, 1.0
+
+volcano, 788, 401, 1.0
+volcano, 0, 600, 1.0
+volcano, 0, 900, 1.0
+
 
 halfgrass, -400, 0, 1.0
 + house1, @0
