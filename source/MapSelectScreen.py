@@ -23,7 +23,10 @@ class MapSelectScreen:
 			[None] * len(ch), # text labels
 			ch]
 		
+		self.index = 0
 		for key in MAP_DB.getKeys():
+			if ACTIVE_SESSION.id == key:
+				self.index = len(self.options)
 			m = MAP_DB.get(key)
 			unlocked = MAP_DB.isUnlocked(m.key)
 			fastestTime = None
@@ -54,7 +57,9 @@ class MapSelectScreen:
 			option = [key, 0, [None] * len(option), option] # [0] -> map key, [1] -> bottom padding, [2] -> pyglet label objects, [3] -> raw string values or None if not present
 			
 			self.options.append(option)
-		
+		self.index += 1
+		if self.index >= len(self.options):
+			self.index = len(self.options) - 1
 	
 	def update(self, events, dt):
 		self.counter += dt * 30
