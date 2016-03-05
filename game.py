@@ -154,6 +154,7 @@ class Engine:
 		self.pyglet = pyglet
 		outerSelf = self
 		self.fontEngine = None
+		self.eventLoop = pyglet.app.EventLoop()
 		
 		class PygletWindow(pyglet.window.Window):
 			def __init__(self, width, height, title):
@@ -275,7 +276,7 @@ class Engine:
 		self.isFullScreen = not self.isFullScreen
 	
 	def quit(self):
-		self.exitGame = True
+		self.eventLoop.exit()
 	
 	def pumpEvents(self):
 		
@@ -366,8 +367,8 @@ class RawImage:
 		# original width and height
 		self.width = resource.width
 		self.height = resource.height
-		self.cx = self.width / 2
-		self.cy = self.height / 2
+		self.cx = self.width // 2
+		self.cy = self.height // 2
 		self.centered = False
 		self.anchor_x = 0
 		self.anchor_y = 0
@@ -532,44 +533,6 @@ class GravityBody:
 		self.isDeathy = state[10]
 		self.type = state[11]
 		self.rotRat = state[12]
-
-
-
-
-IMAGE_ROTATION_INCREMENTS = 500
-
-class ImageLibrary:
-	def __init__(self):
-		self.images = {}
-		self.imagesByThetaByPath = {}
-	
-	def get(self, path):
-		img = self.images.get(path)
-		if img == None:
-			img = pygame.image.load(('source/images/' + path).replace('/', os.sep))
-			self.images[path] = img
-		return img
-	
-	def getRotated(self, path, theta):
-		theta = theta / TWO_PI % 1
-		if theta < 0: theta += 1
-		lookup = self.imagesByThetaByPath.get(path)
-		if lookup == None:
-			img = self.get(path)
-			lookup = [img]
-			self.imagesByThetaByPath[path] = lookup
-			
-			for i in range(1, IMAGE_ROTATION_INCREMENTS):
-				t = i * 360 / IMAGE_ROTATION_INCREMENTS # degrees? really? PyGame, we need to have a talk.
-				lookup.append(pygame.transform.rotate(img, t))
-		
-		
-		return lookup[int(theta * len(lookup))]
-		
-		
-
-IMAGES = ImageLibrary()
-
 
 
 
@@ -815,6 +778,67 @@ class MapSelectScreen:
 
 
 
+class OptionsMenu:
+	def __init__(self):
+		self.next = self
+		self.index = 0
+		self.images = {}
+		
+	
+	def update(self, events, dt):
+		enter = False
+		for event in events:
+			if event.down:
+				if event.type == 'up':
+					self.index -= 1
+				elif event.type == 'down':
+					self.index += 1
+				elif event.type in ('space', 'enter'):
+					enter = True
+		if self.index < 0: self.index = 0
+		elif self.index > 1: self.index = 1
+		
+		if enter:
+			if self.index == 0:
+				DB.setValue('magic', not DB.getBoolean('magic'))
+				DB.save()
+			else:
+				self.next = TitleScene()
+	
+	def render(self):
+		self.getImage('background/space1.png').blitSimple(0, 0)
+		options = ['Magic', 'Back to Title Screen']
+		if not DB.getBoolean('magic'):
+			options[0] = 'More Magic'
+		y = 300
+		for i in range(2):
+			x = 200
+			self.getText(options[i], x, y).render()
+			if i == self.index:
+				yOffset = abs(math.sin(time.time() * 2 * 3.14159)) * 15
+				x -= 70
+				self.getImage('menus/pizza.png').blitSimple(x, y - 25 - yOffset)
+			y += 100
+	
+	def getText(self, text, x, y):
+		key = 'K:' + text
+		img = self.images.get(key)
+		if img == None:
+			img = Q.renderText(text, 'L', x, y)
+			self.images[key] = img
+		return img
+		
+	
+	def getImage(self, path):
+		img = self.images.get(path)
+		if img == None:
+			img = GfxImage(path)
+			self.images[path] = img
+		return img
+
+
+
+
 class PauseScreen:
 
 	def __init__(self, bg):
@@ -1008,7 +1032,7 @@ class PlayScene:
 	# arg is level string ID for M and another playscene for S
 	def __init__(self, restoreType, arg):
 		self.next = self
-		self.bg = GfxImage('background/space4.png')
+		self.bg = GfxImage('background/space1.png')
 		self.pointer = GfxImage('pointer.png')
 		
 		self.sprites = []
@@ -1203,8 +1227,8 @@ class PlayScene:
 		
 		t = int(tm * FPS)
 		
-		cx = Q.width / 2 - self.cameraCurrentX
-		cy = Q.height / 2 - self.cameraCurrentY
+		cx = Q.width / 2.0 - self.cameraCurrentX
+		cy = Q.height / 2.0 - self.cameraCurrentY
 		
 		for deb in self.debris:
 			deb.render(cx, cy)
@@ -1556,7 +1580,7 @@ class Sprite:
 	def render(self, rc, cx, cy):
 		hb = self.getHitBox()
 		imgs = self.images['left'] if self.facingLeft else self.images['right']
-		img = imgs[(rc / 4) % len(imgs)]
+		img = imgs[(int(rc) // 4) % len(imgs)]
 		x = hb[0] + cx
 		y = hb[1] + cy
 		if self.ground == None:
@@ -1596,6 +1620,8 @@ class TitleScene:
 		]
 		self.bg = None
 		self.textCounter = None
+		self.chet = None
+		self.title = None
 		DB.setValue('views', DB.getInt('views', 0) + 1)
 		DB.save()
 	
@@ -1626,13 +1652,14 @@ class TitleScene:
 		self.next = TransitionScene(self, MapSelectScreen())
 	
 	def click_options(self):
-		pass
+		self.next = OptionsMenu()
 	
 	def click_credits(self):
 		pass
 	
 	def click_exit(self):
-		Q.quit()
+		# Not sure if this is considered "clean" in Pyglet, but the recommended way didn't seem to work. But it's PyWeek so this is good enough for me.
+		os.sys.exit()
 	
 	def render(self):
 		if self.bg == None:
@@ -1640,8 +1667,18 @@ class TitleScene:
 			
 		self.bg.blitSimple(0, 0)
 		
-		x = 200
-		y = 200
+		if self.chet == None:
+			self.chet = GfxImage('sprites/chet-walk-1.png')
+			r = 1.0 * self.chet.width / self.chet.height
+			self.chet.setSize(400 * r, 400)
+		self.chet.blitSimple(100, 200)
+		
+		if self.title == None:
+			self.title = GfxImage('menus/title.png')
+		self.title.blitSimple(50, 10)
+		
+		x = 480
+		y = 100
 		i = 0
 		for option in self.options:
 			text = option[0]
@@ -1651,10 +1688,10 @@ class TitleScene:
 				yOffset = int(abs(math.sin(self.counter * TWO_PI / FPS) * 16))
 				if self.cursor == None:
 					self.cursor = GfxImage('menus/pizza.png')
-				self.cursor.blitSimple(x - 100, y - yOffset - 30)
+				self.cursor.blitSimple(x - 70, y - yOffset - 20)
 			obj = option[2]
 			if obj == None:
-				obj = Q.renderText(text, 'L', x, y)
+				obj = Q.renderText(text, 'XL', x, y)
 				option[2] = obj
 			obj.setPosition(x, y)
 			
@@ -1662,25 +1699,9 @@ class TitleScene:
 			
 			
 			
-			y += 80
+			y += 100
 			i += 1
 		
-		if self.textCounter == None:
-			views = str(DB.getInteger('views', 0))
-			last = views[-1:]
-			last2 = views[-2:]
-			if last == '1' and last2 != '11': 
-				suffix = 'st'
-			elif last == '2' and last2 != '12':
-				suffix = 'nd'
-			elif last == '3' and last2 != '13':
-				suffix = 'rd'
-			else:
-				suffix = 'th'
-				
-			self.textCounter = Q.renderText("This is the " + views + suffix + " time you've viewed this screen.", 'M', 0, 20)
-		
-		self.textCounter.render()
 	
 
 
@@ -1693,7 +1714,7 @@ class TransitionScene:
 		self.fromScene = fromScene
 		self.toScene = toScene
 		self.duration = FPS
-		self.half = self.duration / 2
+		self.half = self.duration // 2
 		self.counter = 0
 		self.bg = fromScene
 		self.alpha = 0
@@ -1732,9 +1753,9 @@ def formatTime(amount):
 	deci = int(amount * 100) % 100
 	amount = int(amount)
 	seconds = amount % 60
-	amount = amount / 60
+	amount = amount // 60
 	minutes = amount % 60
-	hours = amount / 60
+	hours = amount // 60
 	
 	if hours > 0:
 		return ':'.join((ensureLength(hours, False), ensureLength(minutes, True), ensureLength(seconds, True) + '.' + ensureLength(deci, True)))
