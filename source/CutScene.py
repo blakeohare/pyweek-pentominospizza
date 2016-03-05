@@ -5,7 +5,7 @@ class CutScene:
 		self.index = 0
 		self.state_counter = 0.0
 		self.progress = 0.0
-
+		
 		self.states = [
 			('start', 2),
 			('ringring', 1),
@@ -33,6 +33,8 @@ class CutScene:
 		antiprogress = 1.0 - progress
 		id = state[0]
 
+		asteroidsY = math.sin(time.time() * TWO_PI) * 4
+		
 		if id == 'start':
 			self.blitImage('window-background-small', 350, 50)
 			self.blitImage('page1', 0, 0)
@@ -68,18 +70,15 @@ class CutScene:
 		elif id == 'white':
 			self.blitImage('white', 0, 0, 1.0)
 		elif id == 'white-out':
+			
 			self.blitImage('space-background', 85, 58)
-			self.blitImage('space-asteroids', 85, 58)
+			self.blitImage('space-asteroids', 85, 58 + asteroidsY)
 			self.blitImage('window', 0, 0)
 			self.blitImage('white', 0, 0, antiprogress)
 		elif id == 'end':
 			self.blitImage('space-background', 85, 58)
-			self.blitImage('space-asteroids', 85, 58)
+			self.blitImage('space-asteroids', 85, 58 + asteroidsY)
 			self.blitImage('window', 0, 0)
-
-
-
-
 
 	def update(self, events, dt):
 		self.state_counter += dt
