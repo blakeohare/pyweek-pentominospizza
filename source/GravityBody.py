@@ -37,6 +37,8 @@ class GravityBody:
 			imgWH = (radius * 2.6, radius * 2.6)
 		elif typeFlag == 'lava':
 			self.isDeathy = True
+		elif self.type == 'blackhole':
+			imgWH = (radius * 5, radius * 5)
 		
 		if EDITOR_ENABLED:
 			self.isDeathy = False
