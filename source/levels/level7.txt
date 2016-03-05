@@ -1,6 +1,13 @@
-halfgrass, 0, 0, 1.0
+halfgrass, -5, 95, 1.0
 + player, @10
 + store, @0
 
-halfgrass, -400, 0, 1.0
+lava, -326, -869, 1.0
+
+rock1, 334, -165, 1.0
+rock2, 538, -841, 1.0
+rock3, 518, -459, 1.0
+rock4, 0, -400, 1.0
+
+halfgrass, 205, -1394, 1.0
 + house1, @0
