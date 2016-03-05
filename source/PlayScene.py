@@ -67,7 +67,7 @@ class PlayScene:
 			bodiesById = {}
 			self.id = arg.id
 			for bodyState in arg.savedStateBodies:
-				gb = GravityBody(0, 0, 150, 'rocks/rock1.png', 0, None) # dummy value
+				gb = GravityBody('rock1', 0, 0, 150, 'rocks/rock1.png', 0, 0, None) # dummy value
 				gb.restoreState(bodyState)
 				self.bodies.append(gb)
 				bodiesById[gb.id] = gb
