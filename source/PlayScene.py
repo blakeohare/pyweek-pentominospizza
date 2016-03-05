@@ -25,6 +25,7 @@ class PlayScene:
 		self.player = None
 		self.bodies = []
 		self.sharks = [] # too much different mechanics than sprites, don't want to introduce bugs 3 hours before game is due. adding as a different type.
+		self.lavaballs = []
 		
 		self.hoverTime = None # counter for when you are jumping
 		self.recordIndicator = None
@@ -109,6 +110,9 @@ class PlayScene:
 				if body.type == 'water':
 					self.sharks.append(Shark(body))
 		
+		for body in self.bodies:
+			if body.lavaball != None:
+				self.lavaballs.append(body.lavaball)
 	
 	def saveState(self):
 		mapping = {} # body instance to index in the list
@@ -182,6 +186,8 @@ class PlayScene:
 				
 			self.player.applyJump(jump, dt)
 		
+		hb = self.player.getHitBox()
+		
 		for deb in self.debris:
 			deb.update(self, dt)
 		for body in self.bodies:
@@ -190,11 +196,18 @@ class PlayScene:
 			sprite.update(self, dt)
 		for shark in self.sharks:
 			shark.update(self, dt)
-			hb = self.player.getHitBox()
 			dx = shark.x - hb[0]
 			dy = shark.y - hb[1]
 			if dx ** 2 + dy ** 2 < 17 ** 2:
-				self.triggerDeath()
+				if not EDITOR_ENABLED:
+					self.triggerDeath()
+		for ball in self.lavaballs:
+			ball.update(self, dt)
+			dx = ball.x - hb[0]
+			dy = ball.y - hb[1]
+			if dx ** 2 + dy ** 2 < 30 ** 2:
+				if not EDITOR_ENABLED:
+					self.triggerDeath()
 	
 	def triggerWin(self):
 		self.next = WinScreen(self)
@@ -234,6 +247,9 @@ class PlayScene:
 		for deb in self.debris:
 			deb.render(cx, cy)
 		
+		for ball in self.lavaballs:
+			ball.render(cx, cy)
+			
 		for body in self.bodies:
 			body.render(cx, cy)
 		
@@ -242,7 +258,7 @@ class PlayScene:
 		
 		for shark in self.sharks:
 			shark.render(cx, cy)
-			
+		
 		
 		if self.recordIndicator != None and self.recordIndicatorCounters != None:
 			lifetime = tm - self.recordIndicatorCounters[2]
