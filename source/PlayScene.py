@@ -14,6 +14,7 @@ class PlayScene:
 	# Restore type is either 'M' for map or 'S' for state
 	# arg is level string ID for M and another playscene for S
 	def __init__(self, restoreType, arg):
+		self.YOU_DEAD = False
 		self.next = self
 		self.bg = GfxImage('background/space1.png')
 		self.pointer = GfxImage('pointer.png')
@@ -122,55 +123,55 @@ class PlayScene:
 			self.triggerLose()
 			return
 			
-		
-		dx = 0
-		if Q.pressedActions['left']:
-			dx = -1
-			self.player.facingLeft = True
-		elif Q.pressedActions['right']:
-			dx = 1
-			self.player.facingLeft = False
+		if not self.YOU_DEAD:
+			dx = 0
+			if Q.pressedActions['left']:
+				dx = -1
+				self.player.facingLeft = True
+			elif Q.pressedActions['right']:
+				dx = 1
+				self.player.facingLeft = False
 			
-		self.player.applyWalk(dx)
+			self.player.applyWalk(dx)
 		
-		jump = False
-		jumpRelease = False
-		for event in events:
-			if event.type == 'space' and event.down:
-				jump = True
-			elif event.type == 'enter' and event.down:
-				self.next = PauseScreen(self)
-			elif EDITOR_ENABLED and self.cameraCurrentX != None:
-				if event.type == 'save' and event.down:
-					saveLevel(self)
-				elif event.coord != None:
-					x, y = event.coord
-					rawXY = (x, y)
-					x = self.cameraCurrentX - 400 + x
-					y = self.cameraCurrentY - 300 + y
-					if event.type == 'mousemove':
-						if self.mouseBody != None:
-							oldXY = (self.mouseBody.x, self.mouseBody.y)
-							self.mouseBody.x = int(x - self.mouseBodyStartOffset[0])
-							self.mouseBody.y = int(y - self.mouseBodyStartOffset[1])
-							
-							
-					elif event.type == 'mouseleft':
-						if event.down:
-							if self.mouseBody == None:
-								for body in self.bodies:
-									dx = x - body.x
-									dy = y - body.y
-									if dx ** 2 + dy ** 2 < body.radius ** 2:
-										self.mouseBody = body
-										self.mouseBodyStartOffset = [dx, dy]
-										break
-						else:
+			jump = False
+			jumpRelease = False
+			for event in events:
+				if event.type == 'space' and event.down:
+					jump = True
+				elif event.type == 'enter' and event.down:
+					self.next = PauseScreen(self)
+				elif EDITOR_ENABLED and self.cameraCurrentX != None:
+					if event.type == 'save' and event.down:
+						saveLevel(self)
+					elif event.coord != None:
+						x, y = event.coord
+						rawXY = (x, y)
+						x = self.cameraCurrentX - 400 + x
+						y = self.cameraCurrentY - 300 + y
+						if event.type == 'mousemove':
 							if self.mouseBody != None:
-								self.mouseBody = None
-							
-			
-		self.player.applyJump(jump, dt)
+								oldXY = (self.mouseBody.x, self.mouseBody.y)
+								self.mouseBody.x = int(x - self.mouseBodyStartOffset[0])
+								self.mouseBody.y = int(y - self.mouseBodyStartOffset[1])
+								
+								
+						elif event.type == 'mouseleft':
+							if event.down:
+								if self.mouseBody == None:
+									for body in self.bodies:
+										dx = x - body.x
+										dy = y - body.y
+										if dx ** 2 + dy ** 2 < body.radius ** 2:
+											self.mouseBody = body
+											self.mouseBodyStartOffset = [dx, dy]
+											break
+							else:
+								if self.mouseBody != None:
+									self.mouseBody = None
+								
+				
+			self.player.applyJump(jump, dt)
 		
 		for deb in self.debris:
 			deb.update(self, dt)
@@ -183,6 +184,7 @@ class PlayScene:
 		self.next = WinScreen(self)
 	
 	def triggerDeath(self):
+		self.YOU_DEAD = True
 		self.next = TransitionScene(self, ['S', self])
 	
 	def triggerLose(self):
