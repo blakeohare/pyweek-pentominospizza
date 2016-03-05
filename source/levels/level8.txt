@@ -2,5 +2,7 @@ halfgrass, 0, 0, 1.0
 + player, @10
 + store, @0
 
-halfgrass, -400, 0, 1.0
+blackhole, -471, -162, 6.0
+
+halfgrass, -1000, 0, 1.0
 + house1, @0
