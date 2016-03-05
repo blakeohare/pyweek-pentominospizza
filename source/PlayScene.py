@@ -24,6 +24,7 @@ class PlayScene:
 		self.sprites = []
 		self.player = None
 		self.bodies = []
+		self.sharks = [] # too much different mechanics than sprites, don't want to introduce bugs 3 hours before game is due. adding as a different type.
 		
 		self.hoverTime = None # counter for when you are jumping
 		self.recordIndicator = None
@@ -102,6 +103,11 @@ class PlayScene:
 			if sprite.type.startswith('house'):
 				self.victoryPlanet = sprite.ground
 				break
+		
+		if self.id == 'level5':
+			for body in self.bodies:
+				if body.type == 'water':
+					self.sharks.append(Shark(body))
 		
 	
 	def saveState(self):
@@ -182,6 +188,8 @@ class PlayScene:
 			body.update(self, dt)
 		for sprite in self.sprites:
 			sprite.update(self, dt)
+		for shark in self.sharks:
+			shark.update(self, dt)
 	
 	def triggerWin(self):
 		self.next = WinScreen(self)
@@ -226,6 +234,9 @@ class PlayScene:
 		
 		for sprite in self.sprites:
 			sprite.render(t, cx, cy)
+		
+		for shark in self.sharks:
+			shark.render(cx, cy)
 			
 		
 		if self.recordIndicator != None and self.recordIndicatorCounters != None:
