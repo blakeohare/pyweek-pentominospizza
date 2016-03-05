@@ -68,11 +68,12 @@ class TitleScene:
 			self.chet = GfxImage('sprites/chet-walk-1.png')
 			r = 1.0 * self.chet.width / self.chet.height
 			self.chet.setSize(400 * r, 400)
-		self.chet.blitSimple(100, 200)
+		self.chet.blitSimple(100, 230)
 		
 		if self.title == None:
 			self.title = GfxImage('menus/title.png')
-		self.title.blitSimple(50, 10)
+			self.title.setSize(self.title.width * 1.5, self.title.height * 1.5)
+		self.title.blitSimple(10, 0)
 		
 		x = 480
 		y = 100
