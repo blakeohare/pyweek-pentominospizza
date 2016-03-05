@@ -104,7 +104,7 @@ class PlayScene:
 				self.victoryPlanet = sprite.ground
 				break
 		
-		if self.id == 'level5':
+		if self.id == 'level5' or self.id == 'level9' or self.id == 'level10':
 			for body in self.bodies:
 				if body.type == 'water':
 					self.sharks.append(Shark(body))
@@ -190,6 +190,11 @@ class PlayScene:
 			sprite.update(self, dt)
 		for shark in self.sharks:
 			shark.update(self, dt)
+			hb = self.player.getHitBox()
+			dx = shark.x - hb[0]
+			dy = shark.y - hb[1]
+			if dx ** 2 + dy ** 2 < 17 ** 2:
+				self.triggerDeath()
 	
 	def triggerWin(self):
 		self.next = WinScreen(self)
