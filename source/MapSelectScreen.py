@@ -83,7 +83,10 @@ class MapSelectScreen:
 			if key == 'BACK':
 				self.next = TransitionScene(self, TitleScene())
 			else:
-				ACTIVE_SESSION.startGame(key, 3 * 60)
+				timelimit = 3 * 60
+				if EDITOR_ENABLED:
+					timelimit = 100 * 60
+				ACTIVE_SESSION.startGame(key, timelimit)
 				self.next = TransitionScene(self, PlayScene('M', key))
 		
 		
