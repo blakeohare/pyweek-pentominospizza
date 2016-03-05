@@ -35,6 +35,9 @@ class GravityBody:
 		elif typeFlag == 'lava':
 			self.isDeathy = True
 		
+		if EDITOR_ENABLED:
+			self.isDeath = False
+		
 		self.image.setSize(imgWH[0], imgWH[1])
 	
 	def update(self, scene, dt):

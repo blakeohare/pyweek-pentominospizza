@@ -41,6 +41,7 @@ class Sprite:
 		self.currentVelocity = (0.0, 0.0)
 		self.distanceFromCenter = None
 		self.waterJump = 0.0
+		self.lastWalk = 0
 		
 		# for DT_TEST_ENABLED
 		self.counter = 0
@@ -146,6 +147,7 @@ class Sprite:
 	
 	def applyWalk(self, dir):
 		if dir != 0:
+			self.lastWalk = time.time()
 			self.facingLeft = dir < 0
 			v = PLAYER_WALK_VELOCITY
 			if self.ground != None:
@@ -267,8 +269,13 @@ class Sprite:
 		
 	def render(self, rc, cx, cy):
 		hb = self.getHitBox()
+		isWalking = (time.time() - self.lastWalk) < .1
+		if not isWalking:
+			rc = 1
+		else:
+			rc = int(rc * 1.3) // 2
 		imgs = self.images['left'] if self.facingLeft else self.images['right']
-		img = imgs[(int(rc) // 4) % len(imgs)]
+		img = imgs[rc % len(imgs)]
 		x = hb[0] + cx
 		y = hb[1] + cy
 		if self.ground == None:
