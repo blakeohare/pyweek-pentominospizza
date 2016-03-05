@@ -2,5 +2,12 @@ halfgrass, 0, 0, 1.0
 + player, @10
 + store, @0
 
-halfgrass, -400, 0, 1.0
+volcano, 0, 400
+volcano, 0, 800
+volcano, 0, 1200
+volcano, 0, 1600
+volcano, 0, 2000
+
+
+halfgrass, 0, 2400, 1.0
 + house1, @0
