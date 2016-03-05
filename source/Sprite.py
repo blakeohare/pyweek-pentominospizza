@@ -116,9 +116,9 @@ class Sprite:
 				self.hitBox = (x, y, self.r)
 		return self.hitBox
 	
-	def applyJump(self, press, dt, treatAsNonWater = False):
+	def applyJump(self, press, dt):
 		if press and self.ground != None:
-			if self.ground.isWater and self.distanceFromCenter < self.ground.radius and not treatAsNonWater:
+			if self.ground.isWater and self.distanceFromCenter < self.ground.radius:
 				self.waterJump = 5
 			else:
 				ground = self.ground
@@ -234,16 +234,12 @@ class Sprite:
 		v = self.angularVelocity * (dt * FPS)
 		if self.ground.isWater:
 			self.distanceFromCenter += self.waterJump
-			if self.distanceFromCenter > self.ground.radius + 10:
-				self.applyJump(True, SPF, True)
-				return
-			else:
-				self.waterJump *= .9 ** (dt * FPS)
-				
-				r = self.distanceFromCenter
-				self.distanceFromCenter *= .98 ** (dt * FPS)
-				if self.distanceFromCenter < 10:
-					self.distanceFromCenter = 10.0
+			self.waterJump *= .9 ** (dt * FPS)
+			
+			r = self.distanceFromCenter
+			self.distanceFromCenter *= .98 ** (dt * FPS)
+			if self.distanceFromCenter < 10:
+				self.distanceFromCenter = 10.0
 		else:
 			r = self.ground.radius
 		
@@ -255,7 +251,6 @@ class Sprite:
 			self.thetaFromGround += theta
 		
 		self.angularVelocity *= .8 ** (dt * FPS)
-		
 	
 	def update(self, scene, dt):
 		oldLoc = self.getHitBox()
