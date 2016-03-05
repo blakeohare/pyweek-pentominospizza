@@ -2,12 +2,14 @@ _BODY_TYPE_INFO = {
 	# image name, radius
 	'halfgrass': ('halfgrass', 150),
 	'lava': ('lava', 250),
+	'lavamini': ('lavamini', 150),
 	'rock1': ('rock1', 150),
 	'rock2': ('rock2', 150),
 	'rock3': ('rock3', 150),
 	'rock4': ('rock4', 150),
 	'volcano': ('volcano', 150),
 	'water': ('water', 150),
+	'blackhole': ('blackhole', 80),
 }
 
 class PlayScene:
@@ -22,6 +24,7 @@ class PlayScene:
 		self.sprites = []
 		self.player = None
 		self.bodies = []
+		self.sharks = [] # too much different mechanics than sprites, don't want to introduce bugs 3 hours before game is due. adding as a different type.
 		
 		self.hoverTime = None # counter for when you are jumping
 		self.recordIndicator = None
@@ -44,8 +47,9 @@ class PlayScene:
 					flag = 'water'
 				elif type == 'volcano':
 					flag = 'volcano'
-				elif type == 'lava':
+				elif type == 'lava' or type == 'lavamini':
 					flag = 'lava'
+				
 				body = GravityBody(type, x, y, radius, 'rocks/' + imgPath + '.png', speedRatio / 30.0, speedRatio, flag)
 				for sprite in sprites:
 					spriteInstance = None
@@ -99,6 +103,11 @@ class PlayScene:
 			if sprite.type.startswith('house'):
 				self.victoryPlanet = sprite.ground
 				break
+		
+		if self.id == 'level5' or self.id == 'level9' or self.id == 'level10':
+			for body in self.bodies:
+				if body.type == 'water':
+					self.sharks.append(Shark(body))
 		
 	
 	def saveState(self):
@@ -179,6 +188,13 @@ class PlayScene:
 			body.update(self, dt)
 		for sprite in self.sprites:
 			sprite.update(self, dt)
+		for shark in self.sharks:
+			shark.update(self, dt)
+			hb = self.player.getHitBox()
+			dx = shark.x - hb[0]
+			dy = shark.y - hb[1]
+			if dx ** 2 + dy ** 2 < 17 ** 2:
+				self.triggerDeath()
 	
 	def triggerWin(self):
 		self.next = WinScreen(self)
@@ -223,6 +239,9 @@ class PlayScene:
 		
 		for sprite in self.sprites:
 			sprite.render(t, cx, cy)
+		
+		for shark in self.sharks:
+			shark.render(cx, cy)
 			
 		
 		if self.recordIndicator != None and self.recordIndicatorCounters != None:

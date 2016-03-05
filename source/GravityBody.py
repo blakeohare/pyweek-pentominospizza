@@ -22,10 +22,13 @@ class GravityBody:
 		self.image = GfxImage(imagePath)
 		self.theta = random.random() * TWO_PI
 		self.rps = rps
+		self.isDeathy = False
 		self.gravity = radius / 100.0
+		if self.type == 'blackhole':
+			self.gravity *= 4
+			self.isDeathy = True
 		self.isWater = False
 		self.isVolcano = False
-		self.isDeathy = False
 		imgWH = (radius * 2, radius * 2)
 		if typeFlag == 'water':
 			self.isWater = True
@@ -36,7 +39,7 @@ class GravityBody:
 			self.isDeathy = True
 		
 		if EDITOR_ENABLED:
-			self.isDeath = False
+			self.isDeathy = False
 		
 		self.image.setSize(imgWH[0], imgWH[1])
 	
