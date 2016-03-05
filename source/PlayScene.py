@@ -210,8 +210,8 @@ class PlayScene:
 		
 		t = int(tm * FPS)
 		
-		cx = Q.width / 2 - self.cameraCurrentX
-		cy = Q.height / 2 - self.cameraCurrentY
+		cx = Q.width / 2.0 - self.cameraCurrentX
+		cy = Q.height / 2.0 - self.cameraCurrentY
 		
 		for deb in self.debris:
 			deb.render(cx, cy)

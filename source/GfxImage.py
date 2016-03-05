@@ -6,8 +6,8 @@ class RawImage:
 		# original width and height
 		self.width = resource.width
 		self.height = resource.height
-		self.cx = self.width / 2
-		self.cy = self.height / 2
+		self.cx = self.width // 2
+		self.cy = self.height // 2
 		self.centered = False
 		self.anchor_x = 0
 		self.anchor_y = 0

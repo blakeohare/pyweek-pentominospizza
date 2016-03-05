@@ -5,7 +5,7 @@ class TransitionScene:
 		self.fromScene = fromScene
 		self.toScene = toScene
 		self.duration = FPS
-		self.half = self.duration / 2
+		self.half = self.duration // 2
 		self.counter = 0
 		self.bg = fromScene
 		self.alpha = 0

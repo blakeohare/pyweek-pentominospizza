@@ -269,7 +269,7 @@ class Sprite:
 	def render(self, rc, cx, cy):
 		hb = self.getHitBox()
 		imgs = self.images['left'] if self.facingLeft else self.images['right']
-		img = imgs[(rc / 4) % len(imgs)]
+		img = imgs[(int(rc) // 4) % len(imgs)]
 		x = hb[0] + cx
 		y = hb[1] + cy
 		if self.ground == None:
