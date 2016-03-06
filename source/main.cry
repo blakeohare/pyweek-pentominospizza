@@ -45,6 +45,7 @@ function main() {
 							// ignore all other keys.
 							break;
 					}
+					break;
 				
 				case EventType.MOUSE_LEFT_DOWN:
 					events.add(new Action('mouseleft', true, [event.x, event.y]));

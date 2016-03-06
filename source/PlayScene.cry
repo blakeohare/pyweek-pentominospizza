@@ -1,20 +1,20 @@
 import Random;
 import GFX;
 
-class PlayScene:
+class PlayScene {
 	
 	static field _BODY_TYPE_INFO = {
 		// image name, radius
-		'halfgrass': ('halfgrass', 150),
-		'lava': ('lava', 250),
-		'lavamini': ('lavamini', 150),
-		'rock1': ('rock1', 150),
-		'rock2': ('rock2', 150),
-		'rock3': ('rock3', 150),
-		'rock4': ('rock4', 150),
-		'volcano': ('volcano', 150),
-		'water': ('water', 150),
-		'blackhole': ('blackhole', 80),
+		'halfgrass': ['halfgrass', 150],
+		'lava': ['lava', 250],
+		'lavamini': ['lavamini', 150],
+		'rock1': ['rock1', 150],
+		'rock2': ['rock2', 150],
+		'rock3': ['rock3', 150],
+		'rock4': ['rock4', 150],
+		'volcano': ['volcano', 150],
+		'water': ['water', 150],
+		'blackhole': ['blackhole', 80],
 	};
 	
 	field YOU_DEAD = false;
@@ -35,14 +35,14 @@ class PlayScene:
 	field cameraTargetY;
 	
 	// These values are immediately set by saveState() and will never actually be null when the game update phase is running.
-	this.savedStateBodies;
-	this.savedStateSprites;
+	field savedStateBodies;
+	field savedStateSprites;
 	
 	
 	// Restore type is either 'M' for map or 'S' for state
 	// arg is level string ID for M and another playscene for S
 	constructor(restoreType, arg) {
-		self.next = self
+		this.next = this;
 		
 		if (restoreType == 'M') {
 			this.level = new Level(arg);
@@ -113,7 +113,7 @@ class PlayScene:
 			this.debris.add(new Debris(Random.nextInt(1000), Random.nextInt(1000), 'small-debris' + str(Random.nextInteger(1, 9))));
 		}
 		
-		this.saveState()
+		this.saveState();
 		
 		for (sprite : this.sprites) {
 			if (sprite.type.startsWith('house')) {
@@ -273,7 +273,7 @@ class PlayScene:
 	}
 	
 	function triggerJumpRecord(x, y, amt) {
-		this.recordIndicator = Font.render('New Record! ' + formatTime(amt), 'M', x, y);
+		this.recordIndicator = TextEngine.render('New Record! ' + formatTime(amt), 'M', x, y);
 		this.recordIndicatorCounters = [x, y, ActiveSession.INSTANCE.getCurrentTime()];
 	}
 	
@@ -365,6 +365,6 @@ class PlayScene:
 		countdown = floor(ActiveSession.INSTANCE.timeLimitSeconds - ActiveSession.INSTANCE.getCurrentTime() + .99); // +.99 so that when it shows 0 it's the actual deadline
 		if (countdown < 0) countdown = 0;
 		timeToShow = formatCountdown(countdown);
-		this.timeLeft = FONT.render('Delivery Guarantee: ' + timeToShow, 'L', 400, 50);
+		this.timeLeft = TextEngine.render('Delivery Guarantee: ' + timeToShow, 'L', 400, 50);
 	}
 }

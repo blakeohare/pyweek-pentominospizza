@@ -56,7 +56,7 @@ class Database {
 	
 	static function save() {
 		output = [];
-		for (key in Database.VALUES.keys()) {
+		for (key : Database.VALUES.keys()) {
 			t = null;
 			value = Database.VALUES[key];
 			ktype = typeof(value);
@@ -74,7 +74,7 @@ class Database {
 		FileIO.UserData.File.writeText(Database.FILENAME, output.join('\n'));
 	}
 	
-	static function getBoolean(key, defaultValue = false):
+	static function getBoolean(key, defaultValue = false) {
 		return Database.VALUES.get(key, def) == true;
 	}
 	

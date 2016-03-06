@@ -91,6 +91,7 @@ class MapSelectScreen {
 				timelimit = 3 * 60;
 				if (EDITOR_ENABLED) {
 					timelimit = 100 * 60;
+				}
 				ActiveSession.INSTANCE.startGame(key, timelimit);
 				this.next = new TransitionScene(this, new PlayScene('M', key));
 			}
@@ -110,7 +111,7 @@ class MapSelectScreen {
 				xSave = x;
 				x += MAP_COLUMN_SPACING[0];
 				for (colIndex = 0; colIndex < this.columnHeaders.length; ++i) {
-					FONT.render(MapSelectScreen.COLUMN_HEADERS[colIndex], 'S', x, y - 40);
+					TextEngine.render(MapSelectScreen.COLUMN_HEADERS[colIndex], 'S', x, y - 40);
 					x += MapSelectScreen.MAP_COLUMN_SPACING[colIndex + 1];
 				}
 			
@@ -129,7 +130,7 @@ class MapSelectScreen {
 			
 			for (i = 0; i < buttons.length; ++i) {
 				if (text[i] != null) {
-					FONT.render(text[i], 'M', x, y);
+					TextEngine.render(text[i], 'M', x, y);
 				}
 				x += MapSelectScreen.MAP_COLUMN_SPACING[i];
 			}

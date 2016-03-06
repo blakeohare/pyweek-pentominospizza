@@ -57,7 +57,7 @@ class PauseScreen {
 				yOffset = abs(15 * sin(this.counter * Math.PI * 2));
 				ImageLibrary.get('menus/pizza.png').draw(x - 80, y - yOffset);
 			}
-			FONT.render(option, 'L', x, y);
+			TextEngine.render(option, 'L', x, y);
 			y += margin;
 		}
 	}

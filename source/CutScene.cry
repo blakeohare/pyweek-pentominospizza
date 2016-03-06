@@ -28,7 +28,7 @@ class CutScene {
 			state = CutScene.STATES[this.index];
 		}
 
-		progress = 1.0 * this.state_counter / state[1];
+		progress = 1.0 * this.stateCounter / state[1];
 		if (progress < 0) progress = 0.0;
 		else if (progress > 1) progress = 1.0;
 		antiprogress = 1.0 - progress;
@@ -105,7 +105,7 @@ class CutScene {
 	}
 	
 	function update(events, dt) {
-		this.state_counter += dt;
+		this.stateCounter += dt;
 		if (this.index >= CutScene.STATES.length) {
 			this.leave();
 		}
@@ -123,12 +123,12 @@ class CutScene {
 		state = CutScene.STATES[this.index];
 
 		total = state[1];
-		if (this.state_counter >= total) {
-			this.state_counter = 0.0;
+		if (this.stateCounter >= total) {
+			this.stateCounter = 0.0;
 			this.index++;
 		}
 		
-		this.progress = 1.0 * this.state_counter / total;
+		this.progress = 1.0 * this.stateCounter / total;
 	}
 
 	function leave() {

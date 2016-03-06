@@ -63,7 +63,7 @@ class GravityBody {
 		this.image = ImageLibrary.getAtScale(imagePath, imageScale);
 	}
 	
-	function update(scene, dt):
+	function update(scene, dt) {
 		if (this.lavaball == null && this.type == 'volcano') {
 			this.lavaball = new LavaBall(this);
 			scene.lavaballs.add(this.lavaball);

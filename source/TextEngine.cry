@@ -77,7 +77,7 @@ class TextEngine {
 				lookup[char] = image;
 			}
 			TextEngine.LETTERS['XL'] = lookup;
-		} else
+		} else {
 			xl = TextEngine.getCharMap('XL');
 			for (key : xl.keys()) {
 				img = xl[key];
@@ -92,7 +92,7 @@ class TextEngine {
 				
 				w = floor(w * r);
 				h = floor(h * r);
-				lookup[key] = img.scale(w, h)
+				lookup[key] = img.scale(w, h);
 			}
 			TextEngine.LETTERS[size] = lookup;
 		}

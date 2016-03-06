@@ -78,7 +78,7 @@ class TitleScene {
 				yOffset = floor(abs(sin(this.counter * TWO_PI) * 16));
 				ImageLibrary.get('menus/pizza.png').blit(x - 70, floor(y - yOffset - 20));
 			}
-			FONT.render(text, 'XL', x, y);
+			TextEngine.render(text, 'XL', x, y);
 			
 			y += 100;
 			i += 1;

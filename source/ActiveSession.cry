@@ -12,6 +12,7 @@ class ActiveSession {
 	field lastKnownJumpRecord;
 	field timerRunning;
 	field timeAccrued;
+	field gameDuration;
 	
 	constructor() { }
 	

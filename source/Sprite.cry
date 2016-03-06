@@ -47,7 +47,7 @@ class Sprite {
 			this.images['right'] = right;
 		} else if (type == 'store' || type == 'house1' || type == 'house2' || type == 'house3') {
 			this.images['left'] = [ImageLibrary.get('sprites/' + type + '.png')];
-			this.images['right'] = this.images['left']
+			this.images['right'] = this.images['left'];
 		} else {
 			Core.assert(false); // unknown sprite type
 		}
@@ -324,7 +324,7 @@ class Sprite {
 		if (this.isPlayer) {
 			currentJump = ActiveSession.INSTANCE.getCurrentJump();
 			if (currentJump != null && currentJump > 1) {
-				FONT.render(formatTime(currentJump), 'M', x - 8, y - 40);
+				TextEngine.render(formatTime(currentJump), 'M', x - 8, y - 40);
 			}
 		}
 	}

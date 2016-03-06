@@ -23,7 +23,7 @@ class LavaBall {
 	function update(scene, dt) {
 		
 		if (this.path == null) {
-			theta = floor(Random.nextInt(3) * TWO_PI / 3 + PI / 2 + 8 - .07; // just kept tweaking the numbers until I got it to line up since my mental math was failing me.
+			theta = floor(Random.nextInt(3) * TWO_PI / 3 + PI / 2 + 8 - .07); // just kept tweaking the numbers until I got it to line up since my mental math was failing me.
 			theta += this.body.theta;
 			this.lifetime = 0;
 			this.path = theta;

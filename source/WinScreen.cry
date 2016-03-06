@@ -76,19 +76,19 @@ class WinScreen {
 		this.bg.render();
 		GFX.Draw.rectangle(0, 0, 800, 600, 0, 0, 0, 128);
 		
-		FONT.render(this.isWin ? "DELIVERY SUCCESSFUL!" : "TIME'S UP!", 'XL', 100, 50);
+		TextEngine.render(this.isWin ? "DELIVERY SUCCESSFUL!" : "TIME'S UP!", 'XL', 100, 50);
 		
 		cols = [100, 300, 500];
 		y = 250;
 		
 		if (this.counter > 1) {
-			FONT.render('Attempt #' + this.timesPlayed, 'L', cols[0], y);
+			TextEngine.render('Attempt #' + this.timesPlayed, 'L', cols[0], y);
 		}
 		
 		y += 80;
 		if (this.counter > 1.5) {
-			FONT.render("Duration:", 'L', cols[0], y);
-			FONT.render(formatTime(this.gameDuration), 'L' cols[1], y);
+			TextEngine.render("Duration:", 'L', cols[0], y);
+			TextEngine.render(formatTime(this.gameDuration), 'L', cols[1], y);
 			if (this.gameDurationRecord) {
 				this.renderBounceText("NEW RECORD!", 'M', cols[2], y);
 			}
@@ -96,8 +96,8 @@ class WinScreen {
 		
 		y += 80;
 		if (this.counter > 2) {
-			FONT.render("Total Jumps:", 'L', cols[0], y);
-			FONT.render(this.jumpCount + '', 'L' cols[1], y);
+			TextEngine.render("Total Jumps:", 'L', cols[0], y);
+			TextEngine.render(this.jumpCount + '', 'L', cols[1], y);
 			if (this.gameDurationRecord) {
 				this.renderBounceText("NEW RECORD!", 'M', cols[2], y);
 			}
@@ -105,8 +105,8 @@ class WinScreen {
 		
 		y += 80;
 		if (this.counter > 2) {
-			FONT.render("Longest Jump:", 'L', cols[0], y);
-			FONT.render(formatTime(this.longestJump), 'L' cols[1], y);
+			TextEngine.render("Longest Jump:", 'L', cols[0], y);
+			TextEngine.render(formatTime(this.longestJump), 'L', cols[1], y);
 			if (this.longestJumpRecord) {
 				this.renderBounceText("NEW RECORD!", 'M', cols[2], y);
 			}
@@ -124,6 +124,6 @@ class WinScreen {
 		} else {
 			y = ybase - Math.abs(10 * Math.sin(this.counter * Math.PI * 4));
 		}
-		FONT.render(text, size, x, y);
+		TextEngine.render(text, size, x, y);
 	}
 }
