@@ -1,26 +1,31 @@
-_DEBRIS_OFFSETS = (
-	(0, 0),
-	(1, 0),
-	(0, 1),
-	(1, 1),
-)
 
-class Debris:
-	def __init__(self, x, y, type):
-		self.x = x
-		self.y = y
-		self.type = type
-		self.theta = random.random() * TWO_PI
-		self.img = GfxImage('rocks/' + type + '.png')
-		self.angularVelocity = random.random() / 25.0
+class Debris {
+	static field DEBRIS_OFFSETS = [
+		[0, 0],
+		[1, 0],
+		[0, 1],
+		[1, 1],
+	];
 	
-	def update(self, scene, dt):
-		self.theta += self.angularVelocity * (dt * FPS)
+	constructor(x, y, type) {
+		this.x = x;
+		this.y = y;
+		this.type = type;
+		this.theta = Random.nextFloat() * TWO_PI;
+		this.img = ImageLibrary.get('rocks/' + type + '.png');
+		this.angularVelocity = Random.nextFloat() / 25.0;
+	}
 	
-	def render(self, cx, cy):
-		x = (self.x + cx * .6) % 1000 - 500
-		y = (self.y + cy * .6) % 1000 - 500
+	function update(scene, dt) {
+		this.theta += this.angularVelocity * (dt * FPS);
+	}
+	
+	function render(cx, cy) {
+		x = (this.x + cx * .6) % 1000 - 500;
+		y = (this.y + cy * .6) % 1000 - 500;
 		
-		for offset in _DEBRIS_OFFSETS:
-			ox, oy = offset
-			self.img.blitRotation(x + ox * 1000, y + oy * 1000, self.theta)
+		for (offset : Debris.DEBRIS_OFFSETS) {
+			this.img.drawRotated(x + offset[0] * 1000, y + offset[1] * 1000, this.theta);
+		}
+	}
+}

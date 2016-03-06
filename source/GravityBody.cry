@@ -1,73 +1,97 @@
 
-GRAVITY_ID_ALLOC = [0]
+function getIdFromBody(body) {
+	if (body == null) return null;
+	return body.id;
+}
 
-def getIdFromBody(body):
-	if body == None: return None
-	return body.id
-
-def getBodyFromId(id, bodies):
-	if id == None: return None
-	return bodies.get(id)
+function getBodyFromId(id, bodies) {
+	if (id == null) return null;
+	return bodies.get(id);
+}
 	
-class GravityBody:
-	def __init__(self, type, x, y, radius, imagePath, rps, rotRat, typeFlag = None):
-		# IF YOU ADD ANYTHING HERE, ADD IT TO SAVE AND RESTORE STATE
-		self.type = type
-		self.id = GRAVITY_ID_ALLOC[0]
-		GRAVITY_ID_ALLOC[0] += 1
-		self.x = x + 0.0
-		self.y = y + 0.0
-		self.radius = radius
-		self.rotRat = rotRat
-		self.image = GfxImage(imagePath)
-		self.theta = random.random() * TWO_PI
-		self.rps = rps
-		self.isDeathy = False
-		self.gravity = radius / 100.0
-		if self.type == 'blackhole':
-			self.gravity *= 4
-			self.isDeathy = True
-		self.isWater = False
-		self.isVolcano = False
-		imgWH = (radius * 2, radius * 2)
-		if typeFlag == 'water':
-			self.isWater = True
-		elif typeFlag == 'volcano':
-			self.isVolcano = True
-			imgWH = (radius * 2.6, radius * 2.6)
-		elif typeFlag == 'lava':
-			self.isDeathy = True
-		elif self.type == 'blackhole':
-			imgWH = (radius * 5, radius * 5)
-		
-		if EDITOR_ENABLED:
-			self.isDeathy = False
-		
-		self.image.setSize(imgWH[0], imgWH[1])
-		self.lavaball = None
-		if self.type == 'volcano':
-			self.lavaball = LavaBall(self)
+class GravityBody {
+	static field GRAVITY_ID_ALLOC = 0;
 	
-	def update(self, scene, dt):
-		self.theta += TWO_PI * self.rps * dt
+	field type;
+	field id = ++GravityBody.GRAVITY_ID_ALLOC;
+	field x;
+	field y;
+	field radius;
+	field rotRat;
+	field image;
+	field theta;
+	field rps;
+	field isDeathy = false;
+	field gravity;
+	field isWater = false;
+	field isVolcano = false;
+	field lavaball = null;
 	
-	def render(self, cx, cy):
-		self.image.blitRotation(self.x + cx, self.y + cy, self.theta)
-
-	def saveState(self):
-		return [self.x, self.y, self.radius, self.image, self.theta, self.rps, self.gravity, self.isWater, self.isVolcano, self.id, self.isDeathy, self.type, self.rotRat]
+	constructor(type, x, y, radius, imagePath, rps, rotRat, typeFlag = null) {
+		// IF YOU ADD ANYTHING HERE, ADD IT TO SAVE AND RESTORE STATE
+		this.type = type;
+		this.x = x + 0.0;
+		this.y = y + 0.0;
+		this.radius = radius;
+		this.rotRat = rotRat;
+		this.theta = random.nextFloat() * TWO_PI;
+		this.rps = rps;
+		this.gravity = radius / 100.0;
+		if (this.type == 'blackhole') {
+			this.gravity *= 4;
+			this.isDeathy = true;
+		}
 		
-	def restoreState(self, state):
-		self.x = state[0]
-		self.y = state[1]
-		self.radius = state[2]
-		self.image = state[3]
-		self.theta = state[4]
-		self.rps = state[5]
-		self.gravity = state[6]
-		self.isWater = state[7]
-		self.isVolcano = state[8]
-		self.id = state[9]
-		self.isDeathy = state[10]
-		self.type = state[11]
-		self.rotRat = state[12]
+		this.isWater = false;
+		this.isVolcano = false;
+		imageScale = 1.0;
+		if (typeFlag == 'water') {
+			this.isWater = true;
+		} else if (typeFlag == 'volcano') {
+			this.isVolcano = true;
+			imageScale = 1.3;
+		} else if (typeFlag == 'lava') {
+			this.isDeathy = true;
+		} else if (this.type == 'blackhole') {
+			imageScale = 2.5;
+		}
+		
+		if (EDITOR_ENABLED) {
+			this.isDeathy = false;
+		}
+		
+		this.image = ImageLibrary.getAtScale(imagePath, imageScale);
+	}
+	
+	function update(scene, dt):
+		if (this.lavaball == null && this.type == 'volcano') {
+			this.lavaball = new LavaBall(this);
+			scene.lavaballs.add(this.lavaball);
+		}
+		this.theta += TWO_PI * this.rps * dt;
+	}
+	
+	function render(cx, cy) {
+		this.image.drawRotated(this.x + cx, this.y + cy, this.theta);
+	}
+	
+	function saveState() {
+		return [this.x, this.y, this.radius, this.image, this.theta, this.rps, this.gravity, this.isWater, this.isVolcano, this.id, this.isDeathy, this.type, this.rotRat];
+	}
+		
+	function restoreState(state) {
+		this.x = state[0];
+		this.y = state[1];
+		this.radius = state[2];
+		this.image = state[3];
+		this.theta = state[4];
+		this.rps = state[5];
+		this.gravity = state[6];
+		this.isWater = state[7];
+		this.isVolcano = state[8];
+		this.id = state[9];
+		this.isDeathy = state[10];
+		this.type = state[11];
+		this.rotRat = state[12];
+	}
+}

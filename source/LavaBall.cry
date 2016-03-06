@@ -1,33 +1,49 @@
-LAVA_EXIT_VELOCITY = 150 # pixels / sec
+const LAVA_EXIT_VELOCITY = 150; // pixels / sec
 
-class LavaBall:
-	def __init__(self, volcano):
-		self.body = volcano
-		self.x = self.body.x
-		self.y = self.body.y
-		self.path = None
-		self.lifetime = 0
-		self.images = [GfxImage('rocks/lavasplash1.png'), GfxImage('rocks/lavasplash2.png')]
-		self.image = self.images[0]
+class LavaBall {
+	field body;
+	field x;
+	field y;
+	field path = null;
+	field lifetime = 0;
+	field images;
+	field image;
 	
-	def update(self, scene, dt):
-		
-		if self.path == None:
-			theta = int(random.random() * 3) * TWO_PI / 3 + PI / 2 + 8 - .07
-			theta += self.body.theta
-			self.lifetime = 0
-			self.path = theta
-			self.image = random.choice(self.images)
-		
-		self.lifetime += dt
-		
-		r = self.body.radius + self.lifetime * LAVA_EXIT_VELOCITY
-		
-		self.x = math.cos(self.path) * r + self.body.x
-		self.y = math.sin(self.path) * r + self.body.y
-		
-		if r - self.body.radius > 300:
-			self.path = None
+	constructor(volcano) {
+		this.body = volcano;
+		this.x = this.body.x;
+		this.y = this.body.y;
+		this.images = [
+			ImageLibrary.get('rocks/lavasplash1.png'),
+			ImageLibrary.get('rocks/lavasplash2.png')
+		];
+		this.image = this.images[0];
+	}
 	
-	def render(self, cx, cy):
-		self.image.blitRotation(self.x + cx, self.y + cy, self.lifetime * 2)
+	function update(scene, dt) {
+		
+		if (this.path == null) {
+			theta = floor(Random.nextInt(3) * TWO_PI / 3 + PI / 2 + 8 - .07; // just kept tweaking the numbers until I got it to line up since my mental math was failing me.
+			theta += this.body.theta;
+			this.lifetime = 0;
+			this.path = theta;
+			this.image = this.images.choice();
+		}
+		
+		this.lifetime += dt;
+		
+		r = this.body.radius + this.lifetime * LAVA_EXIT_VELOCITY;
+		
+		this.x = cos(this.path) * r + this.body.x;
+		this.y = sin(this.path) * r + this.body.y;
+		
+		if (r - this.body.radius > 300) {
+			this.path = null;
+		}
+	}
+	
+	function render(cx, cy) {
+		ang = this.lifetime * 2;
+		this.image.drawRotated(this.x + cx, this.y + cy, ang);
+	}
+}

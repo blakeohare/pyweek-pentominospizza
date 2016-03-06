@@ -1,0 +1,16 @@
+// Action types: up, down, left, right, space, enter
+
+class Action {
+	
+	field type;
+	field down;
+	field up;
+	field coord;
+	
+	constructor(type, down, coord = null) {
+		this.type = type;
+		this.down = down;
+		this.up = !down;
+		this.coord = coord;
+	}
+}

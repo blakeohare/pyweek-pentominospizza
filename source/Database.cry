@@ -14,21 +14,14 @@ A map is considered unlocked if it is first in the manifest or its previous map 
 
 */
 
-class PersistentData {
+class Database {
 	
-	static field INSTANCE = new PersistentData();
+	static field VALUES = {};
+	static field FILENAME = 'pp_save_data.txt';
 	
-	field values = {};
-	field folder = '.';
-	field filename = 'pp_save_data.txt';
-	
-	constructor() {
-		this.initialize(); // sets the save file or doesn't if it can't figure out the system.
-	}
-	
-	function initialize() {
-		if (!FileIO.UserData.Path.exists(this.filename)) return;
-		data = FileIO.UserData.File.readText(this.filename);
+	static constructor() {
+		if (!FileIO.UserData.Path.exists(Database.FILENAME)) return;
+		data = FileIO.UserData.File.readText(Database.FILENAME);
 		
 		for (line : data.split('\n')) {
 			line = line.trim();
@@ -54,19 +47,18 @@ class PersistentData {
 						k = null;
 					}
 					if (k != null) {
-						this.values[k] = v;
+						Database.VALUES[k] = v;
 					}
 				}
 			}
 		}
 	}
 	
-	function save() {
-		if (this.folder == null) return;
+	static function save() {
 		output = [];
-		for (key in this.values.keys()) {
+		for (key in Database.VALUES.keys()) {
 			t = null;
-			value = this.values[key];
+			value = Database.VALUES[key];
 			ktype = typeof(value);
 			switch (ktype) {
 				case Type.INTEGER: t = 'I'; break;
@@ -79,40 +71,40 @@ class PersistentData {
 			output.add(t + ':' + key + ':' + value);
 		}
 		
-		FileIO.UserData.File.writeText(this.filename, output.join('\n'));
+		FileIO.UserData.File.writeText(Database.FILENAME, output.join('\n'));
 	}
 	
-	function getBoolean(key, defaultValue = false):
-		return this.values.get(key, def) == true;
+	static function getBoolean(key, defaultValue = false):
+		return Database.VALUES.get(key, def) == true;
 	}
 	
-	function getFloat(key, defaultValue = 0.0) {
-		output = this.values.get(key, defaultValue);
+	static function getFloat(key, defaultValue = 0.0) {
+		output = Database.VALUES.get(key, defaultValue);
 		if (typeof(output) == Type.FLOAT) return output;
 		if (typeof(output) == Type.INTEGER) return output + 0.0;
 		return defaultValue;
 	}
 	
-	function getInteger(key, defaultValue = 0) {
-		return this.getInt(key, defaultValue);
+	static function getInteger(key, defaultValue = 0) {
+		return Database.getInt(key, defaultValue);
 	}
 	
-	function getInt(key, defaultValue = 0) {
-		output = this.values.get(key, defaultValue);
+	static function getInt(key, defaultValue = 0) {
+		output = Database.VALUES.get(key, defaultValue);
 		if (typeof(output) == Type.INTEGER) return output;
 		if (typeof(output) == Type.FLOAT) return floor(output);
 		return defaultValue;
 	}
 	
-	function getString(key, defaultValue = null) {
-		return '' + this.values.get(key, defaultValue);
+	static function getString(key, defaultValue = null) {
+		return '' + Database.VALUES.get(key, defaultValue);
 	}
 	
-	function hasValue(key) {
-		return this.values.contains(key);
+	static function hasValue(key) {
+		return Database.VALUES.contains(key);
 	}
 	
-	function setValue(key, value) {
-		this.values[key] = value;
+	static function setValue(key, value) {
+		Database.VALUES[key] = value;
 	}
 }
