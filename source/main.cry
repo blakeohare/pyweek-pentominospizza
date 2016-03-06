@@ -1,9 +1,7 @@
 
-def main():
-	if DB.getBoolean('intro_shown'):
-		start = TitleScene()
-	else:
-		start = CutScene()
-	Q.openWindow("Pentomino's Pizza", 800, 600, start)
-	
-main()
+function main() {
+	start = Database.getBoolean('intro_shown')
+		? new TitleScene()
+		: new CutScene();
+	Engine.openWindow("Pentomino's Pizza", 800, 600, start);
+}

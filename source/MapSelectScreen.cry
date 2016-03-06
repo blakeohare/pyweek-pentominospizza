@@ -1,50 +1,44 @@
-MAP_COLUMN_SPACING = [280, 100, 120, 120, 120, 120]
 
-class MapSelectScreen:
-	def __init__(self):
-		self.next = self
+
+class MapSelectScreen {
+	static field MAP_COLUMN_SPACING = [280, 100, 120, 120, 120, 120];
+	static field COLUMN_HEADERS = ['Attempts', 'Fastest Time', 'Fewest Jumps', 'Longest Jump'];
+	
+	field next;
+	field index = 0;
+	field counter = 0;
+	field bg;
+	field options = [];
+	
+	constructor() {
+		this.next = this;
 		
-		self.index = 1
-		self.counter = 0
-		self.bg = None
-		self.cursor = None
-		
-		self.options = []
-		
-		self.options.append([
+		this.options.add([
 			'BACK',
 			20,
-			[None],
 			['Back to title screen'],
-			])
+			]);
 		
-		ch = ['Attempts', 'Fastest Time', 'Fewest Jumps', 'Longest Jump']
-		self.columnHeaders = [
-			[None] * len(ch), # text labels
-			ch]
-		
-		self.index = 0
-		for key in MAP_DB.getKeys():
-			if ACTIVE_SESSION.id == key:
-				self.index = len(self.options)
-			m = MAP_DB.get(key)
-			unlocked = MAP_DB.isUnlocked(m.key)
-			fastestTime = None
-			longestJump = None
-			fewestJumps = None
-			timesPlayed = None
+		for (key : MapDatabase.getKeys()) {
+			if (ActiveSession.INSTANCE.id == key) {
+				this.index = this.options.length;
+			}
+			m = MapDatabase.get(key);
+			unlocked = MapDatabase.isUnlocked(m.key);
+			fastestTime = null;
+			longestJump = null;
+			fewestJumps = null;
+			timesPlayed = null;
 			
-			title = '(Not unlocked yet)'
+			title = '(Not unlocked yet)';
 			
-			if unlocked:
-				title = m.name
-				if DB.hasValue(key + '_fastesttime'):
-					fastestTime = DB.getFloat(key + '_fastesttime')
-				if DB.hasValue(key + '_longestjump'):
-					longestJump = DB.getFloat(key + '_longestjump')
-				if DB.hasValue(key + '_fewestjumps'):
-					fewestJumps = DB.getInt(key + '_fewestjumps')
-				timesPlayed = DB.getInt(key + '_timesplayed')
+			if (unlocked) {
+				title = m.name;
+				if (Database.hasValue(key + '_fastesttime')) fastestTime = Database.getFloat(key + '_fastesttime');
+				if (Database.hasValue(key + '_longestjump')) longestJump = Database.getFloat(key + '_longestjump');
+				if (Database.hasValue(key + '_fewestjumps')) fewestJumps = Database.getInt(key + '_fewestjumps');
+				timesPlayed = Database.getInt(key + '_timesplayed');
+			}
 			
 			option = [
 				title,
@@ -52,91 +46,95 @@ class MapSelectScreen:
 				formatTime(fastestTime),
 				nstr(fewestJumps),
 				formatTime(longestJump),
-			]
+			];
 			
-			option = [key, 0, [None] * len(option), option] # [0] -> map key, [1] -> bottom padding, [2] -> pyglet label objects, [3] -> raw string values or None if not present
+			option = [key, 0, option]; // [0] -> map key, [1] -> bottom padding, [2] -> raw string values or None if not present
 			
-			self.options.append(option)
-		self.index += 1
-		if self.index >= len(self.options):
-			self.index = len(self.options) - 1
+			this.options.add(option);
+		}
+		
+		this.index++;
+		
+		if (this.index >= this.options.length) {
+			this.index = this.options.length - 1;
+		}
+	}
 	
-	def update(self, events, dt):
-		self.counter += dt * 30
-		confirm = False
-		for event in events:
-			if event.down:
-				if event.type == 'up':
-					self.index -= 1
-				elif event.type == 'down':
-					self.index += 1
-				elif event.type == 'space' or event.type == 'enter':
-					confirm = True
+	function update(events, dt) {
+		this.counter += dt * 30;
+		confirm = false;
+		for (event : events) {
+			if (event.down) {
+				if (event.type == 'up') {
+					this.index--;
+				} else if (event.type == 'down') {
+					this.index++;
+				} else if (event.type == 'space' || event.type == 'enter') {
+					confirm = true;
+				}
+			}
+		}
 		
-		if self.index < 0:
-			self.index = 0
-		if self.index >= len(self.options):
-			self.index = len(self.options) - 1
+		if (this.index < 0) {
+			this.index = 0;
+		}
 		
-		if confirm:
-			key = self.options[self.index][0]
-			if key == 'BACK':
-				self.next = TransitionScene(self, TitleScene())
-			else:
-				timelimit = 3 * 60
-				if EDITOR_ENABLED:
-					timelimit = 100 * 60
-				ACTIVE_SESSION.startGame(key, timelimit)
-				self.next = TransitionScene(self, PlayScene('M', key))
+		if (this.index >= this.options.length) {
+			this.index = this.options.length - 1;
+		}
 		
+		if (confirm) {
+			key = this.options[this.index][0];
+			if (key == 'BACK') {
+				this.next = new TransitionScene(this, new TitleScene());
+			} else {
+				timelimit = 3 * 60;
+				if (EDITOR_ENABLED) {
+					timelimit = 100 * 60;
+				ActiveSession.INSTANCE.startGame(key, timelimit);
+				this.next = new TransitionScene(this, new PlayScene('M', key));
+			}
+		}
+	}
+	
+	function render() {
+		ImageLibrary.get('background/space1.png').draw(0, 0);
 		
-	def render(self):
-		if self.bg == None:
-			self.bg = GfxImage('background/space1.png')
-		self.bg.blitSimple(0, 0)
-		
-		
-		y = 40
-		index = -1
-		for option in self.options:
-			index += 1
-			x = 60
+		y = 40;
+		index = -1;
+		for (option : this.options) {
+			index++;
+			x = 60;
 			
-			if index == 1:
-				xSave = x
-				x += MAP_COLUMN_SPACING[0]
-				for colIndex in range(len(self.columnHeaders[0])):
-					img = self.columnHeaders[0][colIndex]
-					if img == None:
-						img = Q.renderText(self.columnHeaders[1][colIndex], 'S', x, y - 40)
-						self.columnHeaders[0][colIndex] = img
-					x += MAP_COLUMN_SPACING[colIndex + 1]
-					img.render()
+			if (index == 1) {
+				xSave = x;
+				x += MAP_COLUMN_SPACING[0];
+				for (colIndex = 0; colIndex < this.columnHeaders.length; ++i) {
+					FONT.render(MapSelectScreen.COLUMN_HEADERS[colIndex], 'S', x, y - 40);
+					x += MapSelectScreen.MAP_COLUMN_SPACING[colIndex + 1];
+				}
 			
-				x = xSave
-			if index == self.index:
-				# needs to be adjusted to dt
-				yOffset = int(abs(math.sin(self.counter * TWO_PI / FPS) * 16))
-				if self.cursor == None:
-					self.cursor = GfxImage('menus/pizza.png')
-				cx = x - 50
-				cy = y - yOffset - 30
-				self.cursor.blitSimple(cx, cy)
+				x = xSave;
+			}
+			
+			if (index == this.index) {
+				yOffset = floor(abs(sin(this.counter * TWO_PI / FPS) * 16));
+				cx = x - 50;
+				cy = y - yOffset - 30;
+				ImageLibrary.get('menus/pizza.png').draw(cx, cy);
+			}
 				
-			yPad = option[1]
-			buttons = option[2]
-			text = option[3]
+			yPad = option[1];
+			text = option[3];
 			
-			for i in range(len(buttons)):
-				button = buttons[i]
-				if button == None and text[i] != None:
-					button = Q.renderText(text[i], 'M', x, y)
-					buttons[i] = button
-				x += MAP_COLUMN_SPACING[i]
-				
-				if button != None:
-					button.render()
+			for (i = 0; i < buttons.length; ++i) {
+				if (text[i] != null) {
+					FONT.render(text[i], 'M', x, y);
+				}
+				x += MapSelectScreen.MAP_COLUMN_SPACING[i];
+			}
 			
-			y += 50 + yPad
-		
-			
+			y += 50 + yPad;
+		}
+	}
+}
