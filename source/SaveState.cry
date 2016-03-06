@@ -1,14 +1,17 @@
-class SaveState:
-	def __init__(self, playscene):
-		self.bodies = []
-		self.sprites = []
-		
-		bodiesToId = {}
-		
-		for body in playscene.bodies:
+class SaveState {
+	field bodies = [];
+	field sprites = [];
+	
+	constructor(playscene) {
+		// WAT? maybe just delete this? 
+		/*
+		bodiesToId = {};
+		for (body : playscene.bodies) {
 			data = [
 				body.x,
 				body.y,
-				body.radius,
-				
-			]
+				body.radius
+			];
+		}//*/
+	}
+}

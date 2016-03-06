@@ -10,11 +10,25 @@ const DT_TEST_ENABLED = false;
 
 class Sprite {
 	
+	field x = null;
+	field y = null;
 	field vx = 0;
 	field vy = 0;
 	field angularVelocity = 0.0;
 	field ground = null;
 	field strongestGround = null;
+	field thetaFromGround = 0;
+	field floatingTheta = 0.0;
+	field hitBox = null;
+	field facingLeft = false;
+	field currentVelocity = [0.0, 0.0];
+	field distanceFromCenter = null;
+	field waterJump = 0.0;
+	field lastWalk = 0;
+	
+	// used when DT_TEST_ENABLED is on
+	field counter = 0;
+	field dtBacklog = 0.0;
 	
 	constructor(type, startType, x_or_body, y_or_theta_or_bodies_lookup) {
 		this.r = 10;
@@ -38,270 +52,280 @@ class Sprite {
 			Core.assert(false); // unknown sprite type
 		}
 		
-		self.thetaFromGround = 0
-		self.floatingTheta = 0.0
-		self.hitBox = None
-		self.facingLeft = False
-		self.currentVelocity = (0.0, 0.0)
-		self.distanceFromCenter = None
-		self.waterJump = 0.0
-		self.lastWalk = 0
-		
-		# for DT_TEST_ENABLED
-		self.counter = 0
-		self.dt_backlog = 0.0
-		
-		self.x = None
-		self.y = None
-		
-		if startType == 'R': #restore
-			self.restoreState(x_or_body, y_or_theta_or_bodies_lookup)
-		elif startType == 'G':
-			self.ground = x_or_body
-			self.thetaFromGround = y_or_theta_or_bodies_lookup
-			if self.ground.isWater:
-				print("Starting sprites on water bodies not supported.")
-		else:
-			self.x = x_or_body + 0.0
-			self.y = y_or_theta_or_bodies_lookup + 0.0
+		if (startType == 'R') { // restore
+			this.restoreState(x_or_body, y_or_theta_or_bodies_lookup);
+		} else if (startType == 'G') {
+			this.ground = x_or_body;
+			this.thetaFromGround = y_or_theta_or_bodies_lookup;
+			if (this.ground.isWater) {
+				print("Starting sprites on water bodies not supported.");
+			}
+		} else {
+			this.x = x_or_body + 0.0;
+			this.y = y_or_theta_or_bodies_lookup + 0.0;
+		}
+	}
 	
-	def restoreState(self, state, bodiesById):
-		self.r = state[0]
-		self.type = state[1]
-		self.images = state[2]
-		self.vx = state[3]
-		self.vy = state[4]
-		self.angularVelocity = state[5]
-		self.ground = getBodyFromId(state[6], bodiesById)
-		self.strongestGround = getBodyFromId(state[7], bodiesById)
-		self.thetaFromGround = state[8]
-		self.floatingTheta = state[9]
-		self.hitBox = state[10]
-		self.facingLeft = state[11]
-		self.currentVelocity = state[12]
-		self.distanceFromCenter = state[13]
-		self.waterJump = state[14]
-		self.counter = state[15]
-		self.x = state[16]
-		self.y = state[17]
-		self.isPlayer = self.type == 'player'
+	function restoreState(state, bodiesById) {
+		this.r = state[0];
+		this.type = state[1];
+		this.images = state[2];
+		this.vx = state[3];
+		this.vy = state[4];
+		this.angularVelocity = state[5];
+		this.ground = getBodyFromId(state[6], bodiesById);
+		this.strongestGround = getBodyFromId(state[7], bodiesById);
+		this.thetaFromGround = state[8];
+		this.floatingTheta = state[9];
+		this.hitBox = state[10];
+		this.facingLeft = state[11];
+		this.currentVelocity = state[12];
+		this.distanceFromCenter = state[13];
+		this.waterJump = state[14];
+		this.counter = state[15];
+		this.x = state[16];
+		this.y = state[17];
+		this.isPlayer = self.type == 'player';
+	}
 	
-	def saveState(self):
+	function saveState() {
 		return [
-			self.r,
-			self.type,
-			self.images,
-			self.vx,
-			self.vy,
-			self.angularVelocity,
-			getIdFromBody(self.ground),
-			getIdFromBody(self.strongestGround),
-			self.thetaFromGround,
-			self.floatingTheta,
-			self.hitBox,
-			self.facingLeft,
-			self.currentVelocity,
-			self.distanceFromCenter,
-			self.waterJump,
-			self.counter,
-			self.x,
-			self.y]
+			this.r,
+			this.type,
+			this.images,
+			this.vx,
+			this.vy,
+			this.angularVelocity,
+			getIdFromBody(this.ground),
+			getIdFromBody(this.strongestGround),
+			this.thetaFromGround,
+			this.floatingTheta,
+			this.hitBox,
+			this.facingLeft,
+			this.currentVelocity,
+			this.distanceFromCenter,
+			this.waterJump,
+			this.counter,
+			this.x,
+			this.y];
+	}
 	
-	def getHitBox(self):
-		if self.hitBox == None:
-			if self.ground == None:
-				self.hitBox = (self.x, self.y, self.r)
-			else:
-				if self.ground.isWater:
-					r = self.distanceFromCenter + self.r
-				else:
-					r = self.ground.radius + self.r
-				x = self.ground.x + r * math.cos(self.thetaFromGround + self.ground.theta)
-				y = self.ground.y + r * math.sin(self.thetaFromGround + self.ground.theta)
-				self.hitBox = (x, y, self.r)
-		return self.hitBox
+	function getHitBox() {
+		if (this.hitBox == null) {
+			if (this.ground == null) {
+				this.hitBox = [this.x, this.y, this.r];
+			} else {
+				if (this.ground.isWater) {
+					r = this.distanceFromCenter + this.r;
+				} else {
+					r = this.ground.radius + this.r;
+				}
+				x = this.ground.x + r * Math.cos(this.thetaFromGround + this.ground.theta);
+				y = this.ground.y + r * Math.sin(this.thetaFromGround + this.ground.theta);
+				this.hitBox = [x, y, this.r];
+			}
+		}
+		return this.hitBox;
+	}
 	
-	def applyJump(self, press, dt):
-		if press and self.ground != None:
-			if self.ground.isWater and self.distanceFromCenter < self.ground.radius:
-				self.waterJump = 5
-			else:
-				ground = self.ground
-				jumpVelocity = PLAYER_JUMP_VELOCITY # pixels per second
-				r = self.ground.radius + self.r + 5
-				theta = self.thetaFromGround + self.ground.theta
-				ux = math.cos(theta)
-				uy = math.sin(theta)
+	function applyJump(press, dt) {
+		if (press && this.ground != null) {
+			if (this.ground.isWater && this.distanceFromCenter < this.ground.radius) {
+				this.waterJump = 5;
+			} else {
+				ground = this.ground;
+				jumpVelocity = PLAYER_JUMP_VELOCITY; // pixels per second
+				r = this.ground.radius + this.r + 5;
+				theta = this.thetaFromGround + this.ground.theta;
+				ux = Math.cos(theta);
+				uy = Math.sin(theta);
 				
-				x = self.ground.x + r * ux
-				y = self.ground.y + r * uy
-				self.x = x
-				self.y = y
-				self.vx = ux * jumpVelocity
-				self.vy = uy * jumpVelocity
-				self.theta = theta
-				self.ground = None
+				x = this.ground.x + r * ux;
+				y = this.ground.y + r * uy;
+				this.x = x;
+				this.y = y;
+				this.vx = ux * jumpVelocity;
+				this.vy = uy * jumpVelocity;
+				this.theta = theta;
+				this.ground = null;
 				
-				if self.isPlayer:
-					ACTIVE_SESSION.startJump()
+				if (this.isPlayer) {
+					ActiveSession.INSTANCE.startJump();
+				}
 				
-				self.vx += self.currentVelocity[0]
-				self.vy += self.currentVelocity[1]
+				this.vx += this.currentVelocity[0];
+				this.vy += this.currentVelocity[1];
+			}
+		}
+	}
+	
+	function applyWalk(dir) {
+		if (dir != 0) {
+			this.lastWalk = Core.currentTime();
+			this.facingLeft = dir < 0;
+			v = PLAYER_WALK_VELOCITY;
+			if (this.ground != null) {
+				// works for both water and solid ground
+				this.angularVelocity = v * dir;
+			}
+		}
+	}
+	
+	function updateForFloating(scene, dt) {
+		if (DT_TEST_ENABLED) {
+			this.counter++;
+			if (this.counter % 2 == 0) {
+				this.dt_backlog = dt;
+				return;
+			} else {
+				dt += this.dt_backlog;
+			}
+		}
 			
-	
-	def applyWalk(self, dir):
-		if dir != 0:
-			self.lastWalk = time.time()
-			self.facingLeft = dir < 0
-			v = PLAYER_WALK_VELOCITY
-			if self.ground != None:
-				# works for both water and solid ground
-				self.angularVelocity = v * dir
-	
-	def updateForFloating(self, scene, dt):
-		if DT_TEST_ENABLED:
-			self.counter += 1
-			if self.counter % 2 == 0:
-				self.dt_backlog = dt
-				return
-			else:
-				dt += self.dt_backlog
-			
-		self.x += self.vx * dt
-		self.y += self.vy * dt
+		this.x += this.vx * dt;
+		this.y += this.vy * dt;
 		
-		gx = 0.0
-		gy = 0.0
-		strongest_g = -1
-		strongest_source = None
+		gx = 0.0;
+		gy = 0.0;
+		strongest_g = -1;
+		strongest_source = null;
 		
-		for body in scene.bodies:
-			dx = body.x - self.x
-			dy = body.y - self.y
-			dr = self.r + body.radius
-			dist = (dx ** 2 + dy ** 2) ** .5
-			if dist < 2000:
-				if dist <= dr:
-					self.ground = body
+		for (body : scene.bodies) {
+			dx = body.x - this.x;
+			dy = body.y - this.y;
+			dr = this.r + body.radius;
+			dist = (dx ** 2 + dy ** 2) ** .5;
+			if (dist < 2000) {
+				if (dist <= dr) {
+					this.ground = body;
 					
-					if self.isPlayer:
+					if (this.isPlayer) {
 						
-						ACTIVE_SESSION.endJump()
-						if ACTIVE_SESSION.isJumpRecord:
-							scene.triggerJumpRecord(self.x, self.y, ACTIVE_SESSION.longestJump)
+						ActiveSession.INSTANCE.endJump();
+						if (ActiveSession.INSTANCE.isJumpRecord) {
+							scene.triggerJumpRecord(this.x, this.y, ActiveSession.INSTANCE.longestJump);
+						}
 						
-						if body == scene.victoryPlanet:
-							scene.triggerWin()
-						
+						if (body == scene.victoryPlanet) {
+							scene.triggerWin();
+						}
+					}
 					
-					self.distanceFromCenter = self.ground.radius + 0.0
-					theta = math.atan2(-dy, -dx)
-					self.thetaFromGround = theta - body.theta
-					if body.isDeathy:
-						scene.triggerDeath()
-					elif body.isWater:
-						pass
-					else:
-						scene.saveState()
-					return
+					this.distanceFromCenter = this.ground.radius + 0.0;
+					theta = Math.arctan(-dy, -dx);
+					this.thetaFromGround = theta - body.theta;
+					if (body.isDeathy) {
+						scene.triggerDeath();
+					} else if (body.isWater) {
+						// do nothing
+					} else {
+						scene.saveState();
+					}
+					return;
+				}
+			}
 				
-			g = body.gravity / (dist / ASTEROID_GRAVITY_COEFFICIENT) ** 2
+			g = body.gravity / (dist / ASTEROID_GRAVITY_COEFFICIENT) ** 2;
 			
-			if g > strongest_g:
-				strongest_g = g
-				strongest_source = body
+			if (g > strongest_g) {
+				strongest_g = g;
+				strongest_source = body;
+			}
 			
-			ux = dx / dist
-			uy = dy / dist
+			ux = dx / dist;
+			uy = dy / dist;
 			
-			gx += g * ux
-			gy += g * uy
+			gx += g * ux;
+			gy += g * uy;
+		}
 		
-		self.strongestGround = strongest_source
-		if strongest_source != None:
-			dx = strongest_source.x - self.x
-			dy = strongest_source.y - self.y
-			targetTheta = math.atan2(-dy, -dx) % TWO_PI
-			currentTheta = self.theta % TWO_PI
-			dTheta = currentTheta - targetTheta
-			if dTheta > PI:
-				currentTheta -= TWO_PI
-			if dTheta < -PI:
-				targetTheta -= TWO_PI
+		this.strongestGround = strongest_source;
+		if (strongest_source != null) {
+			dx = strongest_source.x - this.x;
+			dy = strongest_source.y - this.y;
+			targetTheta = Math.arctan(-dy, -dx) % TWO_PI;
+			currentTheta = this.theta % TWO_PI;
+			dTheta = currentTheta - targetTheta;
+			if (dTheta > Math.PI) {
+				currentTheta -= TWO_PI;
+			}
+			if (dTheta < -PI) {
+				targetTheta -= TWO_PI;
+			}
 			
-			r = .9 ** (dt * FPS)
-			ar = 1.0 - r
-			self.theta = r * currentTheta + ar * targetTheta
+			r = .9 ** (dt * FPS);
+			ar = 1.0 - r;
+			this.theta = r * currentTheta + ar * targetTheta;
+		}
 		
-		self.vx += gx * dt
-		self.vy += gy * dt
+		this.vx += gx * dt;
+		this.vy += gy * dt;
+	}
 	
-	def updateForGround(self, scene, dt):
-		v = self.angularVelocity * (dt * FPS)
-		if self.ground.isWater:
-			self.distanceFromCenter += self.waterJump
-			self.waterJump *= .9 ** (dt * FPS)
+	function updateForGround(scene, dt) {
+		v = this.angularVelocity * (dt * FPS);
+		if (this.ground.isWater) {
+			this.distanceFromCenter += this.waterJump;
+			this.waterJump *= .9 ** (dt * FPS);
 			
-			r = self.distanceFromCenter
-			self.distanceFromCenter *= .98 ** (dt * FPS)
-			if self.distanceFromCenter < 10:
-				self.distanceFromCenter = 10.0
-		else:
-			r = self.ground.radius
+			r = this.distanceFromCenter;
+			this.distanceFromCenter *= .98 ** (dt * FPS);
+			if (this.distanceFromCenter < 10) {
+				this.distanceFromCenter = 10.0;
+			}
+		} else {
+			r = this.ground.radius;
+		}
 		
-		# Law-O-Cosines
-		theta = math.acos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2)))
-		if v < 0:
-			self.thetaFromGround -= theta
-		else:
-			self.thetaFromGround += theta
+		// Law-O-Cosines
+		theta = Math.acos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2)));
+		if (v < 0) {
+			this.thetaFromGround -= theta;
+		} else {
+			this.thetaFromGround += theta;
+		}
 		
-		self.angularVelocity *= .8 ** (dt * FPS)
+		this.angularVelocity *= .8 ** (dt * FPS);
+	}
 	
-	def update(self, scene, dt):
-		oldLoc = self.getHitBox()
-		if self.ground == None:
-			self.updateForFloating(scene, dt)
-		else:
-			self.updateForGround(scene, dt)
-		self.hitBox = None
-		newLoc = self.getHitBox()
+	function update(scene, dt) {
+		oldLoc = this.getHitBox();
+		if (this.ground == null) {
+			this.updateForFloating(scene, dt);
+		} else {
+			this.updateForGround(scene, dt);
+		}
+		this.hitBox = null;
+		newLoc = this.getHitBox();
 		
-		mx = (newLoc[0] - oldLoc[0]) / dt
-		my = (newLoc[1] - oldLoc[1]) / dt
-		self.currentVelocity = (mx, my)
+		mx = (newLoc[0] - oldLoc[0]) / dt;
+		my = (newLoc[1] - oldLoc[1]) / dt;
+		this.currentVelocity = [mx, my];
+	}
+	
+	function render(rc, cx, cy) {
+		hb = this.getHitBox();
+		isWalking = (Core.currentTime() - self.lastWalk) < .1;
+		if (!isWalking) {
+			rc = 1;
+		} else {
+			rc = Math.floor(rc * 1.3) / 2;
+		}
+		imgs = this.images[this.faceingLeft ? 'left' : 'right'];
+		img = imgs[rc % imgs.length];
+		x = hb[0] + cx;
+		y = hb[1] + cy;
+		if (this.ground == null) {
+			img.blitRotation(x, y, this.theta);
+		} else {
+			img.blitRotation(x, y, this.ground.theta + this.thetaFromGround);
+		}
 		
-	def render(self, rc, cx, cy):
-		hb = self.getHitBox()
-		isWalking = (time.time() - self.lastWalk) < .1
-		if not isWalking:
-			rc = 1
-		else:
-			rc = int(rc * 1.3) // 2
-		imgs = self.images['left'] if self.facingLeft else self.images['right']
-		img = imgs[rc % len(imgs)]
-		x = hb[0] + cx
-		y = hb[1] + cy
-		if self.ground == None:
-			img.blitRotation(x, y, self.theta)
-		else:
-			img.blitRotation(x, y, self.ground.theta + self.thetaFromGround)
-		
-		if self.isPlayer:
-			currentJump = ACTIVE_SESSION.getCurrentJump()
-			if currentJump != None and currentJump > 1:
-				currentJump = int(currentJump * 10) / 10.0
-				key = int(currentJump * 10)
-				lbl = CACHED_JUMP_TIMES.get(key)
-				x = x - 8
-				y = y - 40
-				if lbl == None:
-					lbl = Q.renderText(formatTime(currentJump), 'M', x, y)
-					CACHED_JUMP_TIMES[key] = lbl
-				else:
-					lbl.setPosition(x, y)
-				lbl.render()
-				
-				
-			
-		
+		if (this.isPlayer) {
+			currentJump = ActiveSession.INSTANCE.getCurrentJump();
+			if (currentJump != null && currentJump > 1) {
+				FONT.render(formatTime(currentJump), 'M', x - 8, y - 40);
+			}
+		}
+	}
+}

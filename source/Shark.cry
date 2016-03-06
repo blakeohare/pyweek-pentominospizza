@@ -1,52 +1,62 @@
-SHARK_VELOCITY = 2.0
+const SHARK_VELOCITY = 2.0;
 
-SHARK_IMAGES = [None, None]
-
-class Shark:
-	def __init__(self, body):
-		self.x = body.x
-		self.y = body.y
-		self.body = body
-		self.target = None
-		self.leftFacing = random.random() < .5
-		if SHARK_IMAGES[0] == None:
-			SHARK_IMAGES[0] = GfxImage('sprites/shark-right.png')
-			SHARK_IMAGES[1] = GfxImage('sprites/shark-left.png')
-		self.images = SHARK_IMAGES
+class Shark {
+	field x;
+	field y;
+	field body;
+	field target = null;
+	field leftFacing = false;
+	field images;
 	
-	def update(self, scene, dt):
-		player = scene.player
-		x = self.body.x
-		y = self.body.y
-		
-		if player.ground == self.body:
-			hb = player.getHitBox()
-			x = hb[0]
-			y = hb[1]
-		else:
-			if self.target == None:
-				theta = random.random()
-				x = math.cos(theta) * self.body.radius
-				y = math.sin(theta) * self.body.radius
-				x += self.body.x
-				y += self.body.y
-				self.target = (x, y)
-			x, y = self.target
-			
-		dx = x - self.x
-		dy = y - self.y
-		dist = (dx ** 2 + dy ** 2) ** .5
-		if dist > SHARK_VELOCITY * 2:
-			ux = dx / dist
-			uy = dy / dist
-			self.x += SHARK_VELOCITY * ux * dt * FPS
-			self.y += SHARK_VELOCITY * uy * dt * FPS
-			
-			self.leftFacing = dx < 0
-		else:
-			self.target = None
+	constructor(body) {
+		this.x = body.x;
+		this.y = body.y;
+		this.body = body;
+		this.images = [
+			ImageLibrary.get('sprites/shark.png'),
+			ImageLibrary.getFlipped('sprites/shark.png'),
+		];
+	}
 	
-	def render(self, cx, cy):
-		img = self.images[self.leftFacing]
-		img.blitRotation(self.x + cx, self.y + cy, 0)
+	function update(scene, dt) {
+		player = scene.player;
+		x = this.body.x;
+		y = this.body.y;
 		
+		if (player.ground == this.body) {
+			hb = player.getHitBox();
+			x = hb[0];
+			y = hb[1];
+		} else {
+			if (this.target == null) {
+				theta = Random.nextFloat();
+				x = Math.cos(theta) * this.body.radius;
+				y = Math.sin(theta) * this.body.radius;
+				x += this.body.x;
+				y += this.body.y;
+				this.target = [x, y];
+			}
+			x = this.target[0];
+			y = this.target[1];
+		}
+			
+		dx = x - this.x;
+		dy = y - this.y;
+		dist = (dx ** 2 + dy ** 2) ** .5;
+		if (dist > SHARK_VELOCITY * 2) {
+			ux = dx / dist;
+			uy = dy / dist;
+			this.x += SHARK_VELOCITY * ux * dt * FPS;
+			this.y += SHARK_VELOCITY * uy * dt * FPS;
+			
+			this.leftFacing = dx < 0;
+		} else {
+			this.target = null;
+		}
+	}
+	
+	function render(cx, cy) {
+		img = this.images[this.leftFacing ? 1 : 0];
+		img.draw(this.x + cx - img.width / 2, this.y + cy - img.height / 2, 0);
+	}
+}
