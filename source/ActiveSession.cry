@@ -1,67 +1,90 @@
-class ActiveSession:
-	def __init__(self):
-		self.startTime = 0
-		self.id = None
-	
-	def startGame(self, id, timeLimitSeconds):
-		self.id = id
-		self.timeLimitSeconds = timeLimitSeconds
-		self.startTime = time.time()
-		self.longestJump = 0.0
-		self.currentJump = None
-		self.jumpCount = 0
-		self.isJumpRecord = False
-		self.lastKnownJumpRecord = DB.getFloat(id + '_longestjump')
-		self.timerRunning = True
-		self.timeAccrued = 0.0
-	
-	def startJump(self):
-		self.jumpCount += 1
-		self.currentJump = self.getCurrentTime()
-		self.isJumpRecord = False
-	
-	def ensureTimerRunning(self, toggle):
-		if toggle == self.timerRunning:
-			return
-		
-		self.timerRunning = toggle
-		if toggle:
-			self.startTime = time.time() - self.timeAccrued
-		else:
-			self.timeAccrued = time.time() - self.startTime
-	
-	def getCurrentTime(self):
-		if self.timerRunning:
-			return time.time() - self.startTime
-		else:
-			return self.timeAccrued
-	
-	def endJump(self):
-		jumpDuration = self.getCurrentTime() - self.currentJump
-		if jumpDuration > self.longestJump:
-			self.longestJump = jumpDuration
-		if jumpDuration > self.lastKnownJumpRecord:
-			self.isJumpRecord = True
-			self.lastKnownJumpRecord = jumpDuration
-		self.currentJump = None
-	
-	def popJumpRecordStatus(self):
-		if self.isJumpRecord:
-			self.isJumpRecord = False
-			return True
-		return False
-	
-	def getCurrentJump(self):
-		if self.currentJump == None:
-			return None
-		return self.getCurrentTime() - self.currentJump
-	
-	def getLongestJump(self):
-		return self.longestJump
-	
-	def endGame(self):
-		self.gameDuration = time.time() - self.startTime
-		
-	
+class ActiveSession {
 
-ACTIVE_SESSION = ActiveSession()
+	static field INSTANCE = new ActiveSession();
+	
+	field startTime = 0;
+	field id = null;
+	field timeLimitSeconds;
+	field longestJump;
+	field currentJump;
+	field jumpCount;
+	field isJumpRecord;
+	field lastKnownJumpRecord;
+	field timerRunning;
+	field timeAccrued;
+	
+	constructor() { }
+	
+	function startGame(id, timeLimitSeconds) {
+		this.id = id;
+		this.timeLimitSeconds = timeLimitSeconds;
+		this.startTime = currentTime();
+		this.longestJump = 0.0;
+		this.currentJump = null;
+		this.jumpCount = 0;
+		this.isJumpRecord = false;
+		this.lastKnownJumpRecord = Database.getFloat(id + '_longestjump');
+		this.timerRunning = true;
+		this.timeAccrued = 0.0;
+	}
+	
+	function startJump() {
+		this.jumpCount++;
+		this.currentJump = this.getCurrentTime();
+		this.isJumpRecord = false;
+	}
+	
+	function ensureTimerRunning(toggle) {
+		if (toggle == this.timerRunning) return;
+		
+		this.timerRunning = toggle;
+		if (toggle) {
+			this.startTime = currentTime() - this.timeAccrued;
+		} else {
+			this.timeAccrued = currentTime() - this.startTime;
+		}
+	}
+	
+	function getCurrentTime() {
+		if (this.timerRunning) {
+			return currentTime() - this.startTime;
+		} else {
+			return this.timeAccrued;
+		}
+	}
+	
+	function endJump() {
+		jumpDuration = this.getCurrentTime() - this.currentJump;
+		if (jumpDuration > this.longestJump) {
+			this.longestJump = jumpDuration;
+		}
+		if (jumpDuration > this.lastKnownJumpRecord) {
+			this.isJumpRecord = true;
+			this.lastKnownJumpRecord = jumpDuration;
+		}
+		this.currentJump = null;
+	}
+	
+	function popJumpRecordStatus() {
+		if (this.isJumpRecord) {
+			this.isJumpRecord = false;
+			return true;
+		}
+		return false;
+	}
+	
+	function getCurrentJump() {
+		if (this.currentJump == null) {
+			return null;
+		}
+		return this.getCurrentTime() - this.currentJump;
+	}
+	
+	function getLongestJump() {
+		return this.longestJump;
+	}
+	
+	function endGame() {
+		this.gameDuration = currentTime() - this.startTime;
+	}
+}
