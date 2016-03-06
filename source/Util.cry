@@ -1,0 +1,102 @@
+import Math;
+
+function formatTime(amount) {
+	if (amount == null) return null;
+	
+	deci = floor(amount * 100) % 100;
+	amount = floor(amount);
+	seconds = amount % 60;
+	amount = amount / 60;
+	minutes = amount % 60;
+	hours = amount / 60;
+	
+	if (hours > 0) {
+		return [
+			ensureLength(hours, false), 
+			ensureLEngth(minutes, true), 
+			ensureLength(seconds, true) + '.' + ensureLength(deci, true)
+			].join(':');
+	}
+	
+	if (minutes > 0) {
+		return [
+			ensureLength(minutes, False), 
+			"' ", 
+			ensureLength(seconds, True), 
+			'.', 
+			ensureLength(deci, True),
+			'"'].join('');
+	}
+	
+	return ensureLength(seconds, false) + "." + ensureLength(deci, true) + '"';
+}
+
+function formatCountdown(seconds) {
+	minutes = seconds / 60;
+	seconds = seconds % 60;
+	if (seconds < 10) {
+		return minutes + ':0' + seconds;
+	}
+	return minutes + ':' + seconds;
+}
+
+function ensureLength(n, pad) {
+	if (pad && n < 10) return '0' + n;
+	return '' + n;
+}
+
+function nstr(value) {
+	if (value == null) return null;
+	return value + '';
+}
+
+function safeTan(ang) {
+	s = Math.sin(ang);
+	c = Math.cos(ang);
+	if (abs(c) < .00001)
+		return 999999999;
+	return s / c;
+}
+
+function findIntersectionOrNull(angle, ax, ay, bx, by, dist) {
+	cx = Math.cos(angle) * 500;
+	cy = Math.sin(angle) * 500;
+	
+	if (ax == bx) { // && abs(cx) * 2 > abs(cy)) {
+		y = safeTan(angle) * abs(ax);
+		if (ax < 0) y = -y;
+		if (ay > by) {
+			t = ay;
+			ay = by;
+			by = t;
+		}
+		
+		if (y > ay && y < by) {
+			if ((ax < 0) == (cx < 0)) {
+				if ((ax ** 2) + y ** 2 < dist ** 2) {
+					return [ax, y];
+				}
+			}
+		}
+	}
+	
+	if (ay == by) { // && abs(cx) > abs(cy) * 2) {
+		x = abs(ay) / safeTan(angle);
+		if (ay < 0) x = -x;
+		if (ax > bx) {
+			t = ax;
+			ax = bx;
+			bx = t;
+		}
+		
+		if (x > ax && x < bx) {
+			if ((ay < 0) == (cy < 0)) {
+				if ((ay ** 2) + x ** 2 < dist ** 2) {
+					return [x, ay];
+				}
+			}
+		}
+	}
+	
+	return null;
+}
