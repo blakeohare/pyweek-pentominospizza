@@ -2,15 +2,15 @@ halfgrass, -443, -538, 1.0
 + player, @10
 + store, @0
 
-lavamini, 10, -29, 1.0
+lavamini, 18, 37, 1.0
 
-rock1, -345, 46, 1.0
+rock1, -339, -119, 1.0
 
-lavamini, -42, 1146, 1.0
+rock4, -58, 488, 1.0
 
-halfgrass, -85, 1519, 1.0
+halfgrass, -345, 1238, 1.0
 + house1, @0
 
-lavamini, -85, 2500, 1.0
+lavamini, -101, 980, 1.0
 lavamini, -85, 2500, 1.0
 lavamini, -85, 2500, 1.0
