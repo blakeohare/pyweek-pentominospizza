@@ -27,7 +27,7 @@ class Level {
 				} else {
 					parts = line[1:].split(',');
 					spriteId = parts[0].trim();
-					theta = parseInt(parts[1].strip()[1:]) * TWO_PI  / 360;
+					theta = parseInt(parts[1].trim()[1:]) * TWO_PI  / 360;
 					activeObject[3].add([spriteId, theta]);
 				}
 			}

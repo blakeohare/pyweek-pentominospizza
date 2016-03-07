@@ -110,7 +110,7 @@ class MapSelectScreen {
 			if (index == 1) {
 				xSave = x;
 				x += MapSelectScreen.MAP_COLUMN_SPACING[0];
-				for (colIndex = 0; colIndex < MapSelectScreen.COLUMN_HEADERS.length; ++i) {
+				for (colIndex = 0; colIndex < MapSelectScreen.COLUMN_HEADERS.length; ++colIndex) {
 					TextEngine.render(MapSelectScreen.COLUMN_HEADERS[colIndex], 'S', x, y - 40);
 					x += MapSelectScreen.MAP_COLUMN_SPACING[colIndex + 1];
 				}
@@ -126,7 +126,7 @@ class MapSelectScreen {
 			}
 				
 			yPad = option[1];
-			text = option[3];
+			text = option[2];
 			
 			for (i = 0; i < text.length; ++i) {
 				if (text[i] != null) {

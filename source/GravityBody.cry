@@ -10,7 +10,7 @@ function getBodyFromId(id, bodies) {
 	if (id == null) return null;
 	return bodies.get(id);
 }
-	
+
 class GravityBody {
 	static field GRAVITY_ID_ALLOC = 0;
 	
