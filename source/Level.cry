@@ -1,3 +1,6 @@
+import Math;
+import Resources;
+
 class Level {
 	field id;
 	field stuff;
@@ -5,7 +8,7 @@ class Level {
 	constructor(id) {
 		this.id = id;
 		objects = [];
-		lines = Resource.readText('levels/' + id + '.txt').split('\n');
+		lines = Resources.readText('levels/' + id + '.txt').split('\n');
 		activeObject = null;
 		for (line : lines) {
 			line = line.trim();
@@ -38,14 +41,14 @@ class Level {
 // order, take the bodies and just re-allocate them into the file. This will preserve sprite starting locations.
 function saveLevel(playscene) {
 	bodies = playscene.bodies.clone();
-	lines = Resource.readText('levels/' + playscene.id + '.txt').split('\n');
+	lines = Resources.readText('levels/' + playscene.id + '.txt').split('\n');
 	
 	for (i = 0; i < lines.length; ++i) {
 		line = lines[i].trim();
 		if (line.length > 0) {
 			if (line[0] != '+' && bodies.length > 0) {
 				body = bodies[0];
-				newLine = body.type + ', ' + str(floor(body.x)) + ', ' + str(floor(body.y)) + ', ' + str(body.rotRat);
+				newLine = body.type + ', ' + floor(body.x) + ', ' + floor(body.y) + ', ' + body.rotRat;
 				lines[i] = newLine;
 				bodies = bodies[1:];
 			}

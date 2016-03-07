@@ -30,7 +30,7 @@ class ActiveSession {
 	}
 	
 	function startJump() {
-		this.jumpCount++;
+		this.jumpCount = this.jumpCount + 1;
 		this.currentJump = this.getCurrentTime();
 		this.isJumpRecord = false;
 	}

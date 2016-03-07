@@ -10,8 +10,12 @@ const DT_TEST_ENABLED = false;
 
 class Sprite {
 	
+	field type;
+	field r;
 	field x = null;
 	field y = null;
+	field theta;
+	field images;
 	field vx = 0;
 	field vy = 0;
 	field angularVelocity = 0.0;
@@ -25,6 +29,7 @@ class Sprite {
 	field distanceFromCenter = null;
 	field waterJump = 0.0;
 	field lastWalk = 0;
+	field isPlayer = false;
 	
 	// used when DT_TEST_ENABLED is on
 	field counter = 0;
@@ -85,7 +90,7 @@ class Sprite {
 		this.counter = state[15];
 		this.x = state[16];
 		this.y = state[17];
-		this.isPlayer = self.type == 'player';
+		this.isPlayer = this.type == 'player';
 	}
 	
 	function saveState() {
@@ -175,10 +180,10 @@ class Sprite {
 		if (DT_TEST_ENABLED) {
 			this.counter++;
 			if (this.counter % 2 == 0) {
-				this.dt_backlog = dt;
+				this.dtBacklog = dt;
 				return;
 			} else {
-				dt += this.dt_backlog;
+				dt += this.dtBacklog;
 			}
 		}
 			
@@ -278,7 +283,7 @@ class Sprite {
 		}
 		
 		// Law-O-Cosines
-		theta = Math.acos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2)));
+		theta = Math.arccos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2)));
 		if (v < 0) {
 			this.thetaFromGround -= theta;
 		} else {
@@ -305,13 +310,13 @@ class Sprite {
 	
 	function render(rc, cx, cy) {
 		hb = this.getHitBox();
-		isWalking = (Core.currentTime() - self.lastWalk) < .1;
+		isWalking = (Core.currentTime() - this.lastWalk) < .1;
 		if (!isWalking) {
 			rc = 1;
 		} else {
 			rc = Math.floor(rc * 1.3) / 2;
 		}
-		imgs = this.images[this.faceingLeft ? 'left' : 'right'];
+		imgs = this.images[this.facingLeft ? 'left' : 'right'];
 		img = imgs[rc % imgs.length];
 		x = hb[0] + cx;
 		y = hb[1] + cy;

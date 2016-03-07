@@ -1,3 +1,5 @@
+import Math;
+
 class OptionsMenu {
 	field next;
 	field index = 0;
@@ -26,8 +28,8 @@ class OptionsMenu {
 		
 		if (enter) {
 			if (this.index == 0) {
-				DB.setValue('magic', !DB.getBoolean('magic'));
-				DB.save();
+				Database.setValue('magic', !Database.getBoolean('magic'));
+				Database.save();
 			} else {
 				this.next = new TransitionScene(this, new TitleScene());
 			}
@@ -37,14 +39,14 @@ class OptionsMenu {
 	function render() {
 		ImageLibrary.get('background/space1.png').draw(0, 0);
 		options = ['Magic', 'Back to Title Screen'];
-		if (!DB.getBoolean('magic')) {
+		if (!Database.getBoolean('magic')) {
 			options[0] = 'More Magic';
 		}
 		
 		y = 300;
 		for (i = 0; i < 2; ++i) {
 			x = 200;
-			FONT.render(options[i], 'L', x, y);
+			TextEngine.render(options[i], 'L', x, y);
 			
 			if (i == this.index) {
 				yOffset = floor(abs(sin(currentTime() * 2 * Math.PI)) * 15);

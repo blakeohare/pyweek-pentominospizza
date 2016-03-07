@@ -13,18 +13,18 @@ function formatTime(amount) {
 	if (hours > 0) {
 		return [
 			ensureLength(hours, false), 
-			ensureLEngth(minutes, true), 
+			ensureLength(minutes, true), 
 			ensureLength(seconds, true) + '.' + ensureLength(deci, true)
 			].join(':');
 	}
 	
 	if (minutes > 0) {
 		return [
-			ensureLength(minutes, False), 
+			ensureLength(minutes, false), 
 			"' ", 
-			ensureLength(seconds, True), 
+			ensureLength(seconds, true), 
 			'.', 
-			ensureLength(deci, True),
+			ensureLength(deci, true),
 			'"'].join('');
 	}
 	

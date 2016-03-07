@@ -1,3 +1,5 @@
+import Math;
+
 class CreditsScene {
 	
 	field next;
@@ -8,7 +10,7 @@ class CreditsScene {
 	}
 	
 	function update(events, dt) {
-		this.counter += dt;
+		this.counter = this.counter + dt;
 		
 		for (event : events) {
 			if (event.down && (event.type == 'space' || event.type == 'enter')) {

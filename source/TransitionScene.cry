@@ -1,3 +1,5 @@
+import Math;
+import GFX;
 
 class TransitionScene {
 	
@@ -27,7 +29,7 @@ class TransitionScene {
 			progress = 1.0 * this.counter / this.half;
 		} else {
 			// Hack alert: don't instantiate a new PlayScene until the old one is done showing.
-			if (typeof(self.toScene) == Type.LIST) {
+			if (typeof(this.toScene) == Type.LIST) {
 				this.toScene = new PlayScene(this.toScene[0], this.toScene[1]);
 			}
 			this.bg = this.toScene;

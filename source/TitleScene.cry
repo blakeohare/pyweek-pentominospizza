@@ -1,3 +1,4 @@
+import Math;
 
 class TitleScene {
 	field next;
@@ -35,7 +36,7 @@ class TitleScene {
 		}
 		
 		if (this.index < 0) this.index = 0;
-		if (this.index >= self.options.length) this.index = this.options.length - 1;
+		if (this.index >= this.options.length) this.index = this.options.length - 1;
 		
 		if (enter) {
 			this.options[this.index][1]();
@@ -64,7 +65,7 @@ class TitleScene {
 	
 	function render() {
 		ImageLibrary.get('background/space1.png').draw(0, 0);
-		ImageLibrary.getWithDimensions('menus/chet.png').draw(100, 230);
+		ImageLibrary.get('menus/chet.png').draw(100, 230);
 		ImageLibrary.get('menus/title.png').blit(10, 0);
 		
 		x = 480;

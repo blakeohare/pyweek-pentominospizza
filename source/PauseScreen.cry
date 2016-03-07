@@ -1,15 +1,18 @@
+import Math;
+
 class PauseScreen {
 
 	field counter = 0;
 	field next;
 	field bg;
 	field index;
+	
+	static field OPTIONS = ['Resume', 'Restart', 'Back to Menu'];
 
 	constructor(bg) {
 		this.next = this;
 		this.bg = bg;
 		
-		self.options = ['Resume', 'Restart', 'Back to Menu'];
 	}
 	
 	function update(events, dt) {
@@ -51,8 +54,8 @@ class PauseScreen {
 		y = 250;
 		margin = 100;
 		
-		for (i = 0; i < this.options.length; ++i) {
-			option = this.options[i];
+		for (i = 0; i < PauseScreen.OPTIONS.length; ++i) {
+			option = PauseScreen.OPTIONS[i];
 			if (i == this.index) {
 				yOffset = abs(15 * sin(this.counter * Math.PI * 2));
 				ImageLibrary.get('menus/pizza.png').draw(x - 80, y - yOffset);

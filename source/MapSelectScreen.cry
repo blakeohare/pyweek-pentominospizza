@@ -1,4 +1,4 @@
-
+import Math;
 
 class MapSelectScreen {
 	static field MAP_COLUMN_SPACING = [280, 100, 120, 120, 120, 120];
@@ -109,8 +109,8 @@ class MapSelectScreen {
 			
 			if (index == 1) {
 				xSave = x;
-				x += MAP_COLUMN_SPACING[0];
-				for (colIndex = 0; colIndex < this.columnHeaders.length; ++i) {
+				x += MapSelectScreen.MAP_COLUMN_SPACING[0];
+				for (colIndex = 0; colIndex < MapSelectScreen.COLUMN_HEADERS.length; ++i) {
 					TextEngine.render(MapSelectScreen.COLUMN_HEADERS[colIndex], 'S', x, y - 40);
 					x += MapSelectScreen.MAP_COLUMN_SPACING[colIndex + 1];
 				}
@@ -128,7 +128,7 @@ class MapSelectScreen {
 			yPad = option[1];
 			text = option[3];
 			
-			for (i = 0; i < buttons.length; ++i) {
+			for (i = 0; i < text.length; ++i) {
 				if (text[i] != null) {
 					TextEngine.render(text[i], 'M', x, y);
 				}

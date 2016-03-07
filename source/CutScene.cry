@@ -1,3 +1,6 @@
+import GFX;
+import Math;
+
 class CutScene {
 	field next;
 	field index = 0;

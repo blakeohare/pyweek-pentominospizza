@@ -1,9 +1,12 @@
+import GFX;
+import Math;
+
 class TextEngine {
 	static field LETTERS = {};
 	static field CODE_LOOKUP = {};
 	
 	static constructor() {
-		CODE_LOOKUP = {
+		TextEngine.CODE_LOOKUP = {
 			':': 'co',
 			',': 'cm',
 			'}': 'cc',
@@ -38,11 +41,11 @@ class TextEngine {
 			'(': 'op',
 		};
 		for (letter : "abcdefghijklmnopqrstuvwyxz") {
-			CODE_LOOKUP['lc_' + letter] = letter;
-			CODE_LOOKUP['uc_' + letter] = letter.upper();
+			TextEngine.CODE_LOOKUP['lc_' + letter] = letter;
+			TextEngine.CODE_LOOKUP['uc_' + letter] = letter.upper();
 		}
 		for (i = 0; i < 10; ++i) {
-			CODE_LOOKUP['n' + i] = '' + i;
+			TextEngine.CODE_LOOKUP['n' + i] = '' + i;
 		}
 	}
 	
@@ -70,8 +73,8 @@ class TextEngine {
 		
 		lookup = {};
 		if (size == 'XL') {
-			for (char : CODE_LOOKUP.keys()) {
-				code = CODE_LOOKUP[char];
+			for (char : TextEngine.CODE_LOOKUP.keys()) {
+				code = TextEngine.CODE_LOOKUP[char];
 				// already loaded by image sheet so synchronous access is ok.
 				image = ImageLoader.fromResource('text/' + code + '.png').getImage();
 				lookup[char] = image;

@@ -11,17 +11,22 @@ class WinScreen {
 	field isLongestJumpRecord = false;
 	field timesPlayed;
 	field longestJump;
+	field longestJumpRecord;
+	field gameDurationRecord;
+	field jumpCountRecord;
+	field gameDuration;
+	field jumpCount;
 	
 	constructor(bg, isWin = true) {
 		this.next = this;
 		this.isWin = isWin;
 		this.bg = bg;
 		id = this.bg.id;
-		timesPlayed = DB.getInt(id + '_timesplayed') + 1;
-		DB.setValue(id + '_timesplayed', timesPlayed);
-		DB.setValue(id + '_completed', True);
+		timesPlayed = Database.getInt(id + '_timesplayed') + 1;
+		Database.setValue(id + '_timesplayed', timesPlayed);
+		Database.setValue(id + '_completed', true);
 		this.timesPlayed = timesPlayed;
-		ActiveSesssion.INSTANCE.ensureTimerRunning(false);
+		ActiveSession.INSTANCE.ensureTimerRunning(false);
 		
 		ActiveSession.INSTANCE.endGame();
 		this.longestJump = ActiveSession.INSTANCE.getLongestJump();
@@ -30,9 +35,9 @@ class WinScreen {
 		this.gameDurationRecord = false;
 		this.jumpCountRecord = false;
 		
-		prev = DB.getFloat(id + '_longestjump');
+		prev = Database.getFloat(id + '_longestjump');
 		if (this.longestJump > prev) {
-			DB.setValue(id + '_longestjump', this.longestJump);
+			Database.setValue(id + '_longestjump', this.longestJump);
 			this.longestJumpRecord = true;
 		}
 		
@@ -40,22 +45,22 @@ class WinScreen {
 		if (!isWin) { // assuming all losses are timeouts since others resolve into restore-replays. 
 			this.gameDuration = ActiveSession.INSTANCE.timeLimitSeconds * 1.0; // avoid slight rounding errors that would make it look unfair. 
 		}
-		if (!DB.hasValue(id + '_fastesttime') || DB.getFloat(id + '_fastesttime') > this.gameDuration) {
+		if (!Database.hasValue(id + '_fastesttime') || Database.getFloat(id + '_fastesttime') > this.gameDuration) {
 			if (this.isWin) {
-				DB.setValue(id + '_fastesttime', this.gameDuration);
+				Database.setValue(id + '_fastesttime', this.gameDuration);
 				this.gameDurationRecord = true;
 			}
 		}
 		
-		this.jumpCount = ActiveSession.jumpCount;
-		if (!DB.hasValue(id + '_fewestjumps') || this.jumpCount < DB.getInt(id + '_fewestjumps')) {
+		this.jumpCount = ActiveSession.INSTANCE.jumpCount;
+		if (!Database.hasValue(id + '_fewestjumps') || this.jumpCount < Database.getInt(id + '_fewestjumps')) {
 			if (this.isWin) {
-				DB.setValue(id + '_fewestjumps', this.jumpCount);
+				Database.setValue(id + '_fewestjumps', this.jumpCount);
 				this.jumpCountRecord = true;
 			}
 		}
 		
-		DB.save();
+		Database.save();
 	}
 	
 	function update(events, dt) {
@@ -65,7 +70,7 @@ class WinScreen {
 				if (event.down) {
 					if (event.type == 'space' || event.type == 'enter') {
 						mss = new MapSelectScreen();
-						this.next = new TransitionScene(self, mss);
+						this.next = new TransitionScene(this, mss);
 					}
 				}
 			}

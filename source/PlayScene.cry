@@ -1,3 +1,4 @@
+import Math;
 import Random;
 import GFX;
 
@@ -18,6 +19,7 @@ class PlayScene {
 	};
 	
 	field YOU_DEAD = false;
+	field id;
 	field next;
 	field sprites = [];
 	field player = null;
@@ -26,8 +28,12 @@ class PlayScene {
 	field lavaballs = [];
 	field debris = [];
 	field mouseXY = [0, 0];
-	field moueBody = null;
+	field mouseBody = null;
 	field mouseBodyStartOffset = null; // offset from center of body that user clicked
+	field level;
+	field victoryPlanet;
+	field recordIndicatorCounters = null;
+	field timeLeft;
 	
 	field cameraCurrentX;
 	field cameraCurrentY;
@@ -110,7 +116,7 @@ class PlayScene {
 		}
 		
 		for (i = 0; i < 10; ++i) {
-			this.debris.add(new Debris(Random.nextInt(1000), Random.nextInt(1000), 'small-debris' + str(Random.nextInteger(1, 9))));
+			this.debris.add(new Debris(Random.randomInt(1000), Random.randomInt(1000), 'small-debris' + Random.randomInt(1, 9)));
 		}
 		
 		this.saveState();
@@ -165,10 +171,10 @@ class PlayScene {
 			
 		if (!this.YOU_DEAD) {
 			dx = 0;
-			if (Engine.pressedActions['left']) {
+			if (PressedKeyTracker.isPressed('left')) {
 				dx = -1;
 				this.player.facingLeft = true;
-			} else if (Engine.pressedActions['right']) {
+			} else if (PressedKeyTracker.isPressed('right')) {
 				dx = 1;
 				this.player.facingLeft = false;
 			}
@@ -211,7 +217,7 @@ class PlayScene {
 								}
 							} else {
 								if (this.mouseBody != null) {
-									self.mouseBody = null;
+									this.mouseBody = null;
 								}
 							}
 						}
@@ -273,14 +279,12 @@ class PlayScene {
 	}
 	
 	function triggerJumpRecord(x, y, amt) {
-		this.recordIndicator = TextEngine.render('New Record! ' + formatTime(amt), 'M', x, y);
-		this.recordIndicatorCounters = [x, y, ActiveSession.INSTANCE.getCurrentTime()];
+		this.recordIndicatorCounters = [x, y, ActiveSession.INSTANCE.getCurrentTime(), 'New Record! ' + formatTime(amt)];
 	}
 	
 	function render() {
 		tm = ActiveSession.INSTANCE.getCurrentTime();
 		
-		//self.pointer = GfxImage('pointer.png')
 		ImageLibrary.get('background/space1.png').draw(0, 0);
 		
 		hb = this.player.getHitBox();
@@ -320,15 +324,13 @@ class PlayScene {
 			shark.render(cx, cy);
 		}
 		
-		if (this.recordIndicator != null && this.recordIndicatorCounters != null) {
-			lifetime = tm - self.recordIndicatorCounters[2];
+		if (this.recordIndicatorCounters != null) {
+			lifetime = tm - this.recordIndicatorCounters[2];
 			if (lifetime > 2) {
 				this.recordIndicatorCounters = null;
-				this.recordIndicator = null;
 			} else {
 				ric = this.recordIndicatorCounters;
-				this.recordIndicator.setPosition(ric[0] + cx, ric[1] - lifetime * 50 + cy);
-				this.recordIndicator.render();
+				TextEngine.render(ric[3], 'M', ric[0] + cx, ric[1] - lifetime * 50 + cy);
 			}
 		}
 		
@@ -353,7 +355,7 @@ class PlayScene {
 				
 				pt = findIntersectionOrNull(ang, segment[0], segment[1], segment[2], segment[3], dist);
 				if (pt != null) {
-					this.pointer.blitRotation(pt[0] + 400, pt[1] + 300, ang);
+					ImageLibrary.get('pointer.png').drawRotated(pt[0] + 400, pt[1] + 300, ang);
 					break;
 				}
 			}

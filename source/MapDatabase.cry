@@ -1,3 +1,5 @@
+import Resources;
+
 class MapMetadata {
 	field key;
 	field name;
@@ -17,7 +19,7 @@ class MapDatabase {
 	constructor() { } // Crayon TODO: static class labels
 	
 	static constructor() {
-		lines = Resource.readText('levels/manifest.txt').split('\n');
+		lines = Resources.readText('levels/manifest.txt').split('\n');
 		prev = null;
 		for (line : lines) {
 			parts = line.split(':');
@@ -45,7 +47,7 @@ class MapDatabase {
 		return MapDatabase.order.clone();
 	}
 	
-	function isUnlocked(key) {
+	static function isUnlocked(key) {
 		if (MapDatabase.order[0] == key) return true;
 		m = MapDatabase.get(key);
 		if (m == null) return false;

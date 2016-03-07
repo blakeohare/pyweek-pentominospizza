@@ -1,3 +1,5 @@
+import Random;
+import Math;
 
 function getIdFromBody(body) {
 	if (body == null) return null;
@@ -34,7 +36,7 @@ class GravityBody {
 		this.y = y + 0.0;
 		this.radius = radius;
 		this.rotRat = rotRat;
-		this.theta = random.nextFloat() * TWO_PI;
+		this.theta = Random.randomFloat() * TWO_PI;
 		this.rps = rps;
 		this.gravity = radius / 100.0;
 		if (this.type == 'blackhole') {

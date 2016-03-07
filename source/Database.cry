@@ -1,3 +1,4 @@
+import Math;
 import FileIO;
 
 /*
@@ -75,7 +76,7 @@ class Database {
 	}
 	
 	static function getBoolean(key, defaultValue = false) {
-		return Database.VALUES.get(key, def) == true;
+		return Database.VALUES.get(key, defaultValue) == true;
 	}
 	
 	static function getFloat(key, defaultValue = 0.0) {

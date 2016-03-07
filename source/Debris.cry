@@ -19,9 +19,9 @@ class Debris {
 		this.x = x;
 		this.y = y;
 		this.type = type;
-		this.theta = Random.nextFloat() * TWO_PI;
+		this.theta = Random.randomFloat() * TWO_PI;
 		this.img = ImageLibrary.get('rocks/' + type + '.png');
-		this.angularVelocity = Random.nextFloat() / 25.0;
+		this.angularVelocity = Random.randomFloat() / 25.0;
 	}
 	
 	function update(scene, dt) {
