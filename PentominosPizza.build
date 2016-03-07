@@ -27,6 +27,6 @@
 
   <target name="js_noisyprotozoa">
     <platform>js</platform>
-    <jsfileprefix>/games/pentominospizza/</jsfileprefix>
+    <jsfileprefix>/play/pentominospizza/</jsfileprefix>
   </target>
 </build>

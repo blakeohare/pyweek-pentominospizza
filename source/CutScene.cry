@@ -87,7 +87,7 @@ class CutScene {
 				break;
 				
 			case 'white':
-				this.blitImage('white', 0, 0, 1.0);
+				this.whiteOverlay(1.0);
 				break;
 				
 			case 'white-out':

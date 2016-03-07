@@ -5,14 +5,13 @@ class PauseScreen {
 	field counter = 0;
 	field next;
 	field bg;
-	field index;
+	field index = 0;
 	
 	static field OPTIONS = ['Resume', 'Restart', 'Back to Menu'];
 
 	constructor(bg) {
 		this.next = this;
 		this.bg = bg;
-		
 	}
 	
 	function update(events, dt) {

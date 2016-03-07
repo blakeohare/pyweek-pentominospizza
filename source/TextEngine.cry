@@ -51,10 +51,11 @@ class TextEngine {
 	
 	static function render(text, size, x, y) {
 		charMap = TextEngine.getCharMap(size);
-		spaceWidth = charMap['v'].width;
+		v = charMap['v'];
+		spaceWidth = v.width;
 		length = text.length;
 		x = Math.floor(x);
-		y = Math.floor(y);
+		y = Math.floor(y) - v.height / 2;
 		for (char : text) {
 			if (char == ' ') {
 				x += spaceWidth;
@@ -74,26 +75,29 @@ class TextEngine {
 		if (lookup != null) return lookup;
 		
 		lookup = {};
-		if (size == 'XL') {
+		if (size == 'O') {
 			for (char : TextEngine.CODE_LOOKUP.keys()) {
 				code = TextEngine.CODE_LOOKUP[char];
 				// already loaded by image sheet so synchronous access is ok.
 				image = ImageLoader.fromResource('images/text/' + code + '.png').getImage();
 				lookup[char] = image;
 			}
-			TextEngine.LETTERS['XL'] = lookup;
+			TextEngine.LETTERS['O'] = lookup;
 		} else {
-			xl = TextEngine.getCharMap('XL');
+			xl = TextEngine.getCharMap('O');
 			for (key : xl.keys()) {
 				img = xl[key];
 				w = img.width;
 				h = img.height;
 				switch (size) {
+					case 'XL': r = 1.0; break;
 					case 'L': r = 20 / 36.0; break;
 					case 'M': r = 16 / 36.0; break;
 					case 'S': r = 12 / 36.0; break;
 					default: assert(false); break;
 				}
+				
+				r *= 1.5;
 				
 				w = floor(w * r);
 				h = floor(h * r);
