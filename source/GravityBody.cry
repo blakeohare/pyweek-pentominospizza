@@ -62,7 +62,12 @@ class GravityBody {
 			this.isDeathy = false;
 		}
 		
-		this.image = ImageLibrary.getAtScale(imagePath, imageScale);
+		img = ImageLibrary.get(imagePath);
+		diameter = this.radius * 2;
+		desiredWidth = imageScale * diameter;
+		ratio = desiredWidth / img.width;
+		
+		this.image = ImageLibrary.getAtScale(imagePath, ratio);
 	}
 	
 	function update(scene, dt) {
