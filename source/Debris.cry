@@ -33,7 +33,7 @@ class Debris {
 		y = (this.y + cy * .6) % 1000 - 500;
 		
 		for (offset : Debris.DEBRIS_OFFSETS) {
-			this.img.drawRotated(x + offset[0] * 1000, y + offset[1] * 1000, this.theta);
+			this.img.drawRotated(x + offset[0] * 1000, y + offset[1] * 1000, this.theta + HALF_PI);
 		}
 	}
 }

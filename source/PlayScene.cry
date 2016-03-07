@@ -355,7 +355,7 @@ class PlayScene {
 				
 				pt = findIntersectionOrNull(ang, segment[0], segment[1], segment[2], segment[3], dist);
 				if (pt != null) {
-					ImageLibrary.get('pointer.png').drawRotated(pt[0] + 400, pt[1] + 300, ang);
+					ImageLibrary.get('pointer.png').drawRotated(pt[0] + 400, pt[1] + 300, ang + HALF_PI);
 					break;
 				}
 			}

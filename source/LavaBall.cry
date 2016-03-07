@@ -47,6 +47,6 @@ class LavaBall {
 	
 	function render(cx, cy) {
 		ang = this.lifetime * 2;
-		this.image.drawRotated(this.x + cx, this.y + cy, ang);
+		this.image.drawRotated(this.x + cx, this.y + cy, ang + HALF_PI);
 	}
 }

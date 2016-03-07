@@ -321,9 +321,9 @@ class Sprite {
 		x = hb[0] + cx;
 		y = hb[1] + cy;
 		if (this.ground == null) {
-			img.drawRotated(x, y, this.theta);
+			img.drawRotated(x, y, this.theta + HALF_PI);
 		} else {
-			img.drawRotated(x, y, this.ground.theta + this.thetaFromGround);
+			img.drawRotated(x, y, HALF_PI + (this.ground.theta + this.thetaFromGround));
 		}
 		
 		if (this.isPlayer) {

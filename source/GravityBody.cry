@@ -74,7 +74,7 @@ class GravityBody {
 	}
 	
 	function render(cx, cy) {
-		this.image.drawRotated(this.x + cx, this.y + cy, this.theta);
+		this.image.drawRotated(this.x + cx, this.y + cy, this.theta + HALF_PI);
 	}
 	
 	function saveState() {
