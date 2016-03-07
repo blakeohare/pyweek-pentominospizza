@@ -53,6 +53,8 @@ class TextEngine {
 		charMap = TextEngine.getCharMap(size);
 		spaceWidth = charMap['v'].width;
 		length = text.length;
+		x = Math.floor(x);
+		y = Math.floor(y);
 		for (char : text) {
 			if (char == ' ') {
 				x += spaceWidth;
