@@ -11,9 +11,9 @@ class PressedKeyTracker {
 }
 
 function main() {
-	activeScene = Database.getBoolean('intro_shown')
+	activeScene = new LoadingScene(Database.getBoolean('intro_shown')
 		? new TitleScene()
-		: new CutScene();
+		: new CutScene());
 	
 	window = new GameWindow("Pentomino's Pizza", 30, 800, 600);
 	events = [];
@@ -82,6 +82,12 @@ function main() {
 		
 		activeScene.update(events, SPF);
 		activeScene.render();
+		
+		if (activeScene.next != activeScene) {
+			next = activeScene.next;
+			activeScene.next = activeScene;
+			activeScene = next;
+		}
 		
 		window.clockTick();
 	}

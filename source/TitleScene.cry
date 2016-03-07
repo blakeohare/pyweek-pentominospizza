@@ -66,7 +66,7 @@ class TitleScene {
 	function render() {
 		ImageLibrary.get('background/space1.png').draw(0, 0);
 		ImageLibrary.get('menus/chet.png').draw(100, 230);
-		ImageLibrary.get('menus/title.png').blit(10, 0);
+		ImageLibrary.get('menus/title.png').draw(10, 0);
 		
 		x = 480;
 		y = 100;
@@ -77,7 +77,7 @@ class TitleScene {
 			if (i == this.index) {
 				// needs to be adjusted to dt
 				yOffset = floor(abs(sin(this.counter * TWO_PI) * 16));
-				ImageLibrary.get('menus/pizza.png').blit(x - 70, floor(y - yOffset - 20));
+				ImageLibrary.get('menus/pizza.png').draw(x - 70, floor(y - yOffset - 20));
 			}
 			TextEngine.render(text, 'XL', x, y);
 			

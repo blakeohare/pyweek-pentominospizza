@@ -41,11 +41,11 @@ class TextEngine {
 			'(': 'op',
 		};
 		for (letter : "abcdefghijklmnopqrstuvwyxz") {
-			TextEngine.CODE_LOOKUP['lc_' + letter] = letter;
-			TextEngine.CODE_LOOKUP['uc_' + letter] = letter.upper();
+			TextEngine.CODE_LOOKUP[letter] = 'lc_' + letter;
+			TextEngine.CODE_LOOKUP[letter.upper()] = 'uc_' + letter;
 		}
 		for (i = 0; i < 10; ++i) {
-			TextEngine.CODE_LOOKUP['n' + i] = '' + i;
+			TextEngine.CODE_LOOKUP['' + i] = 'n' + i;
 		}
 	}
 	
@@ -76,7 +76,7 @@ class TextEngine {
 			for (char : TextEngine.CODE_LOOKUP.keys()) {
 				code = TextEngine.CODE_LOOKUP[char];
 				// already loaded by image sheet so synchronous access is ok.
-				image = ImageLoader.fromResource('text/' + code + '.png').getImage();
+				image = ImageLoader.fromResource('images/text/' + code + '.png').getImage();
 				lookup[char] = image;
 			}
 			TextEngine.LETTERS['XL'] = lookup;
