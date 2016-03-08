@@ -244,7 +244,7 @@ class PlayScene {
 		
 		for (shark : this.sharks) {
 			shark.update(this, dt);
-			if (this.player.isSharkCollision(shark)) {
+			if (!this.YOU_DEAD && this.player.isSharkCollision(shark)) {
 				if (!EDITOR_ENABLED) {
 					ActiveSession.INSTANCE.pizzasLostInTransit++;
 					this.triggerDeath();
@@ -254,12 +254,14 @@ class PlayScene {
 		
 		for (ball : this.lavaballs) {
 			ball.update(this, dt);
-			dx = ball.x - hb[0];
-			dy = ball.y - hb[1];
-			if (dx ** 2 + dy ** 2 < 30 ** 2) {
-				if (!EDITOR_ENABLED) {
-					ActiveSession.INSTANCE.pizzasLostInTransit++;
-					this.triggerDeath();
+			if (!this.YOU_DEAD) {
+				dx = ball.x - hb[0];
+				dy = ball.y - hb[1];
+				if (dx ** 2 + dy ** 2 < 30 ** 2) {
+					if (!EDITOR_ENABLED) {
+						ActiveSession.INSTANCE.pizzasLostInTransit++;
+						this.triggerDeath();
+					}
 				}
 			}
 		}
