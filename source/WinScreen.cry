@@ -65,14 +65,22 @@ class WinScreen {
 	
 	function update(events, dt) {
 		this.counter += dt;
-		if (this.counter > 3.3) {
-			for (event : events) {
-				if (event.down) {
-					if (event.type == 'space' || event.type == 'enter') {
-						mss = new MapSelectScreen();
-						this.next = new TransitionScene(this, mss);
-					}
+		enterPressed = false;
+		for (event : events) {
+			if (event.down) {
+				if (event.type == 'space' || event.type == 'enter') {
+					enterPressed = true;
 				}
+			}
+		}
+		
+		if (enterPressed) {
+		
+			if (this.counter > 3.3) {
+				mss = new MapSelectScreen();
+				this.next = new TransitionScene(this, mss);
+			} else {
+				this.counter += 10;
 			}
 		}
 	}
