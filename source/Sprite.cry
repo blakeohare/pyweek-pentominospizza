@@ -135,8 +135,8 @@ class Sprite {
 		
 		sharkX = shark.x;
 		sharkY = shark.y;
-		sharkWidth = shark.images[0].width;
-		sharkHeight = shark.images[1].height;
+		sharkWidth = shark.images[0].width + 12;
+		sharkHeight = shark.images[1].height + 12;
 		sharkLeft = sharkX - sharkWidth / 2;
 		sharkTop = sharkY - sharkHeight / 2;
 		sharkRight = sharkLeft + sharkWidth;
@@ -307,7 +307,6 @@ class Sprite {
 	function updateForGround(scene, dt) {
 		v = this.angularVelocity * (dt * FPS);
 		if (this.ground.isWater) {
-			print("On water");
 			this.distanceFromCenter += this.waterJump;
 			this.waterJump *= .9 ** (dt * FPS);
 			
