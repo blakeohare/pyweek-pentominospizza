@@ -244,9 +244,7 @@ class PlayScene {
 		
 		for (shark : this.sharks) {
 			shark.update(this, dt);
-			dx = shark.x - hb[0];
-			dy = shark.y - hb[1];
-			if (dx ** 2 + dy ** 2 < 17 ** 2) {
+			if (this.player.isSharkCollision(shark)) {
 				if (!EDITOR_ENABLED) {
 					this.triggerDeath();
 				}
