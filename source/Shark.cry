@@ -59,6 +59,6 @@ class Shark {
 	
 	function render(cx, cy) {
 		img = this.images[this.leftFacing ? 0 : 1];
-		img.draw(this.x + cx - img.width / 2, this.y + cy - img.height / 2, 0);
+		img.draw(this.x + cx - img.width / 2, this.y + cy - img.height / 2);
 	}
 }
