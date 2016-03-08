@@ -168,7 +168,7 @@ class PlayScene {
 			this.triggerLose();
 			return;
 		}
-			
+		
 		if (!this.YOU_DEAD) {
 			dx = 0;
 			if (PressedKeyTracker.isPressed('left')) {
@@ -180,7 +180,7 @@ class PlayScene {
 			}
 			
 			this.player.applyWalk(dx);
-		
+			
 			jump = false;
 			jumpRelease = false;
 			for (event : events) {
@@ -246,6 +246,7 @@ class PlayScene {
 			shark.update(this, dt);
 			if (this.player.isSharkCollision(shark)) {
 				if (!EDITOR_ENABLED) {
+					ActiveSession.INSTANCE.pizzasLostInTransit++;
 					this.triggerDeath();
 				}
 			}
@@ -257,6 +258,7 @@ class PlayScene {
 			dy = ball.y - hb[1];
 			if (dx ** 2 + dy ** 2 < 30 ** 2) {
 				if (!EDITOR_ENABLED) {
+					ActiveSession.INSTANCE.pizzasLostInTransit++;
 					this.triggerDeath();
 				}
 			}

@@ -91,41 +91,29 @@ class WinScreen {
 		
 		TextEngine.render(this.isWin ? "DELIVERY SUCCESSFUL!" : "TIME'S UP!", 'XL', 100, 50);
 		
-		cols = [100, 300, 500];
+		cols = [100, 450, 600];
 		y = 250;
 		
-		if (this.counter > 1) {
-			TextEngine.render('Attempt #' + this.timesPlayed, 'L', cols[0], y);
-		}
+		data = [
+			[1, 'Attempt #' + this.timesPlayed, '', false],
+			[1.5, 'Duration:', formatTime(this.gameDuration), this.gameDurationRecord],
+			[2, 'Total Jumps:', this.jumpCount + '', this.jumpCountRecord],
+			[2.5, 'Longest Jump:', formatTime(this.longestJump), this.longestJumpRecord],
+			[3.0, "Pizzas Lost in Transit:", ActiveSession.INSTANCE.pizzasLostInTransit + '', false],
+		];
 		
-		y += 80;
-		if (this.counter > 1.5) {
-			TextEngine.render("Duration:", 'L', cols[0], y);
-			TextEngine.render(formatTime(this.gameDuration), 'L', cols[1], y);
-			if (this.gameDurationRecord) {
-				this.renderBounceText("NEW RECORD!", 'M', cols[2], y);
+		for (row : data) {
+			if (this.counter > row[0]) {
+				TextEngine.render(row[1], 'L', cols[0], y);
+				TextEngine.render(row[2], 'L', cols[1], y);
+				if (row[3]) {
+					this.renderBounceText("NEW RECORD!", 'M', cols[2], y);
+				}
 			}
+			y += 50;
 		}
 		
-		y += 80;
-		if (this.counter > 2) {
-			TextEngine.render("Total Jumps:", 'L', cols[0], y);
-			TextEngine.render(this.jumpCount + '', 'L', cols[1], y);
-			if (this.gameDurationRecord) {
-				this.renderBounceText("NEW RECORD!", 'M', cols[2], y);
-			}
-		}
-		
-		y += 80;
-		if (this.counter > 2) {
-			TextEngine.render("Longest Jump:", 'L', cols[0], y);
-			TextEngine.render(formatTime(this.longestJump), 'L', cols[1], y);
-			if (this.longestJumpRecord) {
-				this.renderBounceText("NEW RECORD!", 'M', cols[2], y);
-			}
-		}
-		
-		y += 80;
+		y += 50;
 		if (this.counter > 3.3) {
 			this.renderBounceText("Press ENTER or something", 'S', cols[1], y);
 		}

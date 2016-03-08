@@ -13,6 +13,7 @@ class ActiveSession {
 	field timerRunning;
 	field timeAccrued;
 	field gameDuration;
+	field pizzasLostInTransit;
 	
 	constructor() { }
 	
@@ -27,6 +28,7 @@ class ActiveSession {
 		this.lastKnownJumpRecord = Database.getFloat(id + '_longestjump');
 		this.timerRunning = true;
 		this.timeAccrued = 0.0;
+		this.pizzasLostInTransit = 0;
 	}
 	
 	function startJump() {

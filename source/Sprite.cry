@@ -257,6 +257,7 @@ class Sprite {
 					theta = Math.arctan(-dy, -dx);
 					this.thetaFromGround = theta - body.theta;
 					if (body.isDeathy) {
+						ActiveSession.INSTANCE.pizzasLostInTransit++;
 						scene.triggerDeath();
 					} else if (body.isWater) {
 						// do nothing
