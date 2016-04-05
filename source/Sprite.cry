@@ -47,8 +47,8 @@ class Sprite {
 			right = [];
 			for (i = 0; i < 10; ++i) {
 				img = ImageLibrary.getAtScale('sprites/chet-walk-' + i + '.png', .2);
-				right.append(img);
-				left.append(img.flip(true, false));
+				right.add(img);
+				left.add(img.flip(true, false));
 			}
 			this.images['left'] = left;
 			this.images['right'] = right;
