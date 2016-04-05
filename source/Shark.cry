@@ -1,0 +1,64 @@
+const SHARK_VELOCITY = 2.0;
+
+class Shark {
+	field x;
+	field y;
+	field body;
+	field target = null;
+	field leftFacing = false;
+	field images;
+	
+	static field IMAGES = null;
+	constructor(body) {
+		this.x = body.x;
+		this.y = body.y;
+		this.body = body;
+		if (Shark.IMAGES == null) {
+			img = ImageLibrary.get('sprites/shark.png');
+			Shark.IMAGES = [img, img.flip(true, false)];
+		}
+		this.images = Shark.IMAGES;
+	}
+	
+	function update(scene, dt) {
+		player = scene.player;
+		x = this.body.x;
+		y = this.body.y;
+		
+		if (player.ground == this.body) {
+			hb = player.getHitBox();
+			x = hb[0];
+			y = hb[1];
+		} else {
+			if (this.target == null) {
+				theta = Random.randomFloat();
+				x = Math.cos(theta) * this.body.radius;
+				y = Math.sin(theta) * this.body.radius;
+				x += this.body.x;
+				y += this.body.y;
+				this.target = [x, y];
+			}
+			x = this.target[0];
+			y = this.target[1];
+		}
+			
+		dx = x - this.x;
+		dy = y - this.y;
+		dist = (dx ** 2 + dy ** 2) ** .5;
+		if (dist > SHARK_VELOCITY * 2) {
+			ux = dx / dist;
+			uy = dy / dist;
+			this.x += SHARK_VELOCITY * ux * dt * FPS;
+			this.y += SHARK_VELOCITY * uy * dt * FPS;
+			
+			this.leftFacing = dx < 0;
+		} else {
+			this.target = null;
+		}
+	}
+	
+	function render(cx, cy) {
+		img = this.images[this.leftFacing ? 0 : 1];
+		img.draw(this.x + cx - img.width / 2, this.y + cy - img.height / 2);
+	}
+}

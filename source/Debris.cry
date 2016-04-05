@@ -1,0 +1,39 @@
+import Random;
+
+class Debris {
+	static field DEBRIS_OFFSETS = [
+		[0, 0],
+		[1, 0],
+		[0, 1],
+		[1, 1],
+	];
+	
+	field x;
+	field y;
+	field type;
+	field theta;
+	field img;
+	field angularVelocity;
+	
+	constructor(x, y, type) {
+		this.x = x;
+		this.y = y;
+		this.type = type;
+		this.theta = Random.randomFloat() * TWO_PI;
+		this.img = ImageLibrary.get('rocks/' + type + '.png');
+		this.angularVelocity = Random.randomFloat() / 25.0;
+	}
+	
+	function update(scene, dt) {
+		this.theta += this.angularVelocity * (dt * FPS);
+	}
+	
+	function render(cx, cy) {
+		x = (this.x + cx * .6) % 1000 - 500;
+		y = (this.y + cy * .6) % 1000 - 500;
+		
+		for (offset : Debris.DEBRIS_OFFSETS) {
+			this.img.drawRotated(x + offset[0] * 1000, y + offset[1] * 1000, this.theta + HALF_PI);
+		}
+	}
+}

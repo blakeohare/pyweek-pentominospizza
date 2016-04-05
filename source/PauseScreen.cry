@@ -1,0 +1,66 @@
+import Math;
+
+class PauseScreen {
+
+	field counter = 0;
+	field next;
+	field bg;
+	field index = 0;
+	
+	static field OPTIONS = ['Resume', 'Restart', 'Back to Menu'];
+
+	constructor(bg) {
+		this.next = this;
+		this.bg = bg;
+	}
+	
+	function update(events, dt) {
+		this.counter += dt;
+		ActiveSession.INSTANCE.ensureTimerRunning(false);
+		confirm = false;
+		for (event : events) {
+			if (event.down) {
+				if (event.type == 'space' || event.type == 'enter') {
+					confirm = true;
+				} else if (event.type == 'up') {
+					this.index--;
+				} else if (event.type == 'down') {
+					this.index++;
+				}
+			}
+		}
+		
+		if (this.index < 0) this.index = 0;
+		if (this.index > 2) this.index = 2;
+		
+		if (confirm) {
+			if (this.index == 0) {
+				this.next = this.bg;
+				this.next.next = this.next;
+			} else if (this.index == 1) {
+				this.next = new TransitionScene(this, ['M', this.bg.id]);
+			} else if (this.index == 2) {
+				this.next = new TransitionScene(this, new MapSelectScreen());
+			}
+		}
+	}
+	
+	function render() {
+		this.bg.render();
+		GFX.Draw.rectangle(0, 0, 800, 600, 0, 0, 0, 128);
+		
+		x = 200;
+		y = 250;
+		margin = 100;
+		
+		for (i = 0; i < PauseScreen.OPTIONS.length; ++i) {
+			option = PauseScreen.OPTIONS[i];
+			if (i == this.index) {
+				yOffset = abs(15 * sin(this.counter * Math.PI * 2));
+				ImageLibrary.get('menus/pizza.png').draw(x - 80, y - yOffset);
+			}
+			TextEngine.render(option, 'L', x, y);
+			y += margin;
+		}
+	}
+}

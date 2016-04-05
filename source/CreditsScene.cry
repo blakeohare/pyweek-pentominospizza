@@ -1,0 +1,33 @@
+import Math;
+
+class CreditsScene {
+	
+	field next;
+	field counter = 0;
+	
+	constructor() {
+		this.next = this;
+	}
+	
+	function update(events, dt) {
+		this.counter = this.counter + dt;
+		
+		for (event : events) {
+			if (event.down && (event.type == 'space' || event.type == 'enter')) {
+				this.next = new TransitionScene(this, new TitleScene());
+			}
+		}
+	}
+	
+	function render() {
+		ImageLibrary.get('background/space1.png').draw(0, 0);
+		
+		TextEngine.render("Programming", 'S', 80, 200);
+		TextEngine.render("Blake O'Hare", 'L', 80, 260);
+		TextEngine.render("Art", 'S', 370, 200);
+		TextEngine.render("Sophia Baldonado", 'L', 370, 260);
+		
+		y = 450;
+		TextEngine.render("Press ENTER or something", 'S', 300, y - floor(abs(sin(this.counter * TWO_PI) * 15)));
+	}
+}

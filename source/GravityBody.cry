@@ -1,0 +1,104 @@
+import Random;
+import Math;
+
+function getIdFromBody(body) {
+	if (body == null) return null;
+	return body.id;
+}
+
+function getBodyFromId(id, bodies) {
+	if (id == null) return null;
+	return bodies.get(id);
+}
+
+class GravityBody {
+	static field GRAVITY_ID_ALLOC = 0;
+	
+	field type;
+	field id = ++GravityBody.GRAVITY_ID_ALLOC;
+	field x;
+	field y;
+	field radius;
+	field rotRat;
+	field image;
+	field theta;
+	field rps;
+	field isDeathy = false;
+	field gravity;
+	field isWater = false;
+	field isVolcano = false;
+	field lavaball = null;
+	
+	constructor(type, x, y, radius, imagePath, rps, rotRat, typeFlag = null) {
+		// IF YOU ADD ANYTHING HERE, ADD IT TO SAVE AND RESTORE STATE
+		this.type = type;
+		this.x = x + 0.0;
+		this.y = y + 0.0;
+		this.radius = radius;
+		this.rotRat = rotRat;
+		this.theta = Random.randomFloat() * TWO_PI;
+		this.rps = rps;
+		this.gravity = radius / 100.0;
+		if (this.type == 'blackhole') {
+			this.gravity *= 4;
+			this.isDeathy = true;
+		}
+		
+		this.isWater = false;
+		this.isVolcano = false;
+		imageScale = 1.0;
+		if (typeFlag == 'water') {
+			this.isWater = true;
+		} else if (typeFlag == 'volcano') {
+			this.isVolcano = true;
+			imageScale = 1.3;
+		} else if (typeFlag == 'lava') {
+			this.isDeathy = true;
+		} else if (this.type == 'blackhole') {
+			imageScale = 2.5;
+		}
+		
+		if (EDITOR_ENABLED) {
+			this.isDeathy = false;
+		}
+		
+		img = ImageLibrary.get(imagePath);
+		diameter = this.radius * 2;
+		desiredWidth = imageScale * diameter;
+		ratio = desiredWidth / img.width;
+		
+		this.image = ImageLibrary.getAtScale(imagePath, ratio);
+	}
+	
+	function update(scene, dt) {
+		if (this.lavaball == null && this.type == 'volcano') {
+			this.lavaball = new LavaBall(this);
+			scene.lavaballs.add(this.lavaball);
+		}
+		this.theta += TWO_PI * this.rps * dt;
+	}
+	
+	function render(cx, cy) {
+		this.image.drawRotated(this.x + cx, this.y + cy, this.theta + HALF_PI);
+	}
+	
+	function saveState() {
+		return [this.x, this.y, this.radius, this.image, this.theta, this.rps, this.gravity, this.isWater, this.isVolcano, this.id, this.isDeathy, this.type, this.rotRat];
+	}
+		
+	function restoreState(state) {
+		this.x = state[0];
+		this.y = state[1];
+		this.radius = state[2];
+		this.image = state[3];
+		this.theta = state[4];
+		this.rps = state[5];
+		this.gravity = state[6];
+		this.isWater = state[7];
+		this.isVolcano = state[8];
+		this.id = state[9];
+		this.isDeathy = state[10];
+		this.type = state[11];
+		this.rotRat = state[12];
+	}
+}

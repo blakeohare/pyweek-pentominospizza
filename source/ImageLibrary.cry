@@ -1,0 +1,36 @@
+import Math;
+import GFX;
+
+class ImageLibrary {
+	static field imagesByPath = {};
+	static field imagesByPathByScale = {};
+	
+	static function get(path) {
+		img = ImageLibrary.imagesByPath.get(path);
+		if (img == null) {
+			img = ImageLoader.fromResource('images/' + path).getImage();
+			ImageLibrary.imagesByPath[path] = img;
+		}
+		return img;
+	}
+	
+	static function getAtScale(path, scale) {
+		key = floor(scale * 1000);
+		lookup = ImageLibrary.imagesByPathByScale.get(key);
+		if (lookup == null) {
+			lookup = {};
+			ImageLibrary.imagesByPathByScale[key] = lookup;
+		}
+		
+		img = lookup.get(path);
+		if (img == null) {
+			img = ImageLibrary.get(path);
+			newWidth = floor(img.width * scale + .5);
+			newHeight = floor(img.height * scale + .5);
+			img = img.scale(newWidth, newHeight);
+			lookup[path] = img;
+		}
+		
+		return img;
+	}
+}

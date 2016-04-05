@@ -1,0 +1,130 @@
+import GFX;
+import Math;
+
+// This is now repurposed for when you lose as well as it needs to apply the record for longest jump
+
+class WinScreen {
+	field next;
+	field isWin;
+	field bg;
+	field counter = 0;
+	field isLongestJumpRecord = false;
+	field timesPlayed;
+	field longestJump;
+	field longestJumpRecord;
+	field gameDurationRecord;
+	field jumpCountRecord;
+	field gameDuration;
+	field jumpCount;
+	
+	constructor(bg, isWin = true) {
+		this.next = this;
+		this.isWin = isWin;
+		this.bg = bg;
+		id = this.bg.id;
+		timesPlayed = Database.getInt(id + '_timesplayed') + 1;
+		Database.setValue(id + '_timesplayed', timesPlayed);
+		Database.setValue(id + '_completed', true);
+		this.timesPlayed = timesPlayed;
+		ActiveSession.INSTANCE.ensureTimerRunning(false);
+		
+		ActiveSession.INSTANCE.endGame();
+		this.longestJump = ActiveSession.INSTANCE.getLongestJump();
+		
+		this.longestJumpRecord = false;
+		this.gameDurationRecord = false;
+		this.jumpCountRecord = false;
+		
+		prev = Database.getFloat(id + '_longestjump');
+		if (this.longestJump > prev) {
+			Database.setValue(id + '_longestjump', this.longestJump);
+			this.longestJumpRecord = true;
+		}
+		
+		this.gameDuration = ActiveSession.INSTANCE.gameDuration;
+		if (!isWin) { // assuming all losses are timeouts since others resolve into restore-replays. 
+			this.gameDuration = ActiveSession.INSTANCE.timeLimitSeconds * 1.0; // avoid slight rounding errors that would make it look unfair. 
+		}
+		if (!Database.hasValue(id + '_fastesttime') || Database.getFloat(id + '_fastesttime') > this.gameDuration) {
+			if (this.isWin) {
+				Database.setValue(id + '_fastesttime', this.gameDuration);
+				this.gameDurationRecord = true;
+			}
+		}
+		
+		this.jumpCount = ActiveSession.INSTANCE.jumpCount;
+		if (!Database.hasValue(id + '_fewestjumps') || this.jumpCount < Database.getInt(id + '_fewestjumps')) {
+			if (this.isWin) {
+				Database.setValue(id + '_fewestjumps', this.jumpCount);
+				this.jumpCountRecord = true;
+			}
+		}
+		
+		Database.save();
+	}
+	
+	function update(events, dt) {
+		this.counter += dt;
+		enterPressed = false;
+		for (event : events) {
+			if (event.down) {
+				if (event.type == 'space' || event.type == 'enter') {
+					enterPressed = true;
+				}
+			}
+		}
+		
+		if (enterPressed) {
+		
+			if (this.counter > 3.3) {
+				mss = new MapSelectScreen();
+				this.next = new TransitionScene(this, mss);
+			} else {
+				this.counter += 10;
+			}
+		}
+	}
+	
+	function render() {
+		this.bg.render();
+		GFX.Draw.rectangle(0, 0, 800, 600, 0, 0, 0, 128);
+		
+		TextEngine.render(this.isWin ? "DELIVERY SUCCESSFUL!" : "TIME'S UP!", 'XL', 100, 50);
+		
+		cols = [100, 450, 600];
+		y = 250;
+		
+		data = [
+			[1, 'Attempt #' + this.timesPlayed, '', false],
+			[1.5, 'Duration:', formatTime(this.gameDuration), this.gameDurationRecord],
+			[2, 'Total Jumps:', this.jumpCount + '', this.jumpCountRecord],
+			[2.5, 'Longest Jump:', formatTime(this.longestJump), this.longestJumpRecord],
+			[3.0, "Pizzas Lost in Transit:", ActiveSession.INSTANCE.pizzasLostInTransit + '', false],
+		];
+		
+		for (row : data) {
+			if (this.counter > row[0]) {
+				TextEngine.render(row[1], 'L', cols[0], y);
+				TextEngine.render(row[2], 'L', cols[1], y);
+				if (row[3]) {
+					this.renderBounceText("NEW RECORD!", 'M', cols[2], y);
+				}
+			}
+			y += 50;
+		}
+		
+		y += 50;
+		if (this.counter > 3.3) {
+			this.renderBounceText("Press ENTER or something", 'S', cols[1], y);
+		}
+	}
+		
+	function renderBounceText(text, size, x, ybase, isSlow = false) {
+		if (isSlow) {
+			y = ybase - 5 * Math.sin(this.counter * Math.PI);
+		} else {
+			y = ybase - Math.abs(10 * Math.sin(this.counter * Math.PI * 4));
+		}
+		TextEngine.render(text, size, x, y);
+	}
+}

@@ -1,0 +1,93 @@
+class ActiveSession {
+
+	static field INSTANCE = new ActiveSession();
+	
+	field startTime = 0;
+	field id = null;
+	field timeLimitSeconds;
+	field longestJump;
+	field currentJump;
+	field jumpCount;
+	field isJumpRecord;
+	field lastKnownJumpRecord;
+	field timerRunning;
+	field timeAccrued;
+	field gameDuration;
+	field pizzasLostInTransit;
+	
+	constructor() { }
+	
+	function startGame(id, timeLimitSeconds) {
+		this.id = id;
+		this.timeLimitSeconds = timeLimitSeconds;
+		this.startTime = currentTime();
+		this.longestJump = 0.0;
+		this.currentJump = null;
+		this.jumpCount = 0;
+		this.isJumpRecord = false;
+		this.lastKnownJumpRecord = Database.getFloat(id + '_longestjump');
+		this.timerRunning = true;
+		this.timeAccrued = 0.0;
+		this.pizzasLostInTransit = 0;
+	}
+	
+	function startJump() {
+		this.jumpCount = this.jumpCount + 1;
+		this.currentJump = this.getCurrentTime();
+		this.isJumpRecord = false;
+	}
+	
+	function ensureTimerRunning(toggle) {
+		if (toggle == this.timerRunning) return;
+		
+		this.timerRunning = toggle;
+		if (toggle) {
+			this.startTime = currentTime() - this.timeAccrued;
+		} else {
+			this.timeAccrued = currentTime() - this.startTime;
+		}
+	}
+	
+	function getCurrentTime() {
+		if (this.timerRunning) {
+			return currentTime() - this.startTime;
+		} else {
+			return this.timeAccrued;
+		}
+	}
+	
+	function endJump() {
+		jumpDuration = this.getCurrentTime() - this.currentJump;
+		if (jumpDuration > this.longestJump) {
+			this.longestJump = jumpDuration;
+		}
+		if (jumpDuration > this.lastKnownJumpRecord) {
+			this.isJumpRecord = true;
+			this.lastKnownJumpRecord = jumpDuration;
+		}
+		this.currentJump = null;
+	}
+	
+	function popJumpRecordStatus() {
+		if (this.isJumpRecord) {
+			this.isJumpRecord = false;
+			return true;
+		}
+		return false;
+	}
+	
+	function getCurrentJump() {
+		if (this.currentJump == null) {
+			return null;
+		}
+		return this.getCurrentTime() - this.currentJump;
+	}
+	
+	function getLongestJump() {
+		return this.longestJump;
+	}
+	
+	function endGame() {
+		this.gameDuration = currentTime() - this.startTime;
+	}
+}

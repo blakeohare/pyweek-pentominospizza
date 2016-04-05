@@ -1,0 +1,111 @@
+import Math;
+import FileIO;
+
+/*
+data saved:
+boolean -> intro_shown
+
+boolean -> {map key}_completed
+float -> {map_key}_longestjump (seconds)
+float -> {map_key}_fastesttime (seconds)
+int -> {map_key}_fewestjumps
+int -> {map_key}_timesplayed
+
+A map is considered unlocked if it is first in the manifest or its previous map is marked as _completed
+
+*/
+
+class Database {
+	
+	static field VALUES = {};
+	static field FILENAME = 'pp_save_data.txt';
+	
+	static constructor() {
+		if (!FileIO.UserData.Path.exists(Database.FILENAME)) return;
+		data = FileIO.UserData.File.readText(Database.FILENAME);
+		
+		for (line : data.split('\n')) {
+			line = line.trim();
+			if (line.length > 0) {
+				parts = line.split(':');
+				if (parts.length >= 3) {
+					t = parts[0].upper().trim();
+					k = parts[1].trim();
+					v = parts[2:].join(':').trim();
+					if (t == 'I') {
+						v = parseInt(v);
+						if (v == null) k = null;
+					} else if (t == 'F') {
+						v = parseFloat(v);
+						if (v == null) k = null;
+					} else if (t == 'B') {
+						v = v == '1';
+					} else if (t == 'S') {
+						// pass
+					} else if (t == 'N') {
+						v = null;
+					} else {
+						k = null;
+					}
+					if (k != null) {
+						Database.VALUES[k] = v;
+					}
+				}
+			}
+		}
+	}
+	
+	static function save() {
+		output = [];
+		for (key : Database.VALUES.keys()) {
+			t = null;
+			value = Database.VALUES[key];
+			ktype = typeof(value);
+			switch (ktype) {
+				case Type.INTEGER: t = 'I'; break;
+				case Type.STRING: t = 'S'; break;
+				case Type.BOOLEAN: t = 'B'; value = value ? 1 : 0; break;
+				case Type.FLOAT: t = 'F'; break;
+				case Type.NULL: t = 'N'; value = '-'; break;
+				default: Core.assert(false); break; // unusable type
+			}
+			output.add(t + ':' + key + ':' + value);
+		}
+		
+		FileIO.UserData.File.writeText(Database.FILENAME, output.join('\n'));
+	}
+	
+	static function getBoolean(key, defaultValue = false) {
+		return Database.VALUES.get(key, defaultValue) == true;
+	}
+	
+	static function getFloat(key, defaultValue = 0.0) {
+		output = Database.VALUES.get(key, defaultValue);
+		if (typeof(output) == Type.FLOAT) return output;
+		if (typeof(output) == Type.INTEGER) return output + 0.0;
+		return defaultValue;
+	}
+	
+	static function getInteger(key, defaultValue = 0) {
+		return Database.getInt(key, defaultValue);
+	}
+	
+	static function getInt(key, defaultValue = 0) {
+		output = Database.VALUES.get(key, defaultValue);
+		if (typeof(output) == Type.INTEGER) return output;
+		if (typeof(output) == Type.FLOAT) return floor(output);
+		return defaultValue;
+	}
+	
+	static function getString(key, defaultValue = null) {
+		return '' + Database.VALUES.get(key, defaultValue);
+	}
+	
+	static function hasValue(key) {
+		return Database.VALUES.contains(key);
+	}
+	
+	static function setValue(key, value) {
+		Database.VALUES[key] = value;
+	}
+}

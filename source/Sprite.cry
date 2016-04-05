@@ -1,0 +1,376 @@
+import Math;
+
+const PLAYER_WALK_VELOCITY = 6.0;
+const PLAYER_JUMP_VELOCITY = 470.0;
+const ASTEROID_GRAVITY_COEFFICIENT = 5000.0; // make bigger for stronger gravity
+
+/*
+	If enabled, will skip every other update phase and apply that dt to the next update phase's dt value to ensure that I'm incorporating dt correctly into my calculations
+	Be sure to set this to true every once in a while to test.
+*/
+const DT_TEST_ENABLED = false;
+
+class Sprite {
+	
+	field type;
+	field r;
+	field x = null;
+	field y = null;
+	field theta;
+	field images;
+	field vx = 0;
+	field vy = 0;
+	field angularVelocity = 0.0;
+	field ground = null;
+	field strongestGround = null;
+	field thetaFromGround = 0;
+	field floatingTheta = 0.0;
+	field hitBox = null;
+	field facingLeft = false;
+	field currentVelocity = [0.0, 0.0];
+	field distanceFromCenter = null;
+	field waterJump = 0.0;
+	field lastWalk = 0;
+	field isPlayer = false;
+	
+	// used when DT_TEST_ENABLED is on
+	field counter = 0;
+	field dtBacklog = 0.0;
+	
+	constructor(type, startType, x_or_body, y_or_theta_or_bodies_lookup) {
+		this.r = 10;
+		this.images = {};
+		this.type = type;
+		this.isPlayer = type == 'player';
+		if (type == 'player') {
+			left = [];
+			right = [];
+			for (i = 0; i < 10; ++i) {
+				img = ImageLibrary.getAtScale('sprites/chet-walk-' + i + '.png', .2);
+				right.add(img);
+				left.add(img.flip(true, false));
+			}
+			this.images['left'] = left;
+			this.images['right'] = right;
+		} else if (type == 'store' || type == 'house1' || type == 'house2' || type == 'house3') {
+			this.images['left'] = [ImageLibrary.get('sprites/' + type + '.png')];
+			this.images['right'] = this.images['left'];
+		} else {
+			Core.assert(false); // unknown sprite type
+		}
+		
+		if (startType == 'R') { // restore
+			this.restoreState(x_or_body, y_or_theta_or_bodies_lookup);
+		} else if (startType == 'G') {
+			this.ground = x_or_body;
+			this.thetaFromGround = y_or_theta_or_bodies_lookup;
+			if (this.ground.isWater) {
+				print("Starting sprites on water bodies not supported.");
+			}
+		} else {
+			this.x = x_or_body + 0.0;
+			this.y = y_or_theta_or_bodies_lookup + 0.0;
+		}
+	}
+	
+	function restoreState(state, bodiesById) {
+		this.r = state[0];
+		this.type = state[1];
+		this.images = state[2];
+		this.vx = state[3];
+		this.vy = state[4];
+		this.angularVelocity = state[5];
+		this.ground = getBodyFromId(state[6], bodiesById);
+		this.strongestGround = getBodyFromId(state[7], bodiesById);
+		this.thetaFromGround = state[8];
+		this.floatingTheta = state[9];
+		this.hitBox = state[10];
+		this.facingLeft = state[11];
+		this.currentVelocity = state[12];
+		this.distanceFromCenter = state[13];
+		this.waterJump = state[14];
+		this.counter = state[15];
+		this.x = state[16];
+		this.y = state[17];
+		this.isPlayer = this.type == 'player';
+	}
+	
+	function saveState() {
+		return [
+			this.r,
+			this.type,
+			this.images,
+			this.vx,
+			this.vy,
+			this.angularVelocity,
+			getIdFromBody(this.ground),
+			getIdFromBody(this.strongestGround),
+			this.thetaFromGround,
+			this.floatingTheta,
+			this.hitBox,
+			this.facingLeft,
+			this.currentVelocity,
+			this.distanceFromCenter,
+			this.waterJump,
+			this.counter,
+			this.x,
+			this.y];
+	}
+	
+	function isSharkCollision(shark) {
+		if (shark.body != this.ground) return false;
+		
+		// create a series of 3 points at feet, head, and middle
+		// see if the shark image + 5 pixels overlays any of those
+		// this is hacky but meh, the engine is getting rewritten anyway.
+		
+		gx = this.ground.x;
+		gy = this.ground.y;
+		theta = this.thetaFromGround + this.ground.theta;
+		px = Math.cos(theta);
+		py = Math.sin(theta);
+		r1 = this.distanceFromCenter;
+		r3 = this.distanceFromCenter + this.images['left'][0].height;
+		r2 = (r1 + r3) / 2.0;
+		
+		sharkX = shark.x;
+		sharkY = shark.y;
+		sharkWidth = shark.images[0].width + 12;
+		sharkHeight = shark.images[1].height + 12;
+		sharkLeft = sharkX - sharkWidth / 2;
+		sharkTop = sharkY - sharkHeight / 2;
+		sharkRight = sharkLeft + sharkWidth;
+		sharkBottom = sharkTop + sharkHeight;
+		
+		for (r : [r1, r2, r3]) {
+			x = gx + px * r;
+			y = gy + py * r;
+			if (x > sharkLeft && x < sharkRight && y > sharkTop && y < sharkBottom) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	function getHitBox() {
+		if (this.hitBox == null) {
+			if (this.ground == null) {
+				this.hitBox = [this.x, this.y, this.r];
+			} else {
+				if (this.ground.isWater) {
+					r = this.distanceFromCenter + this.r;
+				} else {
+					r = this.ground.radius + this.r;
+				}
+				x = this.ground.x + r * Math.cos(this.thetaFromGround + this.ground.theta);
+				y = this.ground.y + r * Math.sin(this.thetaFromGround + this.ground.theta);
+				this.hitBox = [x, y, this.r];
+			}
+		}
+		return this.hitBox;
+	}
+	
+	function applyJump(press, dt) {
+		if (press && this.ground != null) {
+			if (this.ground.isWater && this.distanceFromCenter < this.ground.radius) {
+				this.waterJump = 5;
+			} else {
+				ground = this.ground;
+				jumpVelocity = PLAYER_JUMP_VELOCITY; // pixels per second
+				r = this.ground.radius + this.r + 5;
+				theta = this.thetaFromGround + this.ground.theta;
+				ux = Math.cos(theta);
+				uy = Math.sin(theta);
+				
+				x = this.ground.x + r * ux;
+				y = this.ground.y + r * uy;
+				this.x = x;
+				this.y = y;
+				this.vx = ux * jumpVelocity;
+				this.vy = uy * jumpVelocity;
+				this.theta = theta;
+				this.ground = null;
+				
+				if (this.isPlayer) {
+					ActiveSession.INSTANCE.startJump();
+				}
+				
+				this.vx += this.currentVelocity[0];
+				this.vy += this.currentVelocity[1];
+			}
+		}
+	}
+	
+	function applyWalk(dir) {
+		if (dir != 0) {
+			this.lastWalk = Core.currentTime();
+			this.facingLeft = dir < 0;
+			v = PLAYER_WALK_VELOCITY;
+			if (this.ground != null) {
+				// works for both water and solid ground
+				this.angularVelocity = v * dir;
+			}
+		}
+	}
+	
+	function updateForFloating(scene, dt) {
+		if (DT_TEST_ENABLED) {
+			this.counter++;
+			if (this.counter % 2 == 0) {
+				this.dtBacklog = dt;
+				return;
+			} else {
+				dt += this.dtBacklog;
+			}
+		}
+			
+		this.x += this.vx * dt;
+		this.y += this.vy * dt;
+		
+		gx = 0.0;
+		gy = 0.0;
+		strongest_g = -1;
+		strongest_source = null;
+		
+		for (body : scene.bodies) {
+			dx = body.x - this.x;
+			dy = body.y - this.y;
+			dr = this.r + body.radius;
+			dist = (dx ** 2 + dy ** 2) ** .5;
+			if (dist < 2000) {
+				if (dist <= dr) {
+					this.ground = body;
+					
+					if (this.isPlayer) {
+						
+						ActiveSession.INSTANCE.endJump();
+						if (ActiveSession.INSTANCE.isJumpRecord) {
+							scene.triggerJumpRecord(this.x, this.y, ActiveSession.INSTANCE.longestJump);
+						}
+						
+						if (body == scene.victoryPlanet) {
+							scene.triggerWin();
+						}
+					}
+					
+					this.distanceFromCenter = this.ground.radius + 0.0;
+					theta = Math.arctan(-dy, -dx);
+					this.thetaFromGround = theta - body.theta;
+					if (body.isDeathy) {
+						if (!scene.YOU_DEAD) {
+							ActiveSession.INSTANCE.pizzasLostInTransit++;
+							scene.triggerDeath();
+						}
+					} else if (body.isWater) {
+						// do nothing
+					} else {
+						scene.saveState();
+					}
+					return;
+				}
+			}
+				
+			g = body.gravity / (dist / ASTEROID_GRAVITY_COEFFICIENT) ** 2;
+			
+			if (g > strongest_g) {
+				strongest_g = g;
+				strongest_source = body;
+			}
+			
+			ux = dx / dist;
+			uy = dy / dist;
+			
+			gx += g * ux;
+			gy += g * uy;
+		}
+		
+		this.strongestGround = strongest_source;
+		if (strongest_source != null) {
+			dx = strongest_source.x - this.x;
+			dy = strongest_source.y - this.y;
+			targetTheta = Math.arctan(-dy, -dx) % TWO_PI;
+			currentTheta = this.theta % TWO_PI;
+			dTheta = currentTheta - targetTheta;
+			if (dTheta > Math.PI) {
+				currentTheta -= TWO_PI;
+			}
+			if (dTheta < -PI) {
+				targetTheta -= TWO_PI;
+			}
+			
+			r = .9 ** (dt * FPS);
+			ar = 1.0 - r;
+			this.theta = r * currentTheta + ar * targetTheta;
+		}
+		
+		this.vx += gx * dt;
+		this.vy += gy * dt;
+	}
+	
+	function updateForGround(scene, dt) {
+		v = this.angularVelocity * (dt * FPS);
+		if (this.ground.isWater) {
+			this.distanceFromCenter += this.waterJump;
+			this.waterJump *= .9 ** (dt * FPS);
+			
+			r = this.distanceFromCenter;
+			this.distanceFromCenter *= .98 ** (dt * FPS);
+			if (this.distanceFromCenter < 10) {
+				this.distanceFromCenter = 10.0;
+			}
+		} else {
+			r = this.ground.radius;
+		}
+		
+		// Law-O-Cosines
+		theta = Math.arccos(((v ** 2) - 2 * (r ** 2)) / (-2 * (r ** 2)));
+		if (v < 0) {
+			this.thetaFromGround -= theta;
+		} else {
+			this.thetaFromGround += theta;
+		}
+		
+		this.angularVelocity *= .8 ** (dt * FPS);
+	}
+	
+	function update(scene, dt) {
+		oldLoc = this.getHitBox();
+		if (this.ground == null) {
+			this.updateForFloating(scene, dt);
+		} else {
+			this.updateForGround(scene, dt);
+		}
+		this.hitBox = null;
+		newLoc = this.getHitBox();
+		
+		mx = (newLoc[0] - oldLoc[0]) / dt;
+		my = (newLoc[1] - oldLoc[1]) / dt;
+		this.currentVelocity = [mx, my];
+	}
+	
+	function render(rc, cx, cy) {
+		hb = this.getHitBox();
+		isWalking = (Core.currentTime() - this.lastWalk) < .1;
+		if (!isWalking) {
+			rc = 1;
+		} else {
+			rc = Math.floor(rc * 1.3) / 2;
+		}
+		imgs = this.images[this.facingLeft ? 'left' : 'right'];
+		img = imgs[rc % imgs.length];
+		x = hb[0] + cx;
+		y = hb[1] + cy;
+		if (this.ground == null) {
+			img.drawRotated(x, y, this.theta + HALF_PI);
+		} else {
+			img.drawRotated(x, y, HALF_PI + (this.ground.theta + this.thetaFromGround));
+		}
+		
+		if (this.isPlayer) {
+			currentJump = ActiveSession.INSTANCE.getCurrentJump();
+			if (currentJump != null && currentJump > 1) {
+				TextEngine.render(formatTime(currentJump), 'M', x - 8, y - 40);
+			}
+		}
+	}
+}

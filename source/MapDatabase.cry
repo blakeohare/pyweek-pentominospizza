@@ -1,0 +1,57 @@
+import Resources;
+
+class MapMetadata {
+	field key;
+	field name;
+	field next;
+	field prev;
+	
+	constructor(key, name) {
+		this.key = key;
+		this.name = name;
+	}
+}
+
+class MapDatabase {
+	static field values = {};
+	static field order = [];
+	
+	constructor() { } // Crayon TODO: static class labels
+	
+	static constructor() {
+		lines = Resources.readText('levels/manifest.txt').split('\n');
+		prev = null;
+		for (line : lines) {
+			parts = line.split(':');
+			if (parts.length == 2) {
+				key = parts[0].trim();
+				name = parts[1].trim();
+				metadata = new MapMetadata(key, name);
+				metadata.prev = prev;
+				if (prev != null) {
+					prev.next = metadata;
+				}
+				prev = metadata;
+		
+				MapDatabase.order.add(key);
+				MapDatabase.values[key] = metadata;
+			}
+		}
+	}
+	
+	static function get(key) {
+		return MapDatabase.values.get(key);
+	}
+	
+	static function getKeys() {
+		return MapDatabase.order.clone();
+	}
+	
+	static function isUnlocked(key) {
+		if (MapDatabase.order[0] == key) return true;
+		m = MapDatabase.get(key);
+		if (m == null) return false;
+		key = m.prev.key;
+		return Database.getBoolean(key + '_completed');
+	}
+}

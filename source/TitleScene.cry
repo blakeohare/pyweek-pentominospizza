@@ -1,0 +1,88 @@
+import Math;
+
+class TitleScene {
+	field next;
+	field index = 0;
+	field counter = 0;
+	field options;
+	
+	constructor() {
+		this.next = this;
+		
+		this.options = [
+			["Play", this.click_play],
+			["Replay Intro", this.click_intro],
+			['Options', this.click_options],
+			['Credits', this.click_credits],
+			['Exit', this.click_exit],
+		];
+	}
+	
+	function update(events, dt) {
+		this.counter += dt;
+		enter = false;
+		for (event : events) {
+			if (event.down) {
+				if (event.type == 'up') {
+					this.index--;
+					this.counter = 0;
+				} else if (event.type == 'down') {
+					this.index++;
+					this.counter = 0;
+				} else if (event.type == 'enter' || event.type == 'space') {
+					enter = true;
+				}
+			}
+		}
+		
+		if (this.index < 0) this.index = 0;
+		if (this.index >= this.options.length) this.index = this.options.length - 1;
+		
+		if (enter) {
+			this.options[this.index][1]();
+		}
+	}
+	
+	function click_intro() {
+		this.next = new TransitionScene(this, new CutScene());
+	}
+	
+	function click_play() {
+		this.next = new TransitionScene(this, new MapSelectScreen());
+	}
+	
+	function click_options() {
+		this.next = new TransitionScene(this, new OptionsMenu());
+	}
+	
+	function click_credits() {
+		this.next = new TransitionScene(this, new CreditsScene());
+	}
+	
+	function click_exit() {
+		ActiveSession.INSTANCE.exitAttempt = true;
+	}
+	
+	function render() {
+		ImageLibrary.get('background/space1.png').draw(0, 0);
+		ImageLibrary.get('menus/chet.png').draw(100, 230);
+		ImageLibrary.get('menus/title.png').draw(10, 0);
+		
+		x = 480;
+		y = 100;
+		i = 0;
+		for (option : this.options) {
+			text = option[0];
+			yOffset = 0;
+			if (i == this.index) {
+				// needs to be adjusted to dt
+				yOffset = floor(abs(sin(this.counter * TWO_PI) * 16));
+				ImageLibrary.get('menus/pizza.png').draw(x - 70, floor(y - yOffset - 20));
+			}
+			TextEngine.render(text, 'XL', x, y);
+			
+			y += 100;
+			i += 1;
+		}
+	}
+}

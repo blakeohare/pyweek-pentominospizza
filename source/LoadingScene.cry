@@ -1,0 +1,34 @@
+import GFX;
+import Math;
+
+class LoadingScene {
+	
+	field loader;
+	field progress;
+	field next;
+	field startScene;
+	
+	constructor(startScene) {
+		this.next = this;
+		this.loader = ImageSheetLoader.fromIds('everything');
+		this.startScene = startScene;
+	}
+	
+	function update(events, dt) {
+		this.progress = this.loader.getProgress();
+		if (this.loader.isDone()) {
+			this.next = this.startScene;
+		}
+	}
+	
+	function render() {
+		GFX.Draw.fill(0, 0, 0);
+		left = 100;
+		width = 600;
+		height = 20;
+		top = 400 - height / 2;
+		GFX.Draw.rectangle(left, top, width, height, 50, 50, 50);
+		width = floor(width * this.progress);
+		GFX.Draw.rectangle(left, top, width, height, 0, 128, 240);
+	}
+}

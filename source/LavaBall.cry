@@ -1,0 +1,52 @@
+import Math;
+import Random;
+
+const LAVA_EXIT_VELOCITY = 150; // pixels / sec
+
+class LavaBall {
+	field body;
+	field x;
+	field y;
+	field path = null;
+	field lifetime = 0;
+	field images;
+	field image;
+	
+	constructor(volcano) {
+		this.body = volcano;
+		this.x = this.body.x;
+		this.y = this.body.y;
+		this.images = [
+			ImageLibrary.get('rocks/lavasplash1.png'),
+			ImageLibrary.get('rocks/lavasplash2.png')
+		];
+		this.image = this.images[0];
+	}
+	
+	function update(scene, dt) {
+		
+		if (this.path == null) {
+			theta = floor(Random.randomInt(3) * TWO_PI / 3 + PI / 2 + 8 - .07); // just kept tweaking the numbers until I got it to line up since my mental math was failing me.
+			theta += this.body.theta;
+			this.lifetime = 0;
+			this.path = theta;
+			this.image = this.images.choice();
+		}
+		
+		this.lifetime += dt;
+		
+		r = this.body.radius + this.lifetime * LAVA_EXIT_VELOCITY;
+		
+		this.x = cos(this.path) * r + this.body.x;
+		this.y = sin(this.path) * r + this.body.y;
+		
+		if (r - this.body.radius > 300) {
+			this.path = null;
+		}
+	}
+	
+	function render(cx, cy) {
+		ang = this.lifetime * 2;
+		this.image.drawRotated(this.x + cx, this.y + cy, ang + HALF_PI);
+	}
+}

@@ -1,0 +1,374 @@
+import Math;
+import Random;
+import GFX;
+
+class PlayScene {
+	
+	static field _BODY_TYPE_INFO = {
+		// image name, radius
+		'halfgrass': ['halfgrass', 150],
+		'lava': ['lava', 250],
+		'lavamini': ['lavamini', 150],
+		'rock1': ['rock1', 150],
+		'rock2': ['rock2', 150],
+		'rock3': ['rock3', 150],
+		'rock4': ['rock4', 150],
+		'volcano': ['volcano', 150],
+		'water': ['water', 150],
+		'blackhole': ['blackhole', 80],
+	};
+	
+	field YOU_DEAD = false;
+	field id;
+	field next;
+	field sprites = [];
+	field player = null;
+	field bodies = [];
+	field sharks = [];
+	field lavaballs = [];
+	field debris = [];
+	field mouseXY = [0, 0];
+	field mouseBody = null;
+	field mouseBodyStartOffset = null; // offset from center of body that user clicked
+	field level;
+	field victoryPlanet;
+	field recordIndicatorCounters = null;
+	field timeLeft;
+	
+	field cameraCurrentX;
+	field cameraCurrentY;
+	field cameraTargetX;
+	field cameraTargetY;
+	
+	// These values are immediately set by saveState() and will never actually be null when the game update phase is running.
+	field savedStateBodies;
+	field savedStateSprites;
+	
+	
+	// Restore type is either 'M' for map or 'S' for state
+	// arg is level string ID for M and another playscene for S
+	constructor(restoreType, arg) {
+		this.next = this;
+		
+		if (restoreType == 'M') {
+			this.level = new Level(arg);
+			this.id = arg;
+			for (body : this.level.stuff) {
+				type = body[0];
+				x = body[1];
+				y = body[2];
+				sprites = body[3];
+				speedRatio = body[4];
+				bti = PlayScene._BODY_TYPE_INFO[type];
+				imgPath = bti[0];
+				radius = bti[1];
+				flag = null;
+				if (type == 'water') {
+					flag = 'water';
+				} else if (type == 'volcano') {
+					flag = 'volcano';
+				} else if (type == 'lava' || type == 'lavamini') {
+					flag = 'lava';
+				}
+				
+				body = new GravityBody(type, x, y, radius, 'rocks/' + imgPath + '.png', speedRatio / 30.0, speedRatio, flag);
+				for (sprite : sprites) {
+					spriteInstance = null;
+					type = sprite[0];
+					angle = sprite[1];
+					if (type == 'player') {
+						this.player = new Sprite('player', 'G', body, angle);
+					} else if (type == 'store') {
+						spriteInstance = new Sprite('store', 'G', body, angle);
+					} else if (type == 'house1' || type == 'house2' || type == 'house3') {
+						spriteInstance = new Sprite(type, 'G', body, angle);
+					} else {
+						print("Unknown sprite type: " + type);
+					}
+					
+					if (spriteInstance != null) {
+						this.sprites.add(spriteInstance);
+					}
+				}
+				this.bodies.add(body);
+			}
+			
+			if (this.player != null) {
+				// ensure player is rendered last so always on top
+				this.sprites.add(this.player);
+			}
+		} else if (restoreType == 'S') {
+			bodiesById = {};
+			this.id = arg.id;
+			for (bodyState : arg.savedStateBodies) {
+				gb = new GravityBody('rock1', 0, 0, 150, 'rocks/rock1.png', 0, 0, null); // dummy value
+				gb.restoreState(bodyState);
+				this.bodies.add(gb);
+				bodiesById[gb.id] = gb;
+			}
+			for (spriteState : arg.savedStateSprites) {
+				sprite = new Sprite('player', 'R', spriteState, bodiesById);
+				if (sprite.type == 'player') {
+					this.player = sprite;
+				}
+				this.sprites.add(sprite);
+			}
+		}
+		
+		for (i = 0; i < 10; ++i) {
+			this.debris.add(new Debris(Random.randomInt(1000), Random.randomInt(1000), 'small-debris' + Random.randomInt(1, 9)));
+		}
+		
+		this.saveState();
+		
+		for (sprite : this.sprites) {
+			if (sprite.type.startsWith('house')) {
+				this.victoryPlanet = sprite.ground;
+				break;
+			}
+		}
+		
+		if (this.id == 'level5' || this.id == 'level9' || this.id == 'level10') {
+			for (body : this.bodies) {
+				if (body.type == 'water') {
+					this.sharks.add(new Shark(body));
+				}
+			}
+		}
+		
+		for (body : this.bodies) {
+			if (body.lavaball != null) {
+				this.lavaballs.add(body.lavaball);
+			}
+		}
+	}
+	
+	function saveState() {
+		mapping = {}; // body instance to index in the list
+		bodies = [];
+		sprites = [];
+		bodyToIndex = {};
+		for (body : this.bodies) {
+			bodyToIndex[body] = bodies.length;
+			bodies.add(body.saveState());
+		}
+		
+		for (sprite : this.sprites) {
+			sprites.add(sprite.saveState());
+		}
+		
+		this.savedStateBodies = bodies;
+		this.savedStateSprites = sprites;
+	}
+	
+	function update(events, dt) {
+		ActiveSession.INSTANCE.ensureTimerRunning(true);
+		
+		if (ActiveSession.INSTANCE.getCurrentTime() > ActiveSession.INSTANCE.timeLimitSeconds) {
+			this.triggerLose();
+			return;
+		}
+		
+		if (!this.YOU_DEAD) {
+			dx = 0;
+			if (PressedKeyTracker.isPressed('left')) {
+				dx = -1;
+				this.player.facingLeft = true;
+			} else if (PressedKeyTracker.isPressed('right')) {
+				dx = 1;
+				this.player.facingLeft = false;
+			}
+			
+			this.player.applyWalk(dx);
+			
+			jump = false;
+			jumpRelease = false;
+			for (event : events) {
+				if ((event.type == 'space' || event.type == 'up') && event.down) {
+					jump = true;
+				} else if (event.type == 'enter' && event.down) {
+					this.next = new PauseScreen(this);
+				} else if (EDITOR_ENABLED && this.cameraCurrentX != null) {
+					if (event.type == 'save' && event.down) {
+						saveLevel(this);
+					} else if (event.coord != null) {
+						x = event.coord[0];
+						y = event.coord[1];
+						x = this.cameraCurrentX - 400 + x;
+						y = this.cameraCurrentY - 300 + y;
+						if (event.type == 'mousemove') {
+							if (this.mouseBody != null) {
+								oldXY = [this.mouseBody.x, this.mouseBody.y];
+								this.mouseBody.x = floor(x - this.mouseBodyStartOffset[0]);
+								this.mouseBody.y = floor(y - this.mouseBodyStartOffset[1]);
+							}
+						} else if (event.type == 'mouseleft') {
+							if (event.down) {
+								if (this.mouseBody == null) {
+									for (body : this.bodies) {
+										dx = x - body.x;
+										dy = y - body.y;
+										if (dx ** 2 + dy ** 2 < body.radius ** 2) {
+											this.mouseBody = body;
+											this.mouseBodyStartOffset = [dx, dy];
+											break;
+										}
+									}
+								}
+							} else {
+								if (this.mouseBody != null) {
+									this.mouseBody = null;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			this.player.applyJump(jump, dt);
+		}
+		
+		hb = this.player.getHitBox();
+		
+		for (deb : this.debris) {
+			deb.update(this, dt);
+		}
+		
+		for (body : this.bodies) {
+			body.update(this, dt);
+		}
+		
+		for (sprite : this.sprites) {
+			sprite.update(this, dt);
+		}
+		
+		for (shark : this.sharks) {
+			shark.update(this, dt);
+			if (!this.YOU_DEAD && this.player.isSharkCollision(shark)) {
+				if (!EDITOR_ENABLED) {
+					ActiveSession.INSTANCE.pizzasLostInTransit++;
+					this.triggerDeath();
+				}
+			}
+		}
+		
+		for (ball : this.lavaballs) {
+			ball.update(this, dt);
+			if (!this.YOU_DEAD) {
+				dx = ball.x - hb[0];
+				dy = ball.y - hb[1];
+				if (dx ** 2 + dy ** 2 < 30 ** 2) {
+					if (!EDITOR_ENABLED) {
+						ActiveSession.INSTANCE.pizzasLostInTransit++;
+						this.triggerDeath();
+					}
+				}
+			}
+		}
+	}
+	
+	function triggerWin() {
+		this.next = new WinScreen(this);
+	}
+	
+	function triggerDeath() {
+		this.YOU_DEAD = true;
+		this.next = new TransitionScene(this, ['S', this]);
+	}
+	
+	function triggerLose() {
+		this.next = new WinScreen(this, false);
+	}
+	
+	function triggerJumpRecord(x, y, amt) {
+		this.recordIndicatorCounters = [x, y, ActiveSession.INSTANCE.getCurrentTime(), 'New Record! ' + formatTime(amt)];
+	}
+	
+	function render() {
+		tm = ActiveSession.INSTANCE.getCurrentTime();
+		
+		ImageLibrary.get('background/space1.png').draw(0, 0);
+		
+		hb = this.player.getHitBox();
+		
+		this.cameraTargetX = hb[0];
+		this.cameraTargetY = hb[1];
+		if (this.cameraCurrentX == null) {
+			this.cameraCurrentX = this.cameraTargetX;
+			this.cameraCurrentY = this.cameraTargetY;
+		} else {
+			this.cameraCurrentX = this.cameraCurrentX * .9 + this.cameraTargetX * .1;
+			this.cameraCurrentY = this.cameraCurrentY * .9 + this.cameraTargetY * .1;
+		}
+		
+		t = floor(tm * FPS);
+		
+		cx = 400 - this.cameraCurrentX;
+		cy = 300 - this.cameraCurrentY;
+		
+		for (deb : this.debris) {
+			deb.render(cx, cy);
+		}
+		
+		for (ball : this.lavaballs) {
+			ball.render(cx, cy);
+		}
+			
+		for (body : this.bodies) {
+			body.render(cx, cy);
+		}
+		
+		for (sprite : this.sprites) {
+			sprite.render(t, cx, cy);
+		}
+		
+		for (shark : this.sharks) {
+			shark.render(cx, cy);
+		}
+		
+		if (this.recordIndicatorCounters != null) {
+			lifetime = tm - this.recordIndicatorCounters[2];
+			if (lifetime > 2) {
+				this.recordIndicatorCounters = null;
+			} else {
+				ric = this.recordIndicatorCounters;
+				TextEngine.render(ric[3], 'M', ric[0] + cx, ric[1] - lifetime * 50 + cy);
+			}
+		}
+		
+		vp = this.victoryPlanet;
+		cx = this.cameraCurrentX;
+		cy = this.cameraCurrentY;
+		dx = vp.x - cx;
+		dy = vp.y - cy;
+		dist = (dx ** 2 + dy ** 2) ** .5;
+		if (dist > 100) {
+			ang = Math.arctan(dy, dx);
+			left = -350;
+			right = 350;
+			top = -250;
+			bottom = 250;
+			
+			for (segment : [
+				[left, top, right, top],
+				[left, top, left, bottom],
+				[right, top, right, bottom],
+				[left, bottom, right, bottom]]) {
+				
+				pt = findIntersectionOrNull(ang, segment[0], segment[1], segment[2], segment[3], dist);
+				if (pt != null) {
+					ImageLibrary.get('pointer.png').drawRotated(pt[0] + 400, pt[1] + 300, ang + HALF_PI);
+					break;
+				}
+			}
+		}
+		this.renderTimer();
+	}
+	
+	function renderTimer() {
+		countdown = floor(ActiveSession.INSTANCE.timeLimitSeconds - ActiveSession.INSTANCE.getCurrentTime() + .99); // +.99 so that when it shows 0 it's the actual deadline
+		if (countdown < 0) countdown = 0;
+		timeToShow = formatCountdown(countdown);
+		this.timeLeft = TextEngine.render('Delivery Guarantee: ' + timeToShow, 'L', 400, 50);
+	}
+}

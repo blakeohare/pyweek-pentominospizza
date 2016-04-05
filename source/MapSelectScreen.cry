@@ -1,0 +1,141 @@
+import Math;
+
+class MapSelectScreen {
+	static field MAP_COLUMN_SPACING = [280, 100, 120, 120, 120, 120];
+	static field COLUMN_HEADERS = ['Attempts', 'Fastest Time', 'Fewest Jumps', 'Longest Jump'];
+	
+	field next;
+	field index = 0;
+	field counter = 0;
+	field bg;
+	field options = [];
+	
+	constructor() {
+		this.next = this;
+		
+		this.options.add([
+			'BACK',
+			20,
+			['Back to title screen'],
+			]);
+		
+		for (key : MapDatabase.getKeys()) {
+			if (ActiveSession.INSTANCE.id == key) {
+				this.index = this.options.length;
+			}
+			m = MapDatabase.get(key);
+			unlocked = MapDatabase.isUnlocked(m.key);
+			fastestTime = null;
+			longestJump = null;
+			fewestJumps = null;
+			timesPlayed = null;
+			
+			title = '(Not unlocked yet)';
+			
+			if (unlocked) {
+				title = m.name;
+				if (Database.hasValue(key + '_fastesttime')) fastestTime = Database.getFloat(key + '_fastesttime');
+				if (Database.hasValue(key + '_longestjump')) longestJump = Database.getFloat(key + '_longestjump');
+				if (Database.hasValue(key + '_fewestjumps')) fewestJumps = Database.getInt(key + '_fewestjumps');
+				timesPlayed = Database.getInt(key + '_timesplayed');
+			}
+			
+			option = [
+				title,
+				nstr(timesPlayed),
+				formatTime(fastestTime),
+				nstr(fewestJumps),
+				formatTime(longestJump),
+			];
+			
+			option = [key, 0, option]; // [0] -> map key, [1] -> bottom padding, [2] -> raw string values or None if not present
+			
+			this.options.add(option);
+		}
+		
+		this.index++;
+		
+		if (this.index >= this.options.length) {
+			this.index = this.options.length - 1;
+		}
+	}
+	
+	function update(events, dt) {
+		this.counter += dt * 30;
+		confirm = false;
+		for (event : events) {
+			if (event.down) {
+				if (event.type == 'up') {
+					this.index--;
+				} else if (event.type == 'down') {
+					this.index++;
+				} else if (event.type == 'space' || event.type == 'enter') {
+					confirm = true;
+				}
+			}
+		}
+		
+		if (this.index < 0) {
+			this.index = 0;
+		}
+		
+		if (this.index >= this.options.length) {
+			this.index = this.options.length - 1;
+		}
+		
+		if (confirm) {
+			key = this.options[this.index][0];
+			if (key == 'BACK') {
+				this.next = new TransitionScene(this, new TitleScene());
+			} else {
+				timelimit = 3 * 60;
+				if (EDITOR_ENABLED) {
+					timelimit = 100 * 60;
+				}
+				ActiveSession.INSTANCE.startGame(key, timelimit);
+				this.next = new TransitionScene(this, new PlayScene('M', key));
+			}
+		}
+	}
+	
+	function render() {
+		ImageLibrary.get('background/space1.png').draw(0, 0);
+		
+		y = 40;
+		index = -1;
+		for (option : this.options) {
+			index++;
+			x = 60;
+			
+			if (index == 1) {
+				xSave = x;
+				x += MapSelectScreen.MAP_COLUMN_SPACING[0];
+				for (colIndex = 0; colIndex < MapSelectScreen.COLUMN_HEADERS.length; ++colIndex) {
+					TextEngine.render(MapSelectScreen.COLUMN_HEADERS[colIndex], 'S', x, y - 40);
+					x += MapSelectScreen.MAP_COLUMN_SPACING[colIndex + 1];
+				}
+			
+				x = xSave;
+			}
+			
+			if (index == this.index) {
+				yOffset = floor(abs(sin(this.counter * TWO_PI / FPS) * 16));
+				cx = x - 50;
+				cy = y - yOffset - 30;
+				ImageLibrary.get('menus/pizza.png').draw(cx, cy);
+			}
+				
+			yPad = option[1];
+			text = option[2];
+			
+			for (i = 0; i < text.length; ++i) {
+				if (text[i] != null) {
+					TextEngine.render(text[i], 'M', x, y);
+				}
+				x += MapSelectScreen.MAP_COLUMN_SPACING[i];
+			}
+			
+			y += 50 + yPad;
+		}
+	}
+}

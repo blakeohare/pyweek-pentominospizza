@@ -1,0 +1,94 @@
+import Game;
+
+class PressedKeyTracker {
+	static field PRESSED = {};
+	
+	static function isPressed(name) {
+		return PressedKeyTracker.PRESSED.get(name, false);
+	}
+	
+	constructor() { }
+}
+
+function main() {
+	activeScene = new LoadingScene(Database.getBoolean('intro_shown')
+		? new TitleScene()
+		: new CutScene());
+	
+	window = new GameWindow("Pentomino's Pizza", 30, 800, 600);
+	events = [];
+	
+	while (true) {
+		events.clear();
+		
+		for (event : window.pumpEvents()) {
+			switch (event.type) {
+				case EventType.QUIT:
+					return;
+					
+				case EventType.KEY_DOWN:
+				case EventType.KEY_UP:
+					ev = null;
+					switch (event.key) {
+						case KeyboardKey.A:
+						case KeyboardKey.LEFT:
+							ev = new Action('left', event.down);
+							break;
+						case KeyboardKey.S:
+						case KeyboardKey.DOWN:
+							ev = new Action('down', event.down);
+							break;
+						case KeyboardKey.D:
+						case KeyboardKey.RIGHT:
+							ev = new Action('right', event.down);
+							break;
+						case KeyboardKey.W:
+						case KeyboardKey.UP:
+							ev = new Action('up', event.down);
+							break;
+						case KeyboardKey.SPACE:
+							ev = new Action('space', event.down);
+							break;
+						case KeyboardKey.ENTER:
+							ev = new Action('enter', event.down);
+							break;
+						default:
+							// ignore all other keys.
+							break;
+					}
+					if (ev != null) {
+						// Spuriously track mouse events as well. That's okay. They're not harming anyone.
+						events.add(ev);
+						PressedKeyTracker.PRESSED[ev.type] = ev.down;
+					}
+					break;
+				
+				case EventType.MOUSE_LEFT_DOWN:
+					events.add(new Action('mouseleft', true, [event.x, event.y]));
+					break;
+				
+				case EventType.MOUSE_LEFT_UP:
+					events.add(new Action('mouseleft', false, [event.x, event.y]));
+					break;
+				
+				case EventType.MOUSE_MOVE:
+					events.add(new Action('mousemove', false, [event.x, event.y]));
+					break;
+					
+				default:
+					break;
+			}
+		}
+		
+		activeScene.update(events, SPF);
+		activeScene.render();
+		
+		if (activeScene.next != activeScene) {
+			next = activeScene.next;
+			activeScene.next = activeScene;
+			activeScene = next;
+		}
+		
+		window.clockTick();
+	}
+}

@@ -1,0 +1,59 @@
+import Math;
+
+class OptionsMenu {
+	field next;
+	field index = 0;
+	field images = [];
+	
+	constructor() {
+		this.next = this;
+	}
+	
+	function update(events, dt) {
+		enter = false;
+		for (event : events) {
+			if (event.down) {
+				if (event.type == 'up') {
+					this.index--;
+				} else if (event.type == 'down') {
+					this.index++;
+				} else if (event.type == 'space' || event.type == 'enter') {
+					enter = true;
+				}
+			}
+		}
+		
+		if (this.index < 0) this.index = 0;
+		else if (this.index > 1) this.index = 1;
+		
+		if (enter) {
+			if (this.index == 0) {
+				Database.setValue('magic', !Database.getBoolean('magic'));
+				Database.save();
+			} else {
+				this.next = new TransitionScene(this, new TitleScene());
+			}
+		}
+	}
+	
+	function render() {
+		ImageLibrary.get('background/space1.png').draw(0, 0);
+		options = ['Magic', 'Back to Title Screen'];
+		if (!Database.getBoolean('magic')) {
+			options[0] = 'More Magic';
+		}
+		
+		y = 300;
+		for (i = 0; i < 2; ++i) {
+			x = 200;
+			TextEngine.render(options[i], 'L', x, y);
+			
+			if (i == this.index) {
+				yOffset = floor(abs(sin(currentTime() * 2 * Math.PI)) * 15);
+				x -= 70;
+				ImageLibrary.get('menus/pizza.png').draw(x, y - 25 - yOffset);
+			}
+			y += 100;
+		}
+	}
+}

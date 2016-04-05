@@ -1,0 +1,59 @@
+import Math;
+import Resources;
+
+class Level {
+	field id;
+	field stuff;
+	
+	constructor(id) {
+		this.id = id;
+		objects = [];
+		lines = Resources.readText('levels/' + id + '.txt').split('\n');
+		activeObject = null;
+		for (line : lines) {
+			line = line.trim();
+			speedRatio = 1.0;
+			if (line.length > 0) {
+				if (line[0] != '+') {
+					parts = line.split(',');
+					objectId = parts[0].trim();
+					x = parseInt(parts[1].trim());
+					y = parseInt(parts[2].trim());
+					if (parts.length > 3) {
+						speedRatio = parseFloat(parts[3].trim()); // can be negative to rotate in other direction
+					}
+					activeObject = [objectId, x, y, [], speedRatio];
+					objects.add(activeObject);
+				} else {
+					parts = line[1:].split(',');
+					spriteId = parts[0].trim();
+					theta = parseInt(parts[1].trim()[1:]) * TWO_PI  / 360;
+					activeObject[3].add([spriteId, theta]);
+				}
+			}
+		}
+		
+		this.stuff = objects;
+	}
+}
+
+// This is pretty cheesy. Since you can't add or delete asteroids in the editor or change their 
+// order, take the bodies and just re-allocate them into the file. This will preserve sprite starting locations.
+function saveLevel(playscene) {
+	bodies = playscene.bodies.clone();
+	lines = Resources.readText('levels/' + playscene.id + '.txt').split('\n');
+	
+	for (i = 0; i < lines.length; ++i) {
+		line = lines[i].trim();
+		if (line.length > 0) {
+			if (line[0] != '+' && bodies.length > 0) {
+				body = bodies[0];
+				newLine = body.type + ', ' + floor(body.x) + ', ' + floor(body.y) + ', ' + body.rotRat;
+				lines[i] = newLine;
+				bodies = bodies[1:];
+			}
+		}
+	}
+	
+	Core.assert("TODO: saving levels to file.");
+}

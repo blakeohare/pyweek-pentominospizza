@@ -1,0 +1,55 @@
+import Math;
+import GFX;
+
+class TransitionScene {
+	
+	field next;
+	field toScene;
+	field fromScene;
+	field duration;
+	field half;
+	field counter;
+	field bg;
+	field opacityRatio;
+	
+	constructor(fromScene, toScene) {
+		this.next = this;
+		this.fromScene = fromScene;
+		this.toScene = toScene;
+		this.duration = 1.0;
+		this.half = this.duration / 2.0;
+		this.counter = 0;
+		this.bg = fromScene;
+	}
+	
+	function update(events, dt) {
+		this.counter += dt;
+		if (this.counter < this.half) {
+			this.bg = this.fromScene;
+			progress = 1.0 * this.counter / this.half;
+		} else {
+			// Hack alert: don't instantiate a new PlayScene until the old one is done showing.
+			if (typeof(this.toScene) == Type.LIST) {
+				this.toScene = new PlayScene(this.toScene[0], this.toScene[1]);
+			}
+			this.bg = this.toScene;
+			progress = 1.0 - 1.0 * (this.counter - this.half) / this.half;
+		}
+		
+		this.opacityRatio = progress;
+		
+		if (this.counter >= this.duration) {
+			this.next = this.toScene;
+		}
+		
+		this.bg.update(events, dt);
+	}
+	
+	function render() {
+		this.bg.render();
+		alpha = floor(this.opacityRatio * 255);
+		if (alpha > 255) alpha = 255;
+		if (alpha < 0) alpha = 0;
+		GFX.Draw.rectangle(0, 0, 800, 600, 0, 0, 0, alpha);
+	}
+}
