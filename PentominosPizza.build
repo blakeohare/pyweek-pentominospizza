@@ -3,30 +3,35 @@
   <source>source/</source>
   <output>output/%TARGET_NAME%</output>
 
-  <spritesheets>
+  <imagesheets>
     <sheet id="everything">
 	  <prefix>images/</prefix>
 	</sheet>
-  </spritesheets>
+  </imagesheets>
   
-  <target name="windows">
-    <platform>csopengl</platform>
+  <target name="csharp">
+    <platform>csharp-app</platform>
   </target>
 
   <target name="java">
-    <platform>java</platform>
+    <platform>java-app</platform>
   </target>
 
   <target name="python">
-    <platform>python</platform>
+    <platform>python-app</platform>
   </target>
 
   <target name="js_local">
-    <platform>js</platform>
+    <platform>javascript-app-gl</platform>
+  </target>
+
+  <target name="games_browser">
+    <platform>javascript-app-gl</platform>
+    <jsfileprefix>/games/pentominospizza</jsfileprefix>
   </target>
 
   <target name="js_noisyprotozoa">
-    <platform>js</platform>
+    <platform>javascript-app-gl</platform>
     <jsfileprefix>/play/pentominospizza/</jsfileprefix>
   </target>
 </build>

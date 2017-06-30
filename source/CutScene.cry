@@ -1,4 +1,4 @@
-import GFX;
+import Graphics2D;
 import Math;
 
 class CutScene {
@@ -153,6 +153,6 @@ class CutScene {
 		if (alpha < 0) alpha = 0;
 		if (alpha > 255) alpha = 255;
 		
-		GFX.Draw.rectangle(0, 0, 800, 600, 255, 255, 255, alpha);
+		Graphics2D.Draw.rectangle(0, 0, 800, 600, 255, 255, 255, alpha);
 	}
 }

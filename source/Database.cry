@@ -1,5 +1,5 @@
 import Math;
-import FileIO;
+import UserData;
 
 /*
 data saved:
@@ -21,8 +21,8 @@ class Database {
 	static field FILENAME = 'pp_save_data.txt';
 	
 	static constructor() {
-		if (!FileIO.UserData.Path.exists(Database.FILENAME)) return;
-		data = FileIO.UserData.File.readText(Database.FILENAME);
+		if (!UserData.pathExists(Database.FILENAME)) return;
+		data = UserData.fileReadText(Database.FILENAME);
 		
 		for (line : data.split('\n')) {
 			line = line.trim();
@@ -72,7 +72,7 @@ class Database {
 			output.add(t + ':' + key + ':' + value);
 		}
 		
-		FileIO.UserData.File.writeText(Database.FILENAME, output.join('\n'));
+		UserData.fileWriteText(Database.FILENAME, output.join('\n'));
 	}
 	
 	static function getBoolean(key, defaultValue = false) {

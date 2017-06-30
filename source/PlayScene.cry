@@ -1,6 +1,6 @@
+import Graphics2D;
 import Math;
 import Random;
-import GFX;
 
 class PlayScene {
 	

@@ -1,5 +1,5 @@
 import Math;
-import GFX;
+import Graphics2D;
 
 class TransitionScene {
 	
@@ -50,6 +50,6 @@ class TransitionScene {
 		alpha = floor(this.opacityRatio * 255);
 		if (alpha > 255) alpha = 255;
 		if (alpha < 0) alpha = 0;
-		GFX.Draw.rectangle(0, 0, 800, 600, 0, 0, 0, alpha);
+		Graphics2D.Draw.rectangle(0, 0, 800, 600, 0, 0, 0, alpha);
 	}
 }

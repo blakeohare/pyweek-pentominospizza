@@ -1,14 +1,16 @@
+import Graphics2D;
 import Math;
-import GFX;
 
 class ImageLibrary {
 	static field imagesByPath = {};
 	static field imagesByPathByScale = {};
+	static field imageSheet = null;
 	
 	static function get(path) {
 		img = ImageLibrary.imagesByPath.get(path);
 		if (img == null) {
-			img = ImageLoader.fromResource('images/' + path).getImage();
+			imgRes = ImageLibrary.imageSheet.getImage('images/' + path);
+			img = Graphics2D.GraphicsTexture.load(imgRes);
 			ImageLibrary.imagesByPath[path] = img;
 		}
 		return img;

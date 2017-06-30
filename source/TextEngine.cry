@@ -1,4 +1,5 @@
-import GFX;
+import Graphics2D;
+import ImageResources;
 import Math;
 
 class TextEngine {
@@ -79,7 +80,7 @@ class TextEngine {
 			for (char : TextEngine.CODE_LOOKUP.keys()) {
 				code = TextEngine.CODE_LOOKUP[char];
 				// already loaded by image sheet so synchronous access is ok.
-				image = ImageLoader.fromResource('images/text/' + code + '.png').getImage();
+				image = ImageLibrary.get('text/' + code + '.png');
 				lookup[char] = image;
 			}
 			TextEngine.LETTERS['O'] = lookup;

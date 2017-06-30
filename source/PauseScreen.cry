@@ -1,3 +1,4 @@
+import Graphics2D;
 import Math;
 
 class PauseScreen {
@@ -47,7 +48,7 @@ class PauseScreen {
 	
 	function render() {
 		this.bg.render();
-		GFX.Draw.rectangle(0, 0, 800, 600, 0, 0, 0, 128);
+		Graphics2D.Draw.rectangle(0, 0, 800, 600, 0, 0, 0, 128);
 		
 		x = 200;
 		y = 250;

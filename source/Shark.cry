@@ -1,3 +1,6 @@
+import Math;
+import Random;
+
 const SHARK_VELOCITY = 2.0;
 
 class Shark {

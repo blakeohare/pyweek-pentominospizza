@@ -1,4 +1,4 @@
-import GFX;
+import Graphics2D;
 import Math;
 
 // This is now repurposed for when you lose as well as it needs to apply the record for longest jump
@@ -87,7 +87,7 @@ class WinScreen {
 	
 	function render() {
 		this.bg.render();
-		GFX.Draw.rectangle(0, 0, 800, 600, 0, 0, 0, 128);
+		Graphics2D.Draw.rectangle(0, 0, 800, 600, 0, 0, 0, 128);
 		
 		TextEngine.render(this.isWin ? "DELIVERY SUCCESSFUL!" : "TIME'S UP!", 'XL', 100, 50);
 		
